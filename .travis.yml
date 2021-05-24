@@ -1,16 +1,18 @@
 language: python
-python:
-  - "3.7"
+python: "3.7"
+go: "1.16"
 
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/localstack
 
 install:
   - set -e # fail fast
-  - sudo snap install tree
+  - mkdir -p $HOME/.cache/localstack
+  - ls -la $HOME/.cache/localstack
 
 script:
-  - bin/list-tests
-  - tree -a
-  - pwd
-  - which go
-
+  - ls -la $HOME/.cache/localstack
+  - bin/list-tests | tee $HOME/.cache/localstack/test-list.log
+  - ls -la $HOME/.cache/localstack
