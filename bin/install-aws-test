@@ -1,0 +1,7 @@
+#!/bin/bash
+
+[ -f build/aws.test ] && { echo "aws.test already exists, skipping"; exit 0; }
+
+cd terraform-provider-aws
+go test -c ./aws
+mv aws.test ../build
