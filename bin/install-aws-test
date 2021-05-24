@@ -1,7 +1,13 @@
 #!/bin/bash
 
-[ -f build/aws.test ] && { echo "aws.test already exists, skipping"; exit 0; }
+TEST_BIN=$HOME/.cache/localstack/aws.test
+
+[ -f ${TEST_BIN} ] && { echo "aws.test already exists, skipping"; exit 0; }
+
+BIN_DIR=$(dirname ${TEST_BIN})
+mkdir -p ${BIN_DIR}
 
 cd terraform-provider-aws
 go test -c ./aws
-mv aws.test ../build
+
+mv aws.test ${TEST_BIN}

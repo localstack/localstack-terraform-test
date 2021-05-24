@@ -1,16 +1,17 @@
 #!/bin/bash
-TEST_BIN=build/aws.test
+
+TEST_BIN=$HOME/.cache/localstack/aws.test
+[ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
+
 export AWS_PROFILE=default
 export AWS_DEFAULT_REGION=us-east-1
 export TF_ACC=1
 
 TESTS=${1:-TestAcc*}
 
-[ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
-
 mkdir -p build
 # this is where the testfixtures live
 cd terraform-provider-aws
 
-echo "running ../${TEST_BIN} -test.v -test.run ${TESTS}"
-../${TEST_BIN} -test.v -test.run ${TESTS} | tee ../build/test.log
+echo "running ${TEST_BIN} -test.v -test.run ${TESTS}"
+${TEST_BIN} -test.v -test.run ${TESTS} | tee ../build/test.log
