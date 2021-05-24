@@ -10,9 +10,16 @@ cache:
 install:
   - set -e # fail fast
   - mkdir -p $HOME/.cache/localstack
-  - ls -la $HOME/.cache/localstack
+  - eval "$(gimme 1.16)" # install go 1.16
+  - bin/install-aws-test
+  - |
+    (
+      cd localstack
+      make install
+    )
 
 script:
+  - set -e # fail fast
   - ls -la $HOME/.cache/localstack
-  - bin/list-tests | tee $HOME/.cache/localstack/test-list.log
-  - ls -la $HOME/.cache/localstack
+  - go version
+  - ls -la localstack/.venv
