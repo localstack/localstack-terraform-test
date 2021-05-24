@@ -1,0 +1,35 @@
+#!/bin/bash
+
+function usage() {
+    echo "list-tests lists available acceptance tests in the terraform test suite"
+    echo ""
+    echo "Usage"
+    echo "  list-tests [--all]"
+    echo ""
+    echo "  --all    list individual test cases instead of test groups"
+}
+
+function list_testacc_all() {
+    grep "^func TestAcc" terraform-provider-aws/aws/**_test.go \
+        | cut -d':' -f2 | cut -d '(' -f1 | cut -c 6- \
+        | sort -u
+}
+
+function list_testacc() {
+    list_testacc_all | cut -d'_' -f1 | sort -u
+}
+
+
+
+# some logic to invoke the correct command
+function main() {
+    if [[ $* == *--help* ]]; then
+        usage
+    elif [[ $* == *--all* ]]; then
+        list_testacc_all
+    else
+        list_testacc
+    fi
+}
+
+main "$@"
