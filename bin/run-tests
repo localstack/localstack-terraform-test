@@ -1,17 +1,58 @@
 #!/bin/bash
 
-TEST_BIN=$HOME/.cache/localstack/aws.test
-[ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
+export HERE=$(pwd)
+export LST_DIR=${HERE}/localstack
+export BUILD_DIR=${HERE}/build
+
+export LST_LOG=${BUILD_DIR}/localstack.log
+export TEST_LOG=${BUILD_DIR}/test.log
 
 export AWS_PROFILE=default
 export AWS_DEFAULT_REGION=us-east-1
 export TF_ACC=1
 
+TEST_BIN=$HOME/.cache/localstack/aws.test
+[ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
+
 TESTS=${1:-TestAcc*}
 
-mkdir -p build
-# this is where the testfixtures live
-cd terraform-provider-aws
+function run_localstack() {
+	cd ${LST_DIR}
+	source .venv/bin/activate
+	exec bin/localstack start --host
+}
 
-echo "running ${TEST_BIN} -test.v -test.run ${TESTS}"
-${TEST_BIN} -test.v -test.run ${TESTS} | tee ../build/test.log
+function main() {
+	mkdir -p ${BUILD_DIR}
+
+	# start localstack in the background
+	echo "waiting on localstack to start"
+	run_localstack &> ${LST_LOG} &
+	export lst_pid=$!
+	# TODO: subprocesses will stay open if interrupted
+
+	echo "started localstack on ${lst_pid}"
+
+	# wait for localstack to be ready
+	tail -F ${LST_LOG} | grep --max-count=1 -q "Ready\."
+
+	# this is where the testfixtures live
+	cd terraform-provider-aws
+
+	echo "running ${TEST_BIN} -test.v -test.run ${TESTS}"
+
+	set -o pipefail # otherwise $? would output the return code of tee
+	${TEST_BIN} -test.v -test.run ${TESTS} | tee ${TEST_LOG}
+	ret=$?
+
+	# kill the running localstack instance
+	echo "killing localstack ${lst_pid}"
+	kill ${lst_pid}
+	echo "waiting on localstack to end"
+	wait ${lst_pid}
+
+	# exit with the test result
+	exit ${ret}
+}
+
+main "$@"
