@@ -9,7 +9,6 @@ cache:
 
 install:
   - set -e # fail fast
-  - mkdir -p $HOME/.cache/localstack
   - eval "$(gimme 1.16)" # install go 1.16
   - bin/install-aws-test
   - |
@@ -19,7 +18,4 @@ install:
     )
 
 script:
-  - set -e # fail fast
-  - ls -la $HOME/.cache/localstack
-  - go version
-  - ls -la localstack/.venv
+  - bin/run-tests TestAccAWSS3BucketMetric_WithEmptyFilter
