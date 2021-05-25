@@ -18,4 +18,4 @@ install:
     )
 
 script:
-  - bin/run-tests TestAccAWSS3BucketMetric_WithEmptyFilter
+  - bin/run-tests "TestAcc*"
