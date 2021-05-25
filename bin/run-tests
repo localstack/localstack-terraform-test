@@ -26,14 +26,14 @@ function main() {
 	mkdir -p ${BUILD_DIR}
 
 	# start localstack in the background
-	echo "waiting on localstack to start"
-	run_localstack &> ${LST_LOG} &
-	export lst_pid=$!
+	run_localstack > >(tee ${LST_LOG}) &
+	export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
+
 	# TODO: subprocesses will stay open if interrupted
 
-	echo "started localstack on ${lst_pid}"
-
 	# wait for localstack to be ready
+	echo "waiting on localstack to start on process ${lst_pid}"
+
 	tail -F ${LST_LOG} | grep --max-count=1 -q "Ready\."
 
 	# this is where the testfixtures live
