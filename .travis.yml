@@ -18,4 +18,4 @@ install:
     )
 
 script:
-  - bin/run-tests "TestAcc*"
+  - bin/run-tests "TestAccAWSS3Bucket"
