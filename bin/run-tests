@@ -7,8 +7,10 @@ export BUILD_DIR=${HERE}/build
 export LST_LOG=${BUILD_DIR}/localstack.log
 export TEST_LOG=${BUILD_DIR}/test.log
 
-export AWS_PROFILE=default
 export AWS_DEFAULT_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+
 export TF_ACC=1
 
 TEST_BIN=$HOME/.cache/localstack/aws.test
@@ -25,6 +27,7 @@ function run_localstack() {
 function main() {
 	mkdir -p ${BUILD_DIR}
 
+	rm -f ${LST_LOG}
 	# start localstack in the background
 	run_localstack > >(tee ${LST_LOG}) &
 	export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
@@ -34,7 +37,17 @@ function main() {
 	# wait for localstack to be ready
 	echo "waiting on localstack to start on process ${lst_pid}"
 
-	tail -F ${LST_LOG} | grep --max-count=1 -q "Ready\."
+	while true; do
+		sleep 1
+
+		if `grep --max-count=1 -q "Ready\." ${LST_LOG}`; then
+			break
+		fi
+		if ! ps -p ${lst_pid} > /dev/null; then
+			echo "localstack terminated while waiting"
+			exit 1
+		fi
+	done
 
 	# this is where the testfixtures live
 	cd terraform-provider-aws
