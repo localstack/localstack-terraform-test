@@ -10,6 +10,7 @@ cache:
 install:
   - set -e # fail fast
   - eval "$(gimme 1.16)" # install go 1.16
+  - go get -u github.com/jstemmer/go-junit-report # to generate the test report
   - bin/install-aws-test
   - |
     (
@@ -18,4 +19,7 @@ install:
     )
 
 script:
-  - bin/run-tests "TestAccAWSS3Bucket"
+  - bin/run-tests
+
+after_script:
+  - bin/create-report

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+TEST_LOG=build/test.log
+REPORT=build/report.xml
+
+# check for go-junit-report
+which go-junit-report &> /dev/null || { echo "go-junit-report not installed"; exit 1; }
+
+[ -f $TEST_LOG ] || { echo "$TEST_LOG does not exist"; exit 1; }
+
+echo "creating test report from ${TEST_LOG}"
+[ -f $REPORT ] && { echo "overwriting $REPORT"; }
+
+cat "${TEST_LOG}" | go-junit-report > "${REPORT}"
+
+echo "report created at ${REPORT}"
