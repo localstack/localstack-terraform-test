@@ -55,7 +55,7 @@ function run_tests() {
 
     set -o pipefail # otherwise $? would output the return code of tee
 
-    ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run "$@" | tee ${TEST_LOG}
+    ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run "$@" 2>&1 | tee ${TEST_LOG}
 
     return $?
 }
@@ -63,7 +63,7 @@ function run_tests() {
 function run_lst_and_tests() {
     rm -f ${LST_LOG}
     # start localstack in the background
-    run_localstack > >(tee ${LST_LOG}) &
+    run_localstack > >(tee ${LST_LOG}) 2>&1 &
     export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
 
     # TODO: subprocesses will stay open if interrupted
@@ -100,7 +100,7 @@ function main() {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -h|--help)        usage; exit 0 ;;
-            -d|--debug)       export TF_LOG=debug; ;;
+            -d|--debug)       export TF_LOG=debug; export DEBUG=1 ;;
             -i|--include)     list_test_args="$list_test_args -i $2"; shift ;;
             -e|--exclude)     list_test_args="$list_test_args -e $2"; shift ;;
             -t|--tests-only)  start_lst=false; ;;
