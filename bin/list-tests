@@ -1,35 +1,72 @@
 #!/bin/bash
 
 function usage() {
-    echo "list-tests lists available acceptance tests in the terraform test suite"
+    echo "USAGE"
+    echo "  list-tests [OPTION...]"
     echo ""
-    echo "Usage"
-    echo "  list-tests [--all]"
+    echo "DESCRIPTION"
+    echo "  list available acceptance tests in the terraform test suite and prepare arguments for the go test command"
     echo ""
-    echo "  --all    list individual test cases instead of test groups"
+    echo "OPTIONS"
+    echo "  -h, --help"
+    echo "      show this message"
+    echo ""
+    echo "  -a, --all"
+    echo "      list individual test cases instead of test groups"
+    echo ""
+    echo "  -e PATTERN|FILE, --exclude PATTERN|FILE"
+    echo "      repeatable option to exclude certain tests or test groups"
+    echo ""
+    echo "  -p, --prepare"
+    echo "      prepare the list of tests for 'go test -run' command"
 }
 
 function list_testacc_all() {
     grep "^func TestAcc" terraform-provider-aws/aws/**_test.go \
         | cut -d':' -f2 | cut -d '(' -f1 | cut -c 6- \
-        | sort -u
+        | sort -u | grep -v '^$'
 }
 
 function list_testacc() {
-    list_testacc_all | cut -d'_' -f1 | sort -u
+    list_testacc_all | cut -d'_' -f1 | sort -u | grep -v '^$'
 }
-
-
 
 # some logic to invoke the correct command
 function main() {
-    if [[ $* == *--help* ]]; then
-        usage
-    elif [[ $* == *--all* ]]; then
-        list_testacc_all
+    excluded=()
+
+    cmd=list_testacc
+
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -h|--help)     usage; exit 0 ;;
+            -a|--all)      cmd=list_testacc_all; ;;
+            -e|--exclude)  excluded+=("$2"); shift ;;
+            -p|--prepare)  prepare=0; ;;
+            *) echo "unrecognized option: '$1'"; exit 1 ;;
+        esac
+        shift
+    done
+
+    # build grep exclusion filters
+    filters=""
+    for excl in "${excluded[@]}"; do
+        if [ -f $excl ]; then
+            filters="${filters}|grep -v -f "$excl""
+        else
+            filters="${filters}|grep -v '"$excl"'"
+        fi
+    done
+
+    cmd=$(echo "${cmd} ${filters}")
+
+
+    if [ ! -z $prepare ]; then
+        echo "($(eval $cmd | tr '\n' '|' | sed 's/|$//'))"
     else
-        list_testacc
+        eval $cmd
     fi
+
 }
 
 main "$@"
