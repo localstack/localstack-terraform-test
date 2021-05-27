@@ -1,8 +1,33 @@
 #!/bin/bash
 
-export HERE=$(pwd)
-export LST_DIR=${HERE}/localstack
-export BUILD_DIR=${HERE}/build
+function usage() {
+    echo "USAGE"
+    echo "  run-tests [OPTIONS...] [TESTS...]"
+    echo ""
+    echo "DESCRIPTION"
+    echo "  runs the terraform test suite"
+    echo ""
+    echo "OPTIONS"
+    echo "  -h, --help"
+    echo "      show this message"
+    echo ""
+    echo "  -d, --debug"
+    echo "      run terraform tests with debug"
+    echo ""
+    echo "  -e PATTERN|FILE, --exclude PATTERN|FILE"
+    echo "      repeatable option to exclude certain tests or test groups"
+    echo ""
+    echo "  -i PATTERN|FILE, --include PATTERN|FILE"
+    echo "      repeatable option to include certain tests or test groups"
+    echo ""
+    echo "  -t, --tests-only"
+    echo "      run the tests against an already running instance of localstack"
+}
+
+export PROJECT_ROOT=$(pwd) # FIXME
+
+export LST_DIR=${PROJECT_ROOT}/localstack
+export BUILD_DIR=${PROJECT_ROOT}/build
 
 export LST_LOG=${BUILD_DIR}/localstack.log
 export TEST_LOG=${BUILD_DIR}/test.log
@@ -17,56 +42,84 @@ export ACCTEST_PARALLELISM=1
 TEST_BIN=$HOME/.cache/localstack/aws.test
 [ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
 
-TESTS=${1:-TestAcc*}
-
 function run_localstack() {
-	cd ${LST_DIR}
-	source .venv/bin/activate
-	exec bin/localstack start --host
+    cd ${LST_DIR}
+    source .venv/bin/activate
+    exec bin/localstack start --host
+}
+
+function run_tests() {
+    cd terraform-provider-aws
+
+    echo "running ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run $@"
+
+    set -o pipefail # otherwise $? would output the return code of tee
+
+    ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run "$@" | tee ${TEST_LOG}
+
+    return $?
+}
+
+function run_lst_and_tests() {
+    rm -f ${LST_LOG}
+    # start localstack in the background
+    run_localstack > >(tee ${LST_LOG}) &
+    export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
+
+    # TODO: subprocesses will stay open if interrupted
+
+    # wait for localstack to be ready
+    echo "waiting on localstack to start on process ${lst_pid}"
+
+    while true; do
+        sleep 1
+
+        if `grep --max-count=1 -q "Ready\." ${LST_LOG}`; then
+            break
+        fi
+        if ! ps -p ${lst_pid} > /dev/null; then
+            echo "localstack terminated while waiting"
+            exit 1
+        fi
+    done
+
+    run_tests "$@"
+    ret=$?
+
+    # kill the running localstack instance
+    echo "killing localstack ${lst_pid}"
+    kill ${lst_pid}
+    echo "waiting on localstack to end"
+    wait ${lst_pid}
 }
 
 function main() {
-	mkdir -p ${BUILD_DIR}
+    list_test_args="" # test filters (handed to list-tests)
+    start_lst=true
 
-	rm -f ${LST_LOG}
-	# start localstack in the background
-	run_localstack > >(tee ${LST_LOG}) &
-	export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -h|--help)        usage; exit 0 ;;
+            -d|--debug)       export TF_LOG=debug; ;;
+            -i|--include)     list_test_args="$list_test_args -i $2"; shift ;;
+            -e|--exclude)     list_test_args="$list_test_args -e $2"; shift ;;
+            -t|--tests-only)  start_lst=false; ;;
+            *)                list_test_args="$list_test_args -i $1" ;;
+        esac
+        shift
+    done
 
-	# TODO: subprocesses will stay open if interrupted
+    TESTS=$($PROJECT_ROOT/bin/list-tests -p $list_test_args)
 
-	# wait for localstack to be ready
-	echo "waiting on localstack to start on process ${lst_pid}"
+    mkdir -p ${BUILD_DIR}
 
-	while true; do
-		sleep 1
+    if [ $start_lst == false ]; then
+        run_tests $TESTS
+    else
+        run_lst_and_tests $TESTS
+    fi
 
-		if `grep --max-count=1 -q "Ready\." ${LST_LOG}`; then
-			break
-		fi
-		if ! ps -p ${lst_pid} > /dev/null; then
-			echo "localstack terminated while waiting"
-			exit 1
-		fi
-	done
-
-	# this is where the testfixtures live
-	cd terraform-provider-aws
-
-	echo "running ${TEST_BIN} -test.v -test.run -test.parallel=${ACCTEST_PARALLELISM} ${TESTS}"
-
-	set -o pipefail # otherwise $? would output the return code of tee
-	${TEST_BIN} -test.v -test.run ${TESTS} | tee ${TEST_LOG}
-	ret=$?
-
-	# kill the running localstack instance
-	echo "killing localstack ${lst_pid}"
-	kill ${lst_pid}
-	echo "waiting on localstack to end"
-	wait ${lst_pid}
-
-	# exit with the test result
-	exit ${ret}
+    exit $?
 }
 
 main "$@"
