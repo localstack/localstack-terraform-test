@@ -1,3 +1,4 @@
 TestAccAWSAPIGatewayV2
 TestAccAWSSESActiveReceiptRuleSet
 TestAccAWSAPIGatewayResource
+TestAccAWSSSMPatchBaseline
