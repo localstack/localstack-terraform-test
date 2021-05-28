@@ -2,12 +2,15 @@
 
 TEST_BIN=$HOME/.cache/localstack/aws.test
 
-[ -f ${TEST_BIN} ] && { echo "aws.test already exists, skipping"; exit 0; }
+[ -f ${TEST_BIN} ] && { echo "aws.test already exists at ${TEST_BIN}, skipping"; exit 0; }
 
 BIN_DIR=$(dirname ${TEST_BIN})
+PATCH="etc/0001-add-simple-hardcoded-configuration-for-running-tests.patch"
 mkdir -p ${BIN_DIR}
 
 cd terraform-provider-aws
+git apply ../${PATCH}
+
 go test -c ./aws
 
 mv aws.test ${TEST_BIN}
