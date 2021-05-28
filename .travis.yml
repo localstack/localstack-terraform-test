@@ -19,7 +19,7 @@ install:
     )
 
 script:
-  - bin/run-tests --include localstack-tests.incl.txt --exclude localstack-tests.excl.txt
+  - TF_LOG=warn bin/run-tests --include localstack-tests.incl.txt --exclude localstack-tests.excl.txt
 
 after_script:
   - bin/create-report
