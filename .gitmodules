@@ -3,4 +3,4 @@
 	url = https://github.com/localstack/localstack.git
 [submodule "terraform-provider-aws"]
 	path = terraform-provider-aws
-	url = https://github.com/localstack/terraform-provider-aws.git
+	url = https://github.com/hashicorp/terraform-provider-aws.git
