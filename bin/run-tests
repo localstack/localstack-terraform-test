@@ -91,6 +91,8 @@ function run_lst_and_tests() {
     kill ${lst_pid}
     echo "waiting on localstack to end"
     wait ${lst_pid}
+
+    return ${ret}
 }
 
 function main() {
