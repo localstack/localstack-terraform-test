@@ -19,7 +19,7 @@ install:
     )
 
 script:
-  - ./run-fail-fast.sh
+  - bin/run-fail-fast
 
 after_script:
   - bin/create-report

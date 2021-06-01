@@ -40,6 +40,8 @@ function run_localstack() {
 }
 
 function main() {
+    mkdir -p ${BUILD_DIR}
+
     rm -f ${LST_LOG}
     # start localstack in the background
     run_localstack > >(tee ${LST_LOG}) 2>&1 &
