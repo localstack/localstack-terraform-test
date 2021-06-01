@@ -74,7 +74,7 @@ function main() {
     cmd=$(echo "${cmd} ${filters}")
 
     if [ ! -z $prepare ]; then
-        echo "($(eval $cmd | tr '\n' '|' | sed 's/|$//'))"
+        echo "($(eval $cmd | tr '\n' '|' | sed 's/|$/_/' | sed 's/|/_|/g'))"
     else
         eval $cmd
     fi
