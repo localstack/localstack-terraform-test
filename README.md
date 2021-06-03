@@ -9,22 +9,46 @@ Some utilities for local development:
 
 * `bin/list-tests [--all]`: list the available tests by parsing the go test files.
 * `bin/install-aws-test` creates the binary for running the test suite (and installs it into `$HOME/.cache/localstack/aws.test`. requires go 1.16
-* `bin/run-tests [test]` run a specific test. this installs and runs localstack in a background process
+* `bin/run-tests [test]` run a specific test. this installs and runs localstack in a background process. add the flag `-t` to test against an already running localstack instance.
 
 ### Generating the test report
 
-The `build/test.log` can be transformed into a JUnit XML document using `go-junit-report`, which can then be used for other visualization tools.
-You need go and can install it with `go get`.
+TODO: a custom report generator is WIP
 
-    go get -u github.com/jstemmer/go-junit-report
+## Funding and running tests
 
-Then run
+After running `bin/install-aws-test`, use `bin/run-tests [OPTIONS...] [TESTS...]` to run individual tests or entire test suites.
 
-    bin/create-report
+Here are some examples:
 
-## Running locally
+* `bin/run-tests TestAccAWSAPIGatewayResource`
+* `bin/run-tests -t TestAccAWSAPIGatewayResource`: same as above, but does not start localstack
+* `bin/run-tests TestAccAWSAPIGateway`: runs all tests that match `TestAccAWSAPIGateway` (run `bin/list-tests TestAccAWSAPIGateway` to see which ones will be executed)
+* `bin/run-tests -e TestAccAWSAPIGatewayV2 TestAccAWSAPIGateway`: same as above, but excludes all tests that match `TestAccAWSAPIGatewayV2`.
 
-TODO
+You can use `bin/list-tests` with the same parameters to see which tests will be executed,
+or to find specific tests based on patterns.
+
+For example:
+
+```
+ % bin/list-tests Queue
+TestAccAWSBatchJobQueue
+TestAccAWSGameliftGameSessionQueue
+TestAccAWSMediaConvertQueue
+TestAccAWSSQSQueue
+TestAccAWSSQSQueuePolicy
+TestAccDataSourceAwsBatchJobQueue
+TestAccDataSourceAwsSqsQueue
+```
+
+or
+
+```
+ % bin/list-tests "Data.*Queue"
+TestAccDataSourceAwsBatchJobQueue
+TestAccDataSourceAwsSqsQueue
+```
 
 ## Travis config
 
