@@ -13,7 +13,8 @@ Some utilities for local development:
 
 ### Generating the test report
 
-TODO: a custom report generator is WIP
+Test logs are aggregated into `build/tests/*.log`, the command `bin/create-report` will create junit-like xml reports.
+These can then be rendered into html using, for example xuint-viewer available through npm: `npx xunit-viewer -r build/tests/`
 
 ## Funding and running tests
 
