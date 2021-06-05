@@ -60,12 +60,12 @@ function run_watchdog() {
 
 function forward_lst_log() {
     log=$1
-    tail -f ${LST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.localstack] " $0}' | tee -a $log > /dev/null
+    tail -f -n0 ${LST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.localstack] " $0}' | tee -a $log > /dev/null
 }
 
 function forward_test_log() {
     log=$1
-    tail -f ${TEST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.gotest] " $0}' | tee -a $log > /dev/null
+    tail -f -n0 ${TEST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.gotest] " $0}' | tee -a $log > /dev/null
 }
 
 function run_test() {
@@ -91,6 +91,8 @@ function run_tests() {
 
         # touch log for test run
         log="${BUILD_DIR}/tests/$t.log"
+        echo "" > $log
+
         echo "[ltt.runner] starting $t" | tee -a ${log}
 
         run_watchdog $t &
@@ -102,6 +104,8 @@ function run_tests() {
         forward_test_log $log &
         pid_forward_test_log=$!
 
+        sleep 1
+
         run_test $t 2>&1 | stdbuf -oL tee -a ${TEST_LOG} > /dev/null
 
         kill $pid_watchdog &> /dev/null
@@ -110,14 +114,16 @@ function run_tests() {
 
         wait $pid_watchdog $pid_forward_test_log $pid_forward_lst_log
         echo "[ltt.runner] completed $t" | tee -a ${log}
+        sleep 1
+
     done
 }
 
 function run_lst_and_tests() {
     rm -f ${LST_LOG}
     # start localstack in the background
-    DEBUG=1 run_localstack > >(tee ${LST_LOG}) 2>&1 &
-    export lst_pid=$! # returns the pid of run_localstack https://stackoverflow.com/a/8048493/804840
+    DEBUG=1 run_localstack &> ${LST_LOG} &
+    export lst_pid=$!
 
     # TODO: subprocesses will stay open if interrupted
 
