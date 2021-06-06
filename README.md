@@ -11,12 +11,7 @@ Some utilities for local development:
 * `bin/install-aws-test` creates the binary for running the test suite (and installs it into `$HOME/.cache/localstack/aws.test`. requires go 1.16
 * `bin/run-tests [test]` run a specific test. this installs and runs localstack in a background process. add the flag `-t` to test against an already running localstack instance.
 
-### Generating the test report
-
-Test logs are aggregated into `build/tests/*.log`, the command `bin/create-report` will create junit-like xml reports.
-These can then be rendered into html using, for example xuint-viewer available through npm: `npx xunit-viewer -r build/tests/`
-
-## Funding and running tests
+## Finding and running tests
 
 After running `bin/install-aws-test`, use `bin/run-tests [OPTIONS...] [TESTS...]` to run individual tests or entire test suites.
 
@@ -50,6 +45,12 @@ or
 TestAccDataSourceAwsBatchJobQueue
 TestAccDataSourceAwsSqsQueue
 ```
+
+## Generating the test reports
+
+Test logs are aggregated into `build/tests/*.log`, the command `bin/create-report` will create junit-like xml reports.
+These can then be rendered into html using `bin/create-report-html`, which also creates a summary page in `build/report.html`.
+For rendering html, you need `junit2html`.
 
 ## Travis config
 
