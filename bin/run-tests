@@ -50,7 +50,7 @@ function run_watchdog() {
 
     while true; do
         sleep 1
-        if grep --max-count=1 -q "attempt 2/25" ${log} &> /dev/null; then
+        if grep --max-count=1 -q "attempt 1/25" ${log} &> /dev/null; then
             pkill -f "aws.test" # FIXME
             echo "[ltt.runner] terminated $1" | tee -a ${log}
             break
@@ -59,11 +59,13 @@ function run_watchdog() {
 }
 
 function forward_lst_log() {
+    trap 'kill $(jobs -p) 2> /dev/null' EXIT
     log=$1
     tail -f -n0 ${LST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.localstack] " $0}' | tee -a $log > /dev/null
 }
 
 function forward_test_log() {
+    trap 'kill $(jobs -p) 2> /dev/null' EXIT
     log=$1
     tail -f -n0 ${TEST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.gotest] " $0}' | tee -a $log > /dev/null
 }
@@ -90,8 +92,8 @@ function run_tests() {
         echo "" > ${TEST_LOG}
 
         # touch log for test run
-        log="${BUILD_DIR}/tests/$t.log"
-        echo "" > $log
+        log="${BUILD_DIR}/tests/${t}.log"
+        echo "" > ${log}
 
         echo "[ltt.runner] starting $t" | tee -a ${log}
 
@@ -107,6 +109,8 @@ function run_tests() {
         sleep 1
 
         run_test $t 2>&1 | stdbuf -oL tee -a ${TEST_LOG} > /dev/null
+
+        sleep 1
 
         kill $pid_watchdog &> /dev/null
         kill $pid_forward_lst_log &> /dev/null
