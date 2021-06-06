@@ -35,7 +35,7 @@ class RunnerLogParser:
         tests = self.tests
         suite = self.suite
 
-        line = line.encode('utf-8').decode('utf-8', 'ignore') # remove non-utf8 characters
+        line = line.replace('\x1b', '').encode('utf-8').decode('utf-8', 'ignore') # remove special characters
 
         output = line[len(prefixes[src]) + 1:]
 
@@ -164,7 +164,6 @@ def parser_to_xml(parser):
             testsuite['skipped'] += 1
 
 
-
         return d
 
     testcases = [dict2xml(test_to_junit_dict(t), 'testcase') for t in parser.tests.values()]
@@ -238,6 +237,10 @@ def main():
         parser = parse(suite, lines)
 
         f_xml = f[:-4] + '.xml'
+        d = os.path.dirname(f_xml)
+        f = os.path.basename(f_xml)
+
+        f_xml = os.path.join(d, 'TEST-' + f)
 
         with open(f_xml, 'w') as fd:
             print(f_xml)
