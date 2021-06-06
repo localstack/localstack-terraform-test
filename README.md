@@ -21,6 +21,7 @@ Here are some examples:
 * `bin/run-tests -t TestAccAWSAPIGatewayResource`: same as above, but does not start localstack
 * `bin/run-tests TestAccAWSAPIGateway`: runs all tests that match `TestAccAWSAPIGateway` (run `bin/list-tests TestAccAWSAPIGateway` to see which ones will be executed)
 * `bin/run-tests -e TestAccAWSAPIGatewayV2 TestAccAWSAPIGateway`: same as above, but excludes all tests that match `TestAccAWSAPIGatewayV2`.
+* `bin/run-tests -i localstack-tests.incl.txt`: runs all tests listed in the text file
 
 You can use `bin/list-tests` with the same parameters to see which tests will be executed,
 or to find specific tests based on patterns.
