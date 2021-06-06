@@ -70,8 +70,8 @@ function forward_test_log() {
 
 function run_test() {
     cd terraform-provider-aws
-    echo "running ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run $t"
-    ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run "$@"
+    echo "running ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run ${t}_"
+    ${TEST_BIN} -test.v -test.parallel=${ACCTEST_PARALLELISM} -test.run "${t}_"
     return $?
 }
 
