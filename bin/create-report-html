@@ -105,6 +105,8 @@ def main():
         print('junit2html not found in path, please install it with: pip install junit2html')
         exit(1)
 
+    reports.sort()
+
     create_test_reports(reports)
     testsuites, summary = create_summary(reports)
 
