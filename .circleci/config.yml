@@ -61,5 +61,7 @@ jobs:
 
 workflows:
   main:
+    when:
+      equal: [ build, << pipeline.git.branch >> ]
     jobs:
       - build
