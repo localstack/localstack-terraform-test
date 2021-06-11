@@ -33,6 +33,8 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
 export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
 export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
 
+export INSTALL_LOCAL_MOTO=${INSTALL_LOCAL_MOTO:-true}
+
 export TF_ACC=1
 export ACCTEST_PARALLELISM=1
 
@@ -42,6 +44,11 @@ TEST_BIN=$HOME/.cache/localstack/aws.test
 function run_localstack() {
     cd ${LST_DIR}
     source .venv/bin/activate
+
+    if [ ${INSTALL_LOCAL_MOTO} == true ]; then
+        pip install -e ../moto
+    fi
+
     exec bin/localstack start --host
 }
 
