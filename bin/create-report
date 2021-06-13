@@ -11,6 +11,13 @@ prefixes = {
     'runner': '[ltt.runner]'
 }
 
+def strip_special_chars(line):
+    # remove special characters, convert to str
+    if not isinstance(line, bytes):
+        line = line.replace('\x1b', '').encode('utf-8')
+    return line.decode('utf-8', 'ignore')
+
+
 class TestCase:
     def __init__(self, suite, test):
         self.suite = suite
@@ -35,7 +42,7 @@ class RunnerLogParser:
         tests = self.tests
         suite = self.suite
 
-        line = line.replace('\x1b', '').encode('utf-8').decode('utf-8', 'ignore') # remove special characters
+        line = strip_special_chars(line)
 
         output = line[len(prefixes[src]) + 1:]
 
@@ -102,7 +109,7 @@ def parse(suite, lines):
         for src, prefix in prefixes.items():
             if line.startswith(prefix):
                 parser.add_line(src, line)
-                
+
     for test in parser.tests.values():
         if test.result is None:
             test.result = 'errored'
@@ -223,16 +230,17 @@ def dict2xml(d, root_node=None):
 
         if wrap or isinstance(d, dict):
             xml = xml + '</' + root + '>'
-        
+
     return xml
 
 
 
 def main():
     for f in glob.glob('build/tests/*.log'):
-        with open(f, 'r') as fd:
+        with open(f, 'rb') as fd:
             lines = fd.readlines()
 
+        lines = [strip_special_chars(line) for line in lines]
         suite = os.path.basename(f)[:-4] # strip `.log`
         parser = parse(suite, lines)
 
