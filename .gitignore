@@ -18,3 +18,5 @@ __pycache__
 *.log
 *.iml
 
+tests/aws/
+
