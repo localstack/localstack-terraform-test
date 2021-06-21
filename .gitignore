@@ -8,3 +8,13 @@
 *.iml
 
 build/
+target/
+
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.class
+*.log
+*.iml
+
