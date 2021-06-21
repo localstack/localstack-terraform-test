@@ -71,6 +71,8 @@ function main() {
         fi
     done
 
+    ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
+    cd ${ROOT}
     cmd=$(echo "${cmd} ${filters}")
 
     if [ ! -z $prepare ]; then
