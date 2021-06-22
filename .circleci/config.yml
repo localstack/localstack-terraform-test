@@ -13,7 +13,7 @@ jobs:
           name: "Installing prerequisites"
           command: |
             sudo apt-get update
-            sudo apt install -y python3.8 python3.8-dev libsasl2-dev
+            sudo apt install -y python3.8-dev libsasl2-dev
 
       # download/install and cache aws.test and localstack pip
       - restore_cache:
@@ -24,7 +24,7 @@ jobs:
           name: "Installing LocalStack"
           command: |
             cd localstack
-            python3.8 -m venv .venv
+            virtualenv --python=`which python3.8` .venv
             make install
             cd ..
       - save_cache:
@@ -35,13 +35,19 @@ jobs:
       - run:
           name: "Preparing test suite"
           command: |
-            pip3 install -r requirements
-            python3.8 -m tests.generator
+            virtualenv --python=`which python3.8` .venv
+            source .venv/bin/activate
+            pip install -r requirements.txt
+            which pip
+            which pytest
+            python -m tests.generator
 
       # main test suite
       - run:
           name: "Run test suite"
-          command: python3.8 -m pytest --workers 2 --tests-per-worker 4 tests/ -k 'BucketNotification or S3Bucket_basic'
+          command: |
+            source .venv/bin/activate
+            pytest --workers 2 --tests-per-worker 4 tests/ -k 'BucketNotification or S3Bucket_basic'
 
 #      # save build reports as artifacts
 #      - run:
