@@ -1,8 +1,11 @@
 import inspect
+import logging
 import os
 import subprocess
 import threading
 from collections import defaultdict
+
+logger = logging.getLogger(__name__)
 
 root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 list_bin = os.path.join(root_dir, 'bin/list-tests')
@@ -40,8 +43,10 @@ def _load_caches():
     _cache_loaded.set()
 
     pattern = os.path.join(root_dir, 'terraform-provider-aws/aws/**_test.go')
+    logger.info('locating go test suites in %s', pattern)
     cmd = f'grep "^func TestAcc" {pattern}'
     lines = subprocess.check_output(cmd, shell=True, text=True).splitlines(keepends=False)
+    logger.info('found %d records', len(lines))
 
     suite_tests = defaultdict(list)
 

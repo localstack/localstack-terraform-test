@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from queue import Queue
@@ -7,10 +8,12 @@ from typing import Tuple, List
 
 import pytest
 
-test_bin = '/home/thomas/.cache/localstack/aws.test'
-test_log_dir = '/home/thomas/workspace/localstack/localstack-terraform-test/target/logs/'
+logger = logging.getLogger(__name__)
 
-os.makedirs(test_log_dir, exist_ok=True)
+root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+
+test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/aws.test')
+test_log_dir = os.path.join(root_dir, 'target/logs')
 
 TestResult = Tuple[int, List[str]]
 
@@ -28,6 +31,9 @@ def reader(pipe, queue: Queue):
 
 
 def run_test(test: str) -> TestResult:
+    if not os.path.exists(test_log_dir):
+        os.makedirs(test_log_dir, exist_ok=True)
+
     then = time.time()
 
     env = dict(os.environ)
@@ -71,9 +77,9 @@ def run_test(test: str) -> TestResult:
             if 'attempt 2/' in line:
                 duration = time.time() - then
                 lines = [
-                    'TEST TERMINATED (likely 4xx/5xx errors)',
-                    f'--- ERROR: {test} ({duration:.2f}s)',
-                    'ERROR'
+                    'TEST TERMINATED (likely 4xx/5xx errors)\n',
+                    f'--- ERROR: {test} ({duration:.2f}s)\n',
+                    'ERROR\n'
                 ]
 
                 stdout.extend(lines)
@@ -117,7 +123,7 @@ def assert_test(test):
     if rc == 0:
         return
     if rc == -13:
-        pytest.xfail(create_fail_message(stdout))
+        pytest.fail(create_fail_message(stdout), False)
         return
 
     pytest.fail(create_fail_message(stdout), False)
