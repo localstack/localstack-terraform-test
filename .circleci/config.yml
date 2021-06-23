@@ -50,7 +50,7 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            pytest --workers 2 --tests-per-worker 4 tests/ -k 'BucketNotification or S3Bucket_basic'
+            python -m pytest --workers 2 --tests-per-worker 4  tests/ -k "$(cat localstack-tests.incl.txt | xargs | sed 's/ / or /g')"
 
       # save build reports as artifacts
       - run:
