@@ -5,22 +5,25 @@ import os
 import xml.etree.ElementTree as ET
 from shutil import which
 
+target_dir = 'target/reports-html'
+
 
 def render(src, dest):
     os.system(f'junit2html {src} {dest}')
 
 
-def create_test_reports(reports):
+def create_test_reports(reports, target=target_dir):
     files = []
     for f in reports:
 
-        f_html = f[:-4] + '.html'
+        f_html = os.path.basename(f[:-4]) + '.html'
+        f_html = os.path.join(target, f_html)
 
         if os.path.exists(f_html):
-            print('skipping', f)
+            print('skipping', f_html)
             continue
 
-        print(f)
+        print(f_html)
         render(f, f_html)
         files.append(f_html)
 
@@ -28,9 +31,8 @@ def create_test_reports(reports):
 
 
 def parse_testsuite_meta(source):
-    for event, elem in ET.iterparse(source, events=('start', )):
+    for event, elem in ET.iterparse(source, events=('start',)):
         if elem.tag == 'testsuite':
-
             d = dict(elem.attrib)
             d['time'] = float(d['time'])
             d['tests'] = int(d['tests'])
@@ -54,7 +56,7 @@ def create_summary(reports):
                 ts['report'] = os.path.basename(f[:-4] + '.html')
                 testsuites.append(ts)
 
-    summary = {'tests': 0, 'skipped': 0, 'failures': 0, 'errors': 0, 'passed':0, 'time': 0}
+    summary = {'tests': 0, 'skipped': 0, 'failures': 0, 'errors': 0, 'passed': 0, 'time': 0}
 
     for ts in testsuites:
         for k in summary.keys():
@@ -79,7 +81,7 @@ def render_summary(testsuites, summary):
     html += '<table border="1">'
     html += '<tr><th>Results</th><th>Number</th><th>%</th></tr>'
     for k in ('passed', 'failures', 'errors', 'skipped'):
-        html += f'<tr><td>{k}</td><td>{summary[k]}</td><td>{summary[k+"%"]}</td></tr>'
+        html += f'<tr><td>{k}</td><td>{summary[k]}</td><td>{summary[k + "%"]}</td></tr>'
 
     html += f'<tr><td><b>Total</b></td><td>{summary["tests"]}</td><td>100%</td></tr>'
 
@@ -87,7 +89,8 @@ def render_summary(testsuites, summary):
 
     html += '<table border="1"><tr><th>Test</th><th>Tests</th><th>Passed</th><th>Failed</th><th>Errored</th><th>Skipped</th></tr>'
     for ts in testsuites:
-        html += '<tr><td><a href="./tests/{report}">{name}</a></td><td>{tests}</td><td>{passed}</td><td>{failures}</td><td>{errors}</td><td>{skipped}</td></tr>'.format(**ts)
+        html += '<tr><td><a href="./{report}">{name}</a></td><td>{tests}</td><td>{passed}</td><td>{failures}</td><td>{errors}</td><td>{skipped}</td></tr>'.format(
+            **ts)
 
     html += '</table>'
 
@@ -96,7 +99,9 @@ def render_summary(testsuites, summary):
 
 
 def main():
-    reports = glob.glob('build/tests/*.xml')
+    reports = glob.glob('target/reports-xunit/*.xml')
+    os.makedirs(target_dir, exist_ok=True)
+
     if not reports:
         print('no reports, run bin/create-report first')
         exit(1)
@@ -110,7 +115,7 @@ def main():
     create_test_reports(reports)
     testsuites, summary = create_summary(reports)
 
-    with open('build/report.html', 'w') as fd:
+    with open('target/reports-html/index.html', 'w') as fd:
         fd.write(render_summary(testsuites, summary))
 
     print('===========================================')
@@ -118,9 +123,9 @@ def main():
     print()
 
     if which('open'):
-        print('open build/report.html')
+        print(f'open {target_dir}/index.html')
     elif which('xdg-open'):
-        print('xdg-open build/report.html')
+        print(f'xdg-open {target_dir}/index.html')
 
 
 if __name__ == '__main__':

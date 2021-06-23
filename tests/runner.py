@@ -67,8 +67,8 @@ def run_test(test: str) -> TestResult:
     try:
         for source, line in iter(lines.get, None):
             if source == proc.stdout:
-                stdout_log_fd.write(line)
                 stdout.append(line)
+                stdout_log_fd.write(line)
                 continue
 
             # source == proc.stderr
@@ -83,6 +83,7 @@ def run_test(test: str) -> TestResult:
                 ]
 
                 stdout.extend(lines)
+                stdout_log_fd.writelines(lines)
                 stderr_log_fd.writelines(lines)
                 break
 

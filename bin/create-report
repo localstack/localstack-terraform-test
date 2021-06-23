@@ -2,20 +2,26 @@
 
 import glob
 import os
-
 from collections import defaultdict
 
-prefixes = {
-    'go': '[ltt.gotest]',
-    'lst': '[ltt.localstack]',
-    'runner': '[ltt.runner]'
-}
+report_dir = 'target/reports-xunit'
+log_glob = 'target/logs/*.stdout.log'
+
 
 def strip_special_chars(line):
     # remove special characters, convert to str
     if not isinstance(line, bytes):
         line = line.replace('\x1b', '').encode('utf-8')
     return line.decode('utf-8', 'ignore')
+
+
+def escape(s):
+    s = s.replace("&", "&amp;")
+    s = s.replace("<", "&lt;")
+    s = s.replace(">", "&gt;")
+    s = s.replace("\"", "&quot;")
+    s = s.replace("'", "&apos;")
+    return s
 
 
 class TestCase:
@@ -26,6 +32,9 @@ class TestCase:
         self.duration = 0
         self.result = None
 
+    def __str__(self):
+        return f'{self.test}: {self.result} ({self.duration:.2f})'
+
 
 class RunnerLogParser:
     def __init__(self, suite):
@@ -35,91 +44,87 @@ class RunnerLogParser:
         self.collecting = False
 
     def parse_duration(self, fragment):
-        seconds = fragment[1:-2] # (0.00s) -> 0.00
+        seconds = fragment[1:-2]  # (0.00s) -> 0.00
         return float(seconds)
 
-    def add_line(self, src, line):
+    def add_line(self, line):
         tests = self.tests
         suite = self.suite
 
         line = strip_special_chars(line)
+        output = line
 
-        output = line[len(prefixes[src]) + 1:]
+        if output.startswith('=== RUN'):
+            _, _, test = output.split()
+            if test not in tests:
+                tests[test] = TestCase(suite, test)
 
-        if src == 'runner':
-            if output.startswith('starting'):
-                if output.strip().split()[-1] == suite:
-                    self.collecting = True
-
-            if output.startswith('completed'):
-                if output.strip().split()[-1] == suite:
-                    self.collecting = False
-
-        if not self.collecting:
+            self.active_test = test
             return
 
-        if src == 'go':
-            if output.startswith('=== RUN'):
-                _ ,_ , test = output.split()
-                if test not in tests:
-                    tests[test] = TestCase(suite, test)
+        elif output.startswith('=== PAUSE'):
+            _, _, test = output.split()
+            self.active_test = None
+            return
 
-                self.active_test = test
-                return
+        elif output.startswith('=== CONT'):
+            _, _, test = output.split()
+            self.active_test = test
+            return
 
-            elif output.startswith('=== PAUSE'):
-                _ ,_ , test = output.split()
-                self.active_test = None
-                return
+        elif output.strip().startswith('--- PASS'):
+            _, _, test, duration = output.split()
+            self.active_test = None
+            tests[test].result = 'passed'
+            tests[test].duration = self.parse_duration(duration)
+            return
 
-            elif output.startswith('=== CONT'):
-                _ ,_ , test = output.split()
-                self.active_test = test
-                return
+        elif output.strip().startswith('--- SKIP'):
+            _, _, test, duration = output.split()
+            self.active_test = None
+            tests[test].result = 'skipped'
+            tests[test].duration = self.parse_duration(duration)
+            return
 
-            elif output.strip().startswith('--- PASS'):
-                _ ,_ , test, duration = output.split()
-                self.active_test = None
-                tests[test].result = 'passed'
-                tests[test].duration = self.parse_duration(duration)
-                return
+        elif output.strip().startswith('--- FAIL'):
+            _, _, test, duration = output.split()
+            self.active_test = None
+            tests[test].result = 'failed'
+            tests[test].duration = self.parse_duration(duration)
+            return
 
-            elif output.strip().startswith('--- SKIP'):
-                _ ,_ , test, duration = output.split()
-                self.active_test = None
-                tests[test].result = 'skipped'
-                tests[test].duration = self.parse_duration(duration)
-                return
-
-            elif output.strip().startswith('--- FAIL'):
-                _ ,_ , test, duration = output.split()
-                self.active_test = None
-                tests[test].result = 'failed'
-                tests[test].duration = self.parse_duration(duration)
-                return
+        elif output.strip().startswith('--- ERROR'):
+            _, _, test, duration = output.split()
+            self.active_test = None
+            tests[test].result = 'errored'
+            tests[test].duration = self.parse_duration(duration)
+            return
 
         if self.active_test:
             tests[self.active_test].lines.append(line)
 
 
-def parse(suite, lines):
+def parse_suite(suite, logs) -> RunnerLogParser:
     parser = RunnerLogParser(suite)
 
-    for line in lines:
-        for src, prefix in prefixes.items():
-            if line.startswith(prefix):
-                parser.add_line(src, line)
-
-    for test in parser.tests.values():
-        if test.result is None:
-            test.result = 'errored'
-            test.duration = 0.
+    for log in logs:
+        with open(log, 'r') as log_fd:
+            for line in log_fd:
+                parser.add_line(line)
 
     return parser
 
 
-def parser_to_xml(parser):
+def find_fail_message(testcase: TestCase):
+    for line in testcase.lines:
+        line = line.strip()
+        if line:
+            return line  # return the first non-empty line as error message
 
+    return testcase.result
+
+
+def parser_to_xml(parser):
     testsuite = {
         'name': parser.suite,
         'time': 0,
@@ -128,17 +133,6 @@ def parser_to_xml(parser):
         'skipped': 0,
         'tests': 0,
     }
-
-    def find_fail_message(testcase: TestCase):
-        for line in testcase.lines:
-            if not line.startswith('[ltt.gotest]'):
-                continue
-
-            if 'Step' in line and '.go' in line and 'error' in line:
-                return line.strip()
-
-        return 'failure'
-
 
     def test_to_junit_dict(testcase: TestCase):
         d = {
@@ -165,11 +159,9 @@ def parser_to_xml(parser):
             }
             testsuite['failures'] += 1
 
-
         if testcase.result == 'skipped':
             d['skipped'] = {}
             testsuite['skipped'] += 1
-
 
         return d
 
@@ -184,21 +176,12 @@ def parser_to_xml(parser):
     return dict2xml(testsuite, 'testsuite')
 
 
-def escape(s):
-    s = s.replace("&", "&amp;")
-    s = s.replace("<", "&lt;")
-    s = s.replace(">", "&gt;")
-    s = s.replace("\"", "&quot;")
-    s = s.replace("'", "&apos;")
-    return s
-
-
 def dict2xml(d, root_node=None):
-    wrap          =     False if None == root_node or isinstance(d, list) else True
-    root          = 'objects' if None == root_node else root_node
+    wrap = False if None == root_node or isinstance(d, list) else True
+    root = 'objects' if None == root_node else root_node
     root_singular = root[:-1] if 's' == root[-1] and None == root_node else root
-    xml           = ''
-    children      = []
+    xml = ''
+    children = []
 
     if isinstance(d, dict):
         for key, value in dict.items(d):
@@ -234,22 +217,18 @@ def dict2xml(d, root_node=None):
     return xml
 
 
-
 def main():
-    for f in glob.glob('build/tests/*.log'):
-        with open(f, 'rb') as fd:
-            lines = fd.readlines()
+    os.makedirs(report_dir, exist_ok=True)
 
-        lines = [strip_special_chars(line) for line in lines]
-        suite = os.path.basename(f)[:-4] # strip `.log`
-        parser = parse(suite, lines)
+    suites = defaultdict(list)
+    for f in glob.glob(log_glob):
+        suite = os.path.basename(f).split('_')[0]
+        suites[suite].append(f)
 
-        f_xml = f[:-4] + '.xml'
-        d = os.path.dirname(f_xml)
-        f = os.path.basename(f_xml)
+    for suite, logs in suites.items():
+        f_xml = os.path.join(report_dir, f'{suite}.xml')
 
-        f_xml = os.path.join(d, 'TEST-' + f)
-
+        parser = parse_suite(suite, logs)
         with open(f_xml, 'w') as fd:
             print(f_xml)
             fd.writelines(parser_to_xml(parser))
