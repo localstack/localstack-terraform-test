@@ -3,7 +3,7 @@ import os
 import time
 from queue import Queue
 from subprocess import Popen, PIPE
-from threading import Thread
+from threading import Thread, Timer
 from typing import Tuple, List
 
 import pytest
@@ -14,6 +14,8 @@ root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/aws.test')
 test_log_dir = os.path.join(root_dir, 'target/logs')
+
+timeout_seconds = 5 * 60  # 5 minute timeout per test
 
 TestResult = Tuple[int, List[str]]
 
@@ -48,13 +50,8 @@ def run_test(test: str) -> TestResult:
     cmd = [test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$']
 
     proc = Popen(cmd, env=env, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
-
     lines = Queue()
-    t_stdout = Thread(target=reader, args=[proc.stdout, lines])
-    t_stderr = Thread(target=reader, args=[proc.stderr, lines])
-
-    t_stdout.start()
-    t_stderr.start()
+    stdout = []
 
     stderr_log = os.path.join(test_log_dir, f'{test}.stderr.log')
     stdout_log = os.path.join(test_log_dir, f'{test}.stdout.log')
@@ -62,7 +59,28 @@ def run_test(test: str) -> TestResult:
     stdout_log_fd = open(stdout_log, 'w')
     stderr_log_fd = open(stderr_log, 'w')
 
-    stdout = []
+    t_stdout = Thread(target=reader, args=[proc.stdout, lines])
+    t_stderr = Thread(target=reader, args=[proc.stderr, lines])
+
+    t_stdout.start()
+    t_stderr.start()
+
+    def timeout():
+        proc.terminate()
+
+        duration = time.time() - then
+        lines = [
+            f'TEST TERMINATED (timeout {timeout_seconds}s)\n',
+            f'--- ERROR: {test} ({duration:.2f}s)\n',
+            'ERROR\n'
+        ]
+
+        stdout.extend(lines)
+        stdout_log_fd.writelines(lines)
+        stderr_log_fd.writelines(lines)
+
+    timer = Timer(timeout_seconds, timeout)
+    timer.start()
 
     try:
         for source, line in iter(lines.get, None):
@@ -86,21 +104,22 @@ def run_test(test: str) -> TestResult:
                 stdout_log_fd.writelines(lines)
                 stderr_log_fd.writelines(lines)
                 break
-
     finally:
+        timer.cancel()
+
+        proc.stderr.close()
+        proc.stdout.close()
+
+        proc.wait()
+
+        t_stderr.join(5)
+        t_stdout.join(5)
+
         stdout_log_fd.flush()
         stderr_log_fd.flush()
 
         stdout_log_fd.close()
         stderr_log_fd.close()
-
-    proc.stderr.close()
-    proc.stdout.close()
-
-    proc.wait()
-
-    t_stderr.join(5)
-    t_stdout.join(5)
 
     return proc.returncode, stdout
 
