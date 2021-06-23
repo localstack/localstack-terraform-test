@@ -59,10 +59,10 @@ function run_watchdog() {
     while true; do
         sleep 1
         i=$((i + 1))
-        if [ $i -gt 180 ]; then
+        if [ $i -gt 240 ]; then
             # TODO remove duplicate code
             pkill -f "aws.test" # FIXME
-            echo "[ltt.runner] terminated $1" | tee -a ${log}
+            echo "[ltt.runner] terminated (timeout) $1" | tee -a ${log}
             break
         fi
         if grep --max-count=1 -q "attempt 1/25" ${log} &> /dev/null; then
