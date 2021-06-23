@@ -50,7 +50,7 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            python -m pytest --workers 2 --tests-per-worker 4  tests/ -k "$(cat localstack-tests.incl.txt | xargs | sed 's/ / or /g')"
+            python -m pytest --tests-per-worker 2 tests/ -k "$(cat localstack-tests.incl.txt | xargs | sed 's/ / or /g')"
 
       # save build reports as artifacts
       - run:
