@@ -12,12 +12,17 @@ list_bin = os.path.join(root_dir, 'bin/list-tests')
 
 
 def list_tests(query, list_all=False):
-    cmd = [list_bin]
-    if list_all:
-        cmd.append('--all')
-    cmd.append(f'{query}')
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
-    return proc.stdout.splitlines()
+    cwd = os.getcwd()
+    os.chdir(root_dir)
+    try:
+        cmd = [list_bin]
+        if list_all:
+            cmd.append('--all')
+        cmd.append(f'{query}')
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+        return proc.stdout.splitlines()
+    finally:
+        os.chdir(cwd)
 
 
 def collect(suite=None):
