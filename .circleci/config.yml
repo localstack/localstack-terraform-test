@@ -19,6 +19,7 @@ jobs:
       - restore_cache:
           keys:
             - localstack-cache
+
       - run: bin/install-aws-test
       - run:
           name: "Installing LocalStack"
@@ -27,48 +28,46 @@ jobs:
             virtualenv --python=`which python3.8` .venv
             make install
             cd ..
+      - run:
+          name: "Preparing test environment"
+          command: |
+            virtualenv --python=`which python3.8` .venv
+            source .venv/bin/activate
+            pip install -r requirements.txt
+            pip install -r localstack/requirements.txt
+            pip install -e ./localstack/
+            pip install -e ./moto/
+            python -m tests.generator
+
       - save_cache:
           key: localstack-cache
           paths:
             - /home/circleci/.cache/localstack/
             - /home/circleci/.cache/pip/
-      - run:
-          name: "Preparing test suite"
-          command: |
-            virtualenv --python=`which python3.8` .venv
-            source .venv/bin/activate
-            pip install -r requirements.txt
-            which pip
-            which pytest
-            python -m tests.generator
 
       # main test suite
       - run:
-          name: "Run test suite"
+          name: "Running test suite"
           command: |
             source .venv/bin/activate
             pytest --workers 2 --tests-per-worker 4 tests/ -k 'BucketNotification or S3Bucket_basic'
 
-#      # save build reports as artifacts
-#      - run:
-#          name: "Create reports"
-#          when: always
-#          command: |
-#            pip3 install junit2html
-#            bin/create-report
-#            bin/create-report-html
-#            mkdir -p /tmp/logs/tests
-#            mkdir -p /tmp/results/
-#            mv target/logs /tmp/logs
-#            mv build/tests/*.html /tmp/report/tests
-#            mv build/tests/*.xml /tmp/results
-#
-#      - store_test_results:
-#          path: /tmp/results
-#      - store_artifacts:
-#          path: /tmp/report
-#      - store_artifacts:
-#          path: /tmp/report/tests
+      # save build reports as artifacts
+      - run:
+          name: "Creating reports"
+          when: always
+          command: |
+            source .venv/bin/activate
+            bin/create-report
+            bin/create-report-html
+
+      - store_test_results:
+          path: target/reports-xunit
+      - store_artifacts:
+          path: target/logs
+      - store_artifacts:
+          path: target/reports-html
+
 
 workflows:
   main:

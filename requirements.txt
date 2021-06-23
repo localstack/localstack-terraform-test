@@ -1,2 +1,5 @@
+setuptools
+wheel
 pytest
 pytest-parallel
+junit2html
