@@ -23,6 +23,10 @@ jobs:
       - restore_cache:
           keys:
             - localstack-cache
+
+      # uncomment this line to force re-downloading of aws.test binary
+      - run: rm -f /home/circleci/.cache/localstack/aws.test
+
       - run: bin/install-aws-test
       # - run:
       #     name: "Installing LocalStack"
