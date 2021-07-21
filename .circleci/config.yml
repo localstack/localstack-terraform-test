@@ -12,6 +12,10 @@ jobs:
       DOWNLOAD_TEST_BIN: 1
     steps:
       - checkout
+
+      # start LocalStack asynchronously
+      - localstack/start
+
       - run: git submodule update --init --recursive
       - run:
           name: "Installing prerequisites"
@@ -48,7 +52,9 @@ jobs:
           paths:
             - /home/circleci/.cache/localstack/
             - /home/circleci/.cache/pip/
-      - localstack/startup
+
+      # wait for LocalStack to become available
+      - localstack/wait
 
       # main test suite
       - run:

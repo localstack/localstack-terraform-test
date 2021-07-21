@@ -1,4 +1,5 @@
 TestAccAWSAcm
+TestAccAWSAmplify
 TestAccAWSAPIGateway
 TestAccAWSCloudformation
 TestAccAWSCloudTrail
@@ -6,6 +7,7 @@ TestAccAwsCloudWatch
 TestAccAwsCloudWatch
 TestAccAWSCloudWatch
 TestAccAWSCloudwatch
+TestAccAWSCognito
 TestAccAWSDynamoDb
 TestAccAWSEc2
 TestAccAWSGlue
