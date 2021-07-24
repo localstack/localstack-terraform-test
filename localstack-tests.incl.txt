@@ -1,6 +1,7 @@
 TestAccAWSAcm
 TestAccAWSAmplify
-TestAccAWSAPIGateway
+# TestAccAWSAPIGateway
+TestAccAWSAppsync
 TestAccAWSCloudformation
 TestAccAWSCloudTrail
 TestAccAwsCloudWatch
@@ -10,8 +11,8 @@ TestAccAWSCloudwatch
 TestAccAWSCognito
 TestAccAWSDynamoDb
 TestAccAWSEc2
-TestAccAWSGlue
-TestAccAWSIAM
+# TestAccAWSGlue
+# TestAccAWSIAM
 TestAccAWSKinesis
 TestAccAWSKms
 TestAccAWSLambda
