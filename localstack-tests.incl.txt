@@ -9,6 +9,7 @@ TestAccAwsCloudWatch
 TestAccAWSCloudWatch
 TestAccAWSCloudwatch
 TestAccAWSCognito
+TestAccAWSDBCluster
 TestAccAWSDynamoDb
 TestAccAWSEc2
 # TestAccAWSGlue
