@@ -59,7 +59,7 @@ function run_watchdog() {
 
     i=0
     while true; do
-        sleep 1
+        sleep 2
         i=$((i + 1))
         if [ $i -gt $TIMEOUT_SECS ]; then
             # TODO remove duplicate code
@@ -67,7 +67,7 @@ function run_watchdog() {
             echo "[ltt.runner] terminated (timeout) $1" | tee -a ${log}
             break
         fi
-        if grep --max-count=1 -q "attempt 1/25" ${log} &> /dev/null; then
+        if cat ${log} | strings | grep --max-count=1 -q "attempt 1/25" &> /dev/null; then
             pkill -f "aws.test" # FIXME
             echo "[ltt.runner] terminated $1" | tee -a ${log}
             break
@@ -91,7 +91,10 @@ function run_test() {
     cd terraform-provider-aws/aws
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
     ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run "$@"
-    return $?
+    result=$?
+    # clean up tmp dirs
+    rm -rf /tmp/plugintest*
+    return $result
 }
 
 function list_tests() {
@@ -128,7 +131,7 @@ function run_tests() {
 
     echo "" > ${TEST_LOG}
 
-    tail -F ${TEST_LOG} 2> /dev/null | stdbuf -oL egrep "(=== RUN|=== CONT|=== PAUSE|FAIL|PASS|SKIP)" &
+    tail -F ${TEST_LOG} 2> /dev/null | stdbuf -oL strings | egrep "(=== RUN|=== CONT|=== PAUSE|FAIL|PASS|SKIP)" &
 
     export TF_LOG=debug
 
