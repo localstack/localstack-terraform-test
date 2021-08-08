@@ -40,6 +40,8 @@ export TEST_PARALLEL=${TEST_PARALLEL:-1}
 
 export TIMEOUT_SECS=600
 
+SUPPRESS_BIN_LOGS=${SUPPRESS_BIN_LOGS:-0}
+
 TEST_BIN=$HOME/.cache/localstack/aws.test
 [ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
 
@@ -90,8 +92,15 @@ function forward_test_log() {
 function run_test() {
     cd terraform-provider-aws/aws
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
-    ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run "$@"
+    if [ "$SUPPRESS_BIN_LOGS" = "1" ]; then
+      # can be useful for debugging, but seems to break certain API calls, e.g., large S3 file PUTs
+      ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run "$@" 2>&1 | tr -cd "[:print:][\011\012]"
+    else
+      ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run "$@"
+    fi
     result=$?
+    echo
+    echo Test terminated with exit code $?
     # clean up tmp dirs
     rm -rf /tmp/plugintest*
     return $result
