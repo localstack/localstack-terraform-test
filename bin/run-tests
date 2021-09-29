@@ -5,7 +5,7 @@ function usage() {
     echo "  run-tests [OPTIONS...] [TESTS...]"
     echo ""
     echo "DESCRIPTION"
-    echo "  runs the terraform test suite"
+    echo "  runs the Terraform test suite"
     echo ""
     echo "OPTIONS"
     echo "  -h, --help"
