@@ -49,12 +49,15 @@ def create_summary(reports):
 
     for f in reports:
         with open(f, 'r') as fd:
-            ts = parse_testsuite_meta(fd)
-            if ts:
-                ts['report'] = os.path.basename(f[:-4] + '.html')
-                testsuites.append(ts)
+            try:
+                ts = parse_testsuite_meta(fd)
+                if ts:
+                    ts['report'] = os.path.basename(f[:-4] + '.html')
+                    testsuites.append(ts)
+            except Exception as e:
+                print('Unable to parse test suite metadata from report %s: %s' % (f, e))
 
-    summary = {'tests': 0, 'skipped': 0, 'failures': 0, 'errors': 0, 'passed':0, 'time': 0}
+    summary = {'tests': 0, 'skipped': 0, 'failures': 0, 'errors': 0, 'passed': 0, 'time': 0}
 
     for ts in testsuites:
         for k in summary.keys():

@@ -61,13 +61,15 @@ jobs:
           when: always
           command: |
             pip3 install junit2html
-            bin/create-report
-            bin/create-report-html
+            bin/create-report || true
+            bin/create-report-html || true
             mkdir -p /tmp/report/tests
             mkdir -p /tmp/results/
-            mv build/report.html /tmp/report
-            mv build/tests/*.html /tmp/report/tests
-            mv build/tests/*.xml /tmp/results
+            mv build/report.html /tmp/report || true
+            mv build/tests/*.html /tmp/report/tests || true
+            # temporarily also uploading XML files, for debugging
+            cp build/tests/*.xml /tmp/report/tests || true
+            mv build/tests/*.xml /tmp/results || true
 
       - store_test_results:
           path: /tmp/results
