@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  localstack: localstack/platform@dev:alpha
+  localstack: localstack/platform@1.0.1
 
 jobs:
   build:
