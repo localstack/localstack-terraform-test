@@ -25,7 +25,7 @@ function usage() {
 }
 
 function list_testacc_all() {
-    grep "^func TestAcc" terraform-provider-aws/aws/**_test.go \
+    grep "^func TestAcc" terraform-provider-aws/internal/service/**/**_test.go \
         | cut -d':' -f2 | cut -d '(' -f1 | cut -c 6- \
         | sort -u | grep -v '^$'
 }
