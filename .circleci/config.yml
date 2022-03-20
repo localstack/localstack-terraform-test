@@ -5,11 +5,11 @@ orbs:
 
 jobs:
   build:
-    # machine:
-    #   image: ubuntu-2004:202101-01
+    machine:
+      image: ubuntu-2004:202107-02
     executor: localstack/default
     environment:
-      DOWNLOAD_TEST_BIN: 1
+      DOWNLOAD_TEST_BIN: 0
       KINESIS_PROVIDER: kinesalite
     steps:
       - checkout
@@ -22,7 +22,13 @@ jobs:
           name: "Installing prerequisites"
           command: |
             sudo apt-get update
-            sudo apt install -y python3.8-dev libsasl2-dev
+            sudo apt install -y libsasl2-dev python3.8
+            # test suite requires Go v1.17+
+            wget -O /tmp/go1.17.tar.gz https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
+            sudo mv /usr/local/go /usr/local/go.bk
+            (cd /tmp; tar -xzf go1.17.tar.gz)
+            sudo mv /tmp/go /usr/local/go
+            go version
 
       # download/install and cache aws.test and localstack pip
       - restore_cache:
@@ -30,13 +36,13 @@ jobs:
             - localstack-cache
 
       - run: bin/install-aws-test
-      - run:
-          name: "Installing LocalStack"
-          command: |
-            cd localstack
-            virtualenv --python=`which python3.8` .venv
-            make install
-            cd ..
+      # - run:
+      #     name: "Installing LocalStack"
+      #     command: |
+      #       cd localstack
+      #       virtualenv --python=`which python3.8` .venv
+      #       make install
+      #       cd ..
       - run:
           name: "Preparing test environment"
           command: |
@@ -87,8 +93,11 @@ jobs:
       - store_artifacts:
           path: target/reports-html
 
-
 workflows:
   main:
+    when:
+      or:
+        - equal: [ build, << pipeline.git.branch >> ]
+        - equal: [ build-new, << pipeline.git.branch >> ]
     jobs:
       - build

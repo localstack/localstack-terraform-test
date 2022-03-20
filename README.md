@@ -59,3 +59,7 @@ For rendering html, you need `junit2html`.
 
 The Travis-CI worker caches the built `aws.test` binary across builds.
 The first build may therefore take a while.
+
+## Update: Building the test binary
+
+After a recent code refactoring in terraform-provider-aws, the test files are now organized into multiple test packages. Due to this refactoring, there is no longer an easy way for us to use a single test binary. However, the good news is that the test compile/startup times for tests (using "go test ...") have been significantly reduced, as each service test now contains less code to be compiled.

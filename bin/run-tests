@@ -43,7 +43,6 @@ export TIMEOUT_SECS=600
 SUPPRESS_BIN_LOGS=${SUPPRESS_BIN_LOGS:-0}
 
 TEST_BIN=$HOME/.cache/localstack/aws.test
-[ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
 
 function run_localstack() {
     cd ${LST_DIR}
@@ -65,12 +64,12 @@ function run_watchdog() {
         i=$((i + 1))
         if [ $i -gt $TIMEOUT_SECS ]; then
             # TODO remove duplicate code
-            pkill -f "aws.test" # FIXME
+            pkill -f "go" # FIXME
             echo "[ltt.runner] terminated (timeout) $1" | tee -a ${log}
             break
         fi
         if cat ${log} | strings | grep --max-count=1 -q "attempt 1/25" &> /dev/null; then
-            pkill -f "aws.test" # FIXME
+            pkill -f "go" # FIXME
             echo "[ltt.runner] terminated $1" | tee -a ${log}
             break
         fi
@@ -90,6 +89,31 @@ function forward_test_log() {
 }
 
 function run_test() {
+  serviceName=$(get_service_for_test $@)
+
+  cd terraform-provider-aws
+  echo "running TF_ACC=1 go test ./internal/service/${serviceName} -test.v -test.run $@"
+  if [ "$SUPPRESS_BIN_LOGS" = "1" ]; then
+    # can be useful for debugging, but seems to break certain API calls, e.g., large S3 file PUTs
+    go test ./internal/service/${serviceName} -test.v -test.run "$@" 2>&1 | tr -cd "[:print:][\011\012]"
+  else
+    go test ./internal/service/${serviceName} -test.v -test.run "$@"
+  fi
+  result=$?
+  echo
+  echo Test terminated with exit code $?
+  # clean up tmp dirs
+  rm -rf /tmp/plugintest*
+  return $result
+}
+
+function get_service_for_test() {
+  grep -R $1 terraform-provider-aws/internal/service | head -n 1 | cut -f4 -d /
+}
+
+function run_test_with_bin() {
+    [ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
+
     cd terraform-provider-aws/aws
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
     if [ "$SUPPRESS_BIN_LOGS" = "1" ]; then
