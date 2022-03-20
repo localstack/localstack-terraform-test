@@ -81,6 +81,8 @@ jobs:
 workflows:
   main:
     when:
-      equal: [ build, << pipeline.git.branch >> ]
+      or:
+        - equal: [ build, << pipeline.git.branch >> ]
+        - equal: [ build-new, << pipeline.git.branch >> ]
     jobs:
       - build
