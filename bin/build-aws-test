@@ -3,8 +3,10 @@
 pwd=$PWD
 
 (
-PATCH="etc/0002-hardcode-local-endpoints.patch"
 cd terraform-provider-aws || exit
+PATCH="etc/0002-hardcode-local-endpoints.patch"
+git apply $pwd/${PATCH}
+PATCH="etc/0003-route53-reduce-sync-time.patch"
 git apply $pwd/${PATCH}
 )
 
