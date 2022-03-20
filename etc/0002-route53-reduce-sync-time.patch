@@ -1,0 +1,27 @@
+diff --git a/aws/resource_aws_route53_record.go b/aws/resource_aws_route53_record.go
+index eeca299609..9fb7deb45e 100644
+--- a/aws/resource_aws_route53_record.go
++++ b/aws/resource_aws_route53_record.go
+@@ -469,7 +469,7 @@ func resourceAwsRoute53RecordCreate(d *schema.ResourceData, meta interface{}) er
+ 
+ func changeRoute53RecordSet(conn *route53.Route53, input *route53.ChangeResourceRecordSetsInput) (interface{}, error) {
+ 	var out *route53.ChangeResourceRecordSetsOutput
+-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++	err := resource.Retry(5*time.Second, func() *resource.RetryError {
+ 		var err error
+ 		out, err = conn.ChangeResourceRecordSets(input)
+ 		if isAWSErr(err, route53.ErrCodeNoSuchHostedZone, "") {
+@@ -494,10 +494,10 @@ func waitForRoute53RecordSetToSync(conn *route53.Route53, requestId string) erro
+ 	wait := resource.StateChangeConf{
+ 		Pending:      []string{route53.ChangeStatusPending},
+ 		Target:       []string{route53.ChangeStatusInsync},
+-		Delay:        time.Duration(rand.Int63n(20)+10) * time.Second,
++		Delay:        time.Duration(rand.Int63n(2)+1) * time.Second,
+ 		MinTimeout:   5 * time.Second,
+-		PollInterval: 20 * time.Second,
+-		Timeout:      30 * time.Minute,
++		PollInterval: 2 * time.Second,
++		Timeout:      3 * time.Minute,
+ 		Refresh: func() (result interface{}, state string, err error) {
+ 			changeRequest := &route53.GetChangeInput{
+ 				Id: aws.String(requestId),

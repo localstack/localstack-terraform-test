@@ -26,6 +26,12 @@ PATCH="etc/0001-add-simple-hardcoded-configuration-for-running-tests.patch"
 cd terraform-provider-aws
 git apply $pwd/${PATCH}
 
+PATCH="etc/0002-route53-reduce-sync-time.patch"
+
+git apply $pwd/${PATCH}
+
+go get -u ./
+
 echo "building ${TEST_BIN} with go test"
 go test -c ./aws
 
