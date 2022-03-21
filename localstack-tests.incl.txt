@@ -1,6 +1,6 @@
 TestAccAcm
 TestAccAmplify
-# TestAccAPIGateway
+TestAccAPIGateway
 TestAccAppsync
 TestAccCloudformation
 TestAccCloudTrail
@@ -12,23 +12,21 @@ TestAccCognito
 TestAccDBCluster
 TestAccDynamoDb
 TestAccEc2
-# TestAccGlue
-# TestAccIAM
-
-# TODO: re-enable once CI timeout issue is fixed
-# TestAccKinesis
+TestAccGlue
+TestAccIAM
+TestAccKinesis
 TestAccKms
-# TestAccLambda
-# TestAccRedshift
-# TestAccResourceGroup
-# TestAccRoute53
-# TestAccS3
-# TestAccSecrets
-# TestAccSES
-# TestAccSns
-# TestAccSNS
-# TestAccSQS
-# TestAccSSM
-# TestAccSsm
-# TestAccStepFunctions
-# TestAccSwfDomain
+TestAccLambda
+TestAccRedshift
+TestAccResourceGroup
+TestAccRoute53
+TestAccS3
+TestAccSecrets
+TestAccSES
+TestAccSns
+TestAccSNS
+TestAccSQS
+TestAccSSM
+TestAccSsm
+TestAccStepFunctions
+TestAccSwfDomain

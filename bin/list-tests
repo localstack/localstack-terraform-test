@@ -63,13 +63,17 @@ function main() {
             filters="${filters}|grep -v '"$excl"'"
         fi
     done
+    inclGrep="xxx"
     for incl in "${included[@]}"; do
         if [ -f $incl ]; then
             filters="${filters}|grep -f "$incl""
         else
-            filters="${filters}|grep '"$incl"'"
+            inclGrep="$inclGrep\|$incl"
         fi
     done
+    if [ "$inclGrep" != "xxx" ]; then
+        filters="${filters}|grep '"$inclGrep"'"
+    fi
 
     cmd=$(echo "${cmd} ${filters}")
 

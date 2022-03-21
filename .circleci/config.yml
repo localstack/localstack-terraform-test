@@ -8,6 +8,7 @@ jobs:
     machine:
       image: ubuntu-2004:202107-02
     executor: localstack/default
+    parallelism: 4
     environment:
       DOWNLOAD_TEST_BIN: 0
       KINESIS_PROVIDER: kinesalite
@@ -18,16 +19,18 @@ jobs:
       - localstack/start
 
       - run: git submodule update --init --recursive
+
+      - restore_cache:
+          keys:
+            - localstack-cache
+
       - run:
           name: "Installing prerequisites"
           command: |
-            sudo apt-get update
-            sudo apt install -y libsasl2-dev python3.8
-            # test suite requires Go v1.17+
-            wget -O /tmp/go1.17.tar.gz https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
+            go_tgz=/home/circleci/.cache/go1.17.tar.gz
+            test -f $go_tgz || wget -O $go_tgz https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
             sudo mv /usr/local/go /usr/local/go.bk
-            (cd /tmp; tar -xzf go1.17.tar.gz)
-            sudo mv /tmp/go /usr/local/go
+            (cd /tmp; tar -xzf $go_tgz; sudo mv go /usr/local/go)
             go version
 
       # download/install and cache aws.test and localstack pip
@@ -57,8 +60,7 @@ jobs:
       - save_cache:
           key: localstack-cache
           paths:
-            - /home/circleci/.cache/localstack/
-            - /home/circleci/.cache/pip/
+            - /home/circleci/.cache/go1.17.tar.gz
 
       # wait for LocalStack to become available
       - localstack/wait
@@ -68,8 +70,10 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            python -m pytest tests/ -k "$(cat localstack-tests.incl.txt | xargs | sed 's/ / or /g')"
-          # command: bin/run-tests -t localstack-tests.incl.txt
+            TEST_CASES=$(cat localstack-tests.incl.txt | circleci tests split --split-by=timings | sed 's/ / or /g')
+            echo "Running test cases: $TEST_CASES"
+            python -m pytest tests/ -k "$TEST_CASES"
+          # command: bin/run-tests -t $TEST_CASES
 
       # save build reports as artifacts
       - run:
