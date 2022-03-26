@@ -26,12 +26,17 @@ startup_monitor_event = mp.Event()  # event that can be triggered to start local
 
 @pytest.hookimpl()
 def pytest_configure(config):
-    _start_monitor()
+    if should_start_localstack_embedded():
+        _start_monitor()
 
 
 @pytest.hookimpl()
 def pytest_unconfigure(config):
     _trigger_stop()
+
+
+def should_start_localstack_embedded():
+    return os.environ.get("START_EMBEDDED") in ["1", "true"]
 
 
 def startup_monitor() -> None:
@@ -104,6 +109,10 @@ def run_and_capture_localstack():
 
 @pytest.fixture(scope='session', autouse=True)
 def localstack_runtime():
+    if not should_start_localstack_embedded():
+        yield
+        return
+
     fixture_mutex.acquire()
     if localstack_started.is_set():
         fixture_mutex.release()

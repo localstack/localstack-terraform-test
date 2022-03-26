@@ -33,10 +33,10 @@ jobs:
             (cd /tmp; tar -xzf $go_tgz; sudo mv go /usr/local/go)
             go version
 
-      # download/install and cache aws.test and localstack pip
-      - restore_cache:
-          keys:
-            - localstack-cache
+      - save_cache:
+          key: localstack-cache
+          paths:
+            - /home/circleci/.cache/go1.17.tar.gz
 
       - run: bin/install-aws-test
       # - run:
@@ -52,15 +52,10 @@ jobs:
             virtualenv --python=`which python3.8` .venv
             source .venv/bin/activate
             pip install -r requirements.txt
-            pip install -r localstack/requirements.txt
-            pip install -e ./localstack/
-            pip install -e ./moto/
+            # pip install -r localstack/requirements.txt
+            # pip install -e ./localstack/
+            # pip install -e ./moto/
             python -m tests.generator
-
-      - save_cache:
-          key: localstack-cache
-          paths:
-            - /home/circleci/.cache/go1.17.tar.gz
 
       # wait for LocalStack to become available
       - localstack/wait
@@ -70,9 +65,9 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            TEST_CASES=$(cat localstack-tests.incl.txt | circleci tests split --split-by=timings | sed 's/ / or /g')
+            TEST_CASES=$(cat localstack-tests.incl.txt | circleci tests split --split-by=timings | xargs | sed 's/ / or /g')
             echo "Running test cases: $TEST_CASES"
-            python -m pytest tests/ -k "$TEST_CASES"
+            python -m pytest tests/ --tests-per-worker 3 -k "$TEST_CASES"
           # command: bin/run-tests -t $TEST_CASES
 
       # save build reports as artifacts

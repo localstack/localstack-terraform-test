@@ -47,7 +47,7 @@ def _load_caches():
         return
     _cache_loaded.set()
 
-    pattern = os.path.join(root_dir, 'terraform-provider-aws/aws/**_test.go')
+    pattern = os.path.join(root_dir, 'terraform-provider-aws/internal/service/**/*_test.go')
     logger.info('locating go test suites in %s', pattern)
     cmd = f'grep "^func TestAcc" {pattern}'
     lines = subprocess.check_output(cmd, shell=True, text=True).splitlines(keepends=False)
@@ -62,7 +62,9 @@ def _load_caches():
         path, signature = line.split(':', maxsplit=1)
         test = signature[5:].split('(')[0]  # func TestAccAWSXray_foo(t *testing.T) { -> TestAccAWSXray_foo
         suite = test.split('_')[0]
-        suite_tests[suite].append(test)
-        _cache_tests.append(test)
+        service_name = path.split('internal/service/')[1].split('/')[0]
+        test_ref = f"{service_name}:{test}"
+        suite_tests[suite].append(test_ref)
+        _cache_tests.append(test_ref)
 
     _cache_suites = suite_tests

@@ -21,12 +21,3 @@ TestAccRedshift
 TestAccResourceGroup
 TestAccRoute53
 TestAccS3
-TestAccSecrets
-TestAccSES
-TestAccSns
-TestAccSNS
-TestAccSQS
-TestAccSSM
-TestAccSsm
-TestAccStepFunctions
-TestAccSwfDomain

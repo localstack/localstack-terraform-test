@@ -21,7 +21,7 @@ aws_tests_dir = os.path.join(os.path.dirname(__file__), 'aws')
 def generate_aws():
     os.makedirs(aws_tests_dir, exist_ok=True)
 
-    tests = list_tests('TestAccAWS')
+    tests = list_tests('TestAcc')
     init_file = os.path.join(aws_tests_dir, '__init__.py')
     if not os.path.isfile(init_file):
         with open(init_file, 'w') as fd:

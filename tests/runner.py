@@ -4,7 +4,7 @@ import time
 from queue import Queue
 from subprocess import Popen, PIPE
 from threading import Thread, Timer
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 import pytest
 
@@ -32,6 +32,13 @@ def reader(pipe, queue: Queue):
         queue.put(None)
 
 
+def get_run_test_cmd(service_name: str, test: str) -> Tuple[List[str], Dict]:
+    if os.environ.get("USE_TEST_BIN", "").strip() in ["1", "true"]:
+        return [test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$'], {}
+    kwargs = {"cwd": "./terraform-provider-aws"}
+    return ["go", "test", f"./internal/service/{service_name}", '-test.parallel=1', '-test.v', '-test.run', test], kwargs
+
+
 def run_test(test: str) -> TestResult:
     if not os.path.exists(test_log_dir):
         os.makedirs(test_log_dir, exist_ok=True)
@@ -47,9 +54,11 @@ def run_test(test: str) -> TestResult:
         'AWS_DEFAULT_REGION': 'us-east-1'
     })
 
-    cmd = [test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$']
+    service_name, test = test.split(":", maxsplit=1)
+    logger.warning("run_test %s", test)
+    cmd, run_kwargs = get_run_test_cmd(service_name, test)
 
-    proc = Popen(cmd, env=env, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
+    proc = Popen(cmd, env=env, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True, **run_kwargs)
     lines = Queue()
     stdout = []
 
@@ -125,6 +134,8 @@ def run_test(test: str) -> TestResult:
 
 
 def create_fail_message(stdout):
+    if not os.environ.get("PRINT_LOGS"):
+        return ''
     result = list()
     for line in stdout[:-1]:
         if line.startswith('=== ') or line.startswith('--- '):
