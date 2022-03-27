@@ -1,5 +1,7 @@
 import logging
 import os
+import subprocess
+import threading
 import time
 from queue import Queue
 from subprocess import Popen, PIPE
@@ -17,6 +19,8 @@ test_log_dir = os.path.join(root_dir, 'target/logs')
 
 timeout_seconds = 5 * 60  # 5 minute timeout per test
 
+compile_lock = threading.RLock()
+
 TestResult = Tuple[int, List[str]]
 
 
@@ -33,9 +37,21 @@ def reader(pipe, queue: Queue):
 
 
 def get_run_test_cmd(service_name: str, test: str) -> Tuple[List[str], Dict]:
+    provider_dir = "./terraform-provider-aws"
+    _test_bin = test_bin
+
+    if os.environ.get("COMPILE_TEST_BIN", "").strip() not in ["0", "false"]:
+        print("compiling...")
+        _test_bin = os.path.join(provider_dir, f"{service_name}.test")
+        os.environ["USE_TEST_BIN"] = "1"
+        with compile_lock:
+            if not os.path.exists(_test_bin):
+                subprocess.check_output(["go", "test", '-c', f"./internal/service/{service_name}/..."], cwd=provider_dir)
+
     if os.environ.get("USE_TEST_BIN", "").strip() in ["1", "true"]:
-        return [test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$'], {}
-    kwargs = {"cwd": "./terraform-provider-aws"}
+        return [_test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$'], {}
+
+    kwargs = {"cwd": provider_dir}
     return ["go", "test", f"./internal/service/{service_name}", '-test.parallel=1', '-test.v', '-test.run', test], kwargs
 
 
