@@ -1,23 +1,20 @@
 TestAccAcm
 TestAccAmplify
-TestAccAPIGateway
+# TestAccAPIGateway
 TestAccAppsync
 TestAccCloudformation
 TestAccCloudTrail
 TestAccCloudWatch
-TestAccCloudWatch
-TestAccCloudWatch
-TestAccCloudwatch
 TestAccCognito
-TestAccDBCluster
+# TestAccDBCluster
 TestAccDynamoDb
-TestAccEc2
-TestAccGlue
-TestAccIAM
-TestAccKinesis
+# TestAccEc2
+# TestAccGlue
+# TestAccIAM
+# TestAccKinesis
 TestAccKms
-TestAccLambda
-TestAccRedshift
-TestAccResourceGroup
-TestAccRoute53
-TestAccS3
+# TestAccLambda
+# TestAccRedshift
+# TestAccResourceGroup
+# TestAccRoute53
+# TestAccS3

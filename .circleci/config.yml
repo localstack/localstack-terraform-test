@@ -37,14 +37,14 @@ jobs:
       - run:
           name: "Install test binary"
           command: |
-            # force re-downloading
+            # force re-downloading of test binary, for now
             rm -rf .cache/localstack/aws.combined.test
             bin/install-aws-test
 
       - save_cache:
           key: localstack-cache
           paths:
-            - /home/circleci/.cache/go1.17.tar.gz
+#            - /home/circleci/.cache/go1.17.tar.gz
             - /home/circleci/.cache/localstack/aws.combined.test
 
       - run:
@@ -63,30 +63,54 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            TEST_CASES=$(cat localstack-tests.incl.txt | circleci tests split --split-by=timings | xargs | sed 's/ / or /g')
+            TEST_CASES=$(cat localstack-tests.incl.txt | grep -v '#' | circleci tests split --split-by=timings | xargs | sed 's/ / or /g')
             echo "Running test cases: $TEST_CASES"
-            python -m pytest tests/ --tests-per-worker 4 -k "$TEST_CASES"
+            python -m pytest --durations=20 tests/ --tests-per-worker 4 -k "$TEST_CASES" || true
           # command: bin/run-tests -t $TEST_CASES
 
-      # save build reports as artifacts
       - run:
-          name: "Creating reports"
-          when: always
+          name: "Generating test reports"
           command: |
             source .venv/bin/activate
             bin/create-report || true
-            bin/create-report-html || true
-            mkdir -p /tmp/results/
-            mv build/report.html /tmp/report || true
-            mv build/tests/*.html /tmp/report/tests || true
-            # temporarily also uploading XML files, for debugging
-            cp build/tests/*.xml /tmp/report/tests || true
-            mv build/tests/*.xml /tmp/results || true
 
       - store_test_results:
           path: target/reports-xunit
       - store_artifacts:
           path: target/logs
+
+      - persist_to_workspace:
+          root:
+            target/
+          paths:
+            - reports-xunit
+            - logs
+
+  report:
+    machine:
+      image: ubuntu-2004:202107-02
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: target/
+
+      - run:
+          name: "Preparing environment"
+          command: |
+            virtualenv --python=`which python3.8` .venv
+            source .venv/bin/activate
+            pip install -r requirements.txt
+
+      # save build reports as artifacts
+      - run:
+          name: "Creating combined HTML test report"
+          when: always
+          command: |
+            ls -la target/ || true
+            source .venv/bin/activate
+            bin/create-report-html || true
+
       - store_artifacts:
           path: target/reports-html
 
@@ -98,3 +122,6 @@ workflows:
         - equal: [ build-new, << pipeline.git.branch >> ]
     jobs:
       - build
+      - report:
+          requires:
+            - build

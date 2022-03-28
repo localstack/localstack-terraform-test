@@ -44,6 +44,7 @@ SUPPRESS_BIN_LOGS=${SUPPRESS_BIN_LOGS:-0}
 
 # TEST_BIN=$HOME/.cache/localstack/aws.test
 TEST_BIN=$HOME/.cache/localstack/aws.combined.test
+TEST_BIN_NAME=aws.combined.test
 
 function run_localstack() {
     cd ${LST_DIR}
@@ -65,12 +66,12 @@ function run_watchdog() {
         i=$((i + 1))
         if [ $i -gt $TIMEOUT_SECS ]; then
             # TODO remove duplicate code
-            pkill -f "go" # FIXME
+            pkill -f $TEST_BIN_NAME
             echo "[ltt.runner] terminated (timeout) $1" | tee -a ${log}
             break
         fi
         if cat ${log} | strings | grep --max-count=1 -q "attempt 1/25" &> /dev/null; then
-            pkill -f "go" # FIXME
+            pkill -f $TEST_BIN_NAME
             echo "[ltt.runner] terminated $1" | tee -a ${log}
             break
         fi
@@ -89,7 +90,7 @@ function forward_test_log() {
     tail -f -n0 ${TEST_LOG} 2> /dev/null | stdbuf -oL awk '{print "[ltt.gotest] " $0}' | tee -a $log > /dev/null
 }
 
-function run_test() {
+function run_test_with_go_test() {
   serviceName=$(get_service_for_test $@)
 
   cd terraform-provider-aws
@@ -115,7 +116,7 @@ function get_service_for_test() {
 function run_test_with_bin() {
     [ ! -f $TEST_BIN ] && { echo "aws.combined.test not installed. please run bin/install-aws-test"; exit 1; }
 
-    cd terraform-provider-aws/aws
+    cd terraform-provider-aws/internal/service || exit 1
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
     if [ "$SUPPRESS_BIN_LOGS" = "1" ]; then
       # can be useful for debugging, but seems to break certain API calls, e.g., large S3 file PUTs
@@ -196,7 +197,7 @@ function run_tests() {
             arg="${t}_"
         fi
 
-        run_test "${arg}" 2>&1 | stdbuf -oL tee -a ${TEST_LOG} > /dev/null
+        run_test_with_bin "${arg}" 2>&1 | stdbuf -oL tee -a ${TEST_LOG} > /dev/null
 
         kill $pid_watchdog &> /dev/null
         kill $pid_forward_lst_log &> /dev/null
