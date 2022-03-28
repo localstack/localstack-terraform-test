@@ -10,7 +10,7 @@ jobs:
     executor: localstack/default
     parallelism: 4
     environment:
-      DOWNLOAD_TEST_BIN: 0
+      DOWNLOAD_TEST_BIN: 1
       KINESIS_PROVIDER: kinesalite
     steps:
       - checkout
@@ -38,7 +38,12 @@ jobs:
           paths:
             - /home/circleci/.cache/go1.17.tar.gz
 
-      - run: bin/install-aws-test
+      - run:
+          name: "Install test binary"
+          command: |
+            # force re-downloading
+            rm -rf .cache/localstack/aws.combined.test
+            bin/install-aws-test
       # - run:
       #     name: "Installing LocalStack"
       #     command: |

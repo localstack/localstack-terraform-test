@@ -1,40 +1,33 @@
 #!/bin/bash
 
-pwd=`pwd`
+TEST_BIN=$HOME/.cache/localstack/aws.combined.test
 
-(
-PATCH="etc/0002-hardcode-local-endpoints.patch"
-cd terraform-provider-aws
-git apply $pwd/${PATCH}
-)
-
-# !NOTE!: patches below no longer applicable due to recent code restructuring
-
-# TEST_BIN=$HOME/.cache/localstack/aws.test
-#
 # TEST_BIN_URL=${TEST_BIN_URL:-"https://localstack-terraform-test.s3.eu-central-1.amazonaws.com/aws.test"}
+TEST_BIN_URL=${TEST_BIN_URL:-"https://localstack-terraform-test.s3.eu-central-1.amazonaws.com/allservices.test"}
+
+[ -f ${TEST_BIN} ] && { echo "aws.combined.test already exists at ${TEST_BIN} skipping"; exit 0; }
+
+BIN_DIR=$(dirname ${TEST_BIN})
+mkdir -p ${BIN_DIR}
+
+if [ "${DOWNLOAD_TEST_BIN}" == "1" ]; then
+  echo "downloading test_binary from ${TEST_BIN_URL}"
+  if ! curl -L ${TEST_BIN_URL} --output ${TEST_BIN}; then
+    exit 1;
+  fi
+  chmod +x ${TEST_BIN}
+  ls -la ${TEST_BIN}
+  exit 0
+fi
+
+# !NOTE!: patches below no longer applicable due to recent code restructuring - see build-aws-test
+
+#PATCH="etc/0001-add-simple-hardcoded-configuration-for-running-tests.patch"
 #
-# [ -f ${TEST_BIN} ] && { echo "aws.test already exists at ${TEST_BIN} skipping"; exit 0; }
+#cd terraform-provider-aws
+#git apply $pwd/${PATCH}
 #
-# BIN_DIR=$(dirname ${TEST_BIN})
-# mkdir -p ${BIN_DIR}
+#echo "building ${TEST_BIN} with go test"
+#go test -c ./aws
 #
-# if [ "${DOWNLOAD_TEST_BIN}" == "1" ]; then
-# 	echo "downloading test_binary from ${TEST_BIN_URL}"
-# 	if ! curl ${TEST_BIN_URL} --output ${TEST_BIN}; then
-# 		exit 1;
-# 	fi
-# 	chmod +x ${TEST_BIN}
-# 	ls -la ${TEST_BIN}
-# 	exit 0
-# fi
-#
-# PATCH="etc/0001-add-simple-hardcoded-configuration-for-running-tests.patch"
-#
-# cd terraform-provider-aws
-# git apply $pwd/${PATCH}
-#
-# echo "building ${TEST_BIN} with go test"
-# go test -c ./aws
-#
-# mv aws.test ${TEST_BIN}
+#mv aws.test ${TEST_BIN}

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
-test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/aws.test')
+test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/aws.combined.test')
 test_log_dir = os.path.join(root_dir, 'target/logs')
 
 timeout_seconds = 5 * 60  # 5 minute timeout per test
@@ -40,15 +40,14 @@ def get_run_test_cmd(service_name: str, test: str) -> Tuple[List[str], Dict]:
     provider_dir = "./terraform-provider-aws"
     _test_bin = test_bin
 
-    if os.environ.get("COMPILE_TEST_BIN", "").strip() not in ["0", "false"]:
-        print("compiling...")
+    if os.environ.get("COMPILE_TEST_BIN", "").strip() in ["1", "true"]:
         _test_bin = os.path.join(provider_dir, f"{service_name}.test")
         os.environ["USE_TEST_BIN"] = "1"
         with compile_lock:
             if not os.path.exists(_test_bin):
                 subprocess.check_output(["go", "test", '-c', f"./internal/service/{service_name}/..."], cwd=provider_dir)
 
-    if os.environ.get("USE_TEST_BIN", "").strip() in ["1", "true"]:
+    if os.environ.get("USE_TEST_BIN", "").strip() not in ["0", "false"]:
         return [_test_bin, '-test.v', '-test.parallel=1', '-test.run', f'{test}$'], {}
 
     kwargs = {"cwd": provider_dir}

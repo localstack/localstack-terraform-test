@@ -42,7 +42,8 @@ export TIMEOUT_SECS=600
 
 SUPPRESS_BIN_LOGS=${SUPPRESS_BIN_LOGS:-0}
 
-TEST_BIN=$HOME/.cache/localstack/aws.test
+# TEST_BIN=$HOME/.cache/localstack/aws.test
+TEST_BIN=$HOME/.cache/localstack/aws.combined.test
 
 function run_localstack() {
     cd ${LST_DIR}
@@ -112,7 +113,7 @@ function get_service_for_test() {
 }
 
 function run_test_with_bin() {
-    [ ! -f $TEST_BIN ] && { echo "aws.test not installed. please run bin/install-aws-test"; exit 1; }
+    [ ! -f $TEST_BIN ] && { echo "aws.combined.test not installed. please run bin/install-aws-test"; exit 1; }
 
     cd terraform-provider-aws/aws
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
