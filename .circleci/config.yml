@@ -8,7 +8,7 @@ jobs:
     machine:
       image: ubuntu-2004:202107-02
     executor: localstack/default
-    parallelism: 4
+    parallelism: 6
     environment:
       DOWNLOAD_TEST_BIN: 1
       KINESIS_PROVIDER: kinesalite
@@ -24,19 +24,15 @@ jobs:
           keys:
             - localstack-cache
 
-      - run:
-          name: "Installing prerequisites"
-          command: |
-            go_tgz=/home/circleci/.cache/go1.17.tar.gz
-            test -f $go_tgz || wget -O $go_tgz https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
-            sudo mv /usr/local/go /usr/local/go.bk
-            (cd /tmp; tar -xzf $go_tgz; sudo mv go /usr/local/go)
-            go version
-
-      - save_cache:
-          key: localstack-cache
-          paths:
-            - /home/circleci/.cache/go1.17.tar.gz
+# Note: only required if not using the precompiled test binary (DOWNLOAD_TEST_BIN=0)
+#      - run:
+#          name: "Installing prerequisites"
+#          command: |
+#            go_tgz=/home/circleci/.cache/go1.17.tar.gz
+#            test -f $go_tgz || wget -O $go_tgz https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
+#            sudo mv /usr/local/go /usr/local/go.bk
+#            (cd /tmp; tar -xzf $go_tgz; sudo mv go /usr/local/go)
+#            go version
 
       - run:
           name: "Install test binary"
@@ -44,22 +40,19 @@ jobs:
             # force re-downloading
             rm -rf .cache/localstack/aws.combined.test
             bin/install-aws-test
-      # - run:
-      #     name: "Installing LocalStack"
-      #     command: |
-      #       cd localstack
-      #       virtualenv --python=`which python3.8` .venv
-      #       make install
-      #       cd ..
+
+      - save_cache:
+          key: localstack-cache
+          paths:
+            - /home/circleci/.cache/go1.17.tar.gz
+            - /home/circleci/.cache/localstack/aws.combined.test
+
       - run:
           name: "Preparing test environment"
           command: |
             virtualenv --python=`which python3.8` .venv
             source .venv/bin/activate
             pip install -r requirements.txt
-            # pip install -r localstack/requirements.txt
-            # pip install -e ./localstack/
-            # pip install -e ./moto/
             python -m tests.generator
 
       # wait for LocalStack to become available
@@ -72,7 +65,7 @@ jobs:
             source .venv/bin/activate
             TEST_CASES=$(cat localstack-tests.incl.txt | circleci tests split --split-by=timings | xargs | sed 's/ / or /g')
             echo "Running test cases: $TEST_CASES"
-            python -m pytest tests/ --tests-per-worker 3 -k "$TEST_CASES"
+            python -m pytest tests/ --tests-per-worker 4 -k "$TEST_CASES"
           # command: bin/run-tests -t $TEST_CASES
 
       # save build reports as artifacts
