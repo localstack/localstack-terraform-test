@@ -16,5 +16,7 @@ TestAccKms
 # TestAccLambda
 # TestAccRedshift
 # TestAccResourceGroup
-# TestAccRoute53
-# TestAccS3
+TestAccRoute53
+TestAccS3
+TestAccSNS
+TestAccSSM

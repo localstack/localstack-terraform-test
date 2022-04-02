@@ -38,14 +38,14 @@ jobs:
           name: "Install test binary"
           command: |
             # force re-downloading of test binary, for now
-            rm -rf .cache/localstack/aws.combined.test
+            rm -rf $HOME/.cache/localstack/allservices.test
             bin/install-aws-test
 
       - save_cache:
           key: localstack-cache
           paths:
 #            - /home/circleci/.cache/go1.17.tar.gz
-            - /home/circleci/.cache/localstack/aws.combined.test
+            - /home/circleci/.cache/localstack/allservices.test
 
       - run:
           name: "Preparing test environment"

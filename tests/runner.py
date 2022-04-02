@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
-test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/aws.combined.test')
+test_bin = os.path.join(os.path.expanduser('~'), '.cache/localstack/allservices.test')
 test_log_dir = os.path.join(root_dir, 'target/logs')
 
 timeout_seconds = 5 * 60  # 5 minute timeout per test

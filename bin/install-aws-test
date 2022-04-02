@@ -1,23 +1,30 @@
 #!/bin/bash
 
-TEST_BIN=$HOME/.cache/localstack/aws.combined.test
+CACHE_DIR=$HOME/.cache/localstack
+TEST_BIN=$CACHE_DIR/allservices.test
 
 # TEST_BIN_URL=${TEST_BIN_URL:-"https://localstack-terraform-test.s3.eu-central-1.amazonaws.com/aws.test"}
-TEST_BIN_URL=${TEST_BIN_URL:-"https://localstack-terraform-test.s3.eu-central-1.amazonaws.com/allservices.test"}
+TEST_BIN_ZIP=allservices.test.zip
+TEST_BIN_URL=${TEST_BIN_URL:-"https://localstack-terraform-test.s3.eu-central-1.amazonaws.com/$TEST_BIN_ZIP"}
+TEST_BIN_ZIP_PATH=${CACHE_DIR}/${TEST_BIN_ZIP}
 
-[ -f ${TEST_BIN} ] && { echo "aws.combined.test already exists at ${TEST_BIN} skipping"; exit 0; }
+[ -f ${TEST_BIN} ] && { echo "allservices.test already exists at ${TEST_BIN} skipping"; exit 0; }
 
 BIN_DIR=$(dirname ${TEST_BIN})
 mkdir -p ${BIN_DIR}
 
 if [ "${DOWNLOAD_TEST_BIN}" == "1" ]; then
   echo "downloading test_binary from ${TEST_BIN_URL}"
-  if ! curl -L ${TEST_BIN_URL} --output ${TEST_BIN}; then
+  if ! curl -L ${TEST_BIN_URL} --output ${TEST_BIN_ZIP_PATH}; then
     exit 1;
   fi
-  chmod +x ${TEST_BIN}
-  ls -la ${TEST_BIN}
-  exit 0
+  (
+    cd ${CACHE_DIR} || exit 1
+    unzip ${TEST_BIN_ZIP}
+    chmod +x ${TEST_BIN}
+    ls -la ${TEST_BIN}
+    exit 0
+  )
 fi
 
 # !NOTE!: patches below no longer applicable due to recent code restructuring - see build-aws-test

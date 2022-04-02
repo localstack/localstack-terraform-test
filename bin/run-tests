@@ -43,8 +43,8 @@ export TIMEOUT_SECS=600
 SUPPRESS_BIN_LOGS=${SUPPRESS_BIN_LOGS:-0}
 
 # TEST_BIN=$HOME/.cache/localstack/aws.test
-TEST_BIN=$HOME/.cache/localstack/aws.combined.test
-TEST_BIN_NAME=aws.combined.test
+TEST_BIN=$HOME/.cache/localstack/allservices.test
+TEST_BIN_NAME=allservices.test
 
 function run_localstack() {
     cd ${LST_DIR}
@@ -93,7 +93,7 @@ function forward_test_log() {
 function run_test_with_go_test() {
   serviceName=$(get_service_for_test $@)
 
-  cd terraform-provider-aws
+  cd terraform-provider-aws || exit 1
   echo "running TF_ACC=1 go test ./internal/service/${serviceName} -test.v -test.run $@"
   if [ "$SUPPRESS_BIN_LOGS" = "1" ]; then
     # can be useful for debugging, but seems to break certain API calls, e.g., large S3 file PUTs
@@ -114,7 +114,7 @@ function get_service_for_test() {
 }
 
 function run_test_with_bin() {
-    [ ! -f $TEST_BIN ] && { echo "aws.combined.test not installed. please run bin/install-aws-test"; exit 1; }
+    [ ! -f $TEST_BIN ] && { echo "allservices.test not installed. please run bin/install-aws-test"; exit 1; }
 
     cd terraform-provider-aws/internal/service || exit 1
     echo "running ${TEST_BIN} -test.v -test.parallel=${TEST_PARALLEL} -test.run $@"
