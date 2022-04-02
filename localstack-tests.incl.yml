@@ -1,0 +1,29 @@
+tests:
+  worker-0:
+    - TestAccS3
+  worker-1:
+    - TestAccAcm
+    - TestAccAmplify
+    # - TestAccAPIGateway
+  worker-2:
+    - TestAccAppsync
+    - TestAccCloudformation
+    - TestAccCloudTrail
+  worker-3:
+    - TestAccCloudWatch
+    - TestAccCognito
+    # - TestAccDBCluster
+  worker-4:
+    - TestAccDynamoDb
+    # - TestAccEc2
+    # - TestAccGlue
+    # - TestAccIAM
+    # - TestAccKinesis
+    - TestAccKms
+  worker-5:
+    # - TestAccLambda
+    # - TestAccRedshift
+    # - TestAccResourceGroup
+    - TestAccRoute53
+    - TestAccSNS
+    - TestAccSSM

@@ -63,7 +63,7 @@ jobs:
           name: "Running test suite"
           command: |
             source .venv/bin/activate
-            TEST_CASES=$(cat localstack-tests.incl.txt | grep -v '#' | circleci tests split --split-by=timings | xargs | sed 's/ / or /g')
+            TEST_CASES=$(bin/select-tests | xargs | sed 's/ / or /g')
             echo "Running test cases: $TEST_CASES"
             python -m pytest --durations=20 tests/ --tests-per-worker 4 -k "$TEST_CASES" || true
           # command: bin/run-tests -t $TEST_CASES
