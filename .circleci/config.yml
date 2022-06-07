@@ -11,11 +11,15 @@ jobs:
     parallelism: 6
     environment:
       DOWNLOAD_TEST_BIN: 1
-      KINESIS_PROVIDER: kinesalite
+      # KINESIS_PROVIDER: kinesalite
+      DNS_ADDRESS: 0
+      AWS_DEFAULT_REGION: us-east-2
+      AWS_ALTERNATE_REGION: eu-west-1
     steps:
       - checkout
 
       # start LocalStack asynchronously
+      - run: docker pull localstack/localstack
       - localstack/start
 
       - run: git submodule update --init --recursive
@@ -67,6 +71,8 @@ jobs:
             echo "Running test cases: $TEST_CASES"
             python -m pytest --durations=20 tests/ --tests-per-worker 4 -k "$TEST_CASES" || true
           # command: bin/run-tests -t $TEST_CASES
+
+      - run: docker logs localstack_main
 
       - run:
           name: "Generating test reports"
