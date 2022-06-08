@@ -16,12 +16,15 @@ LS_SERVICES=(acm amplify apigateway apigatewaymanagementapi apigatewayv2 appconf
 function replaceInFile() {
   if [[ $1 == *"(" ]]; then
     search=$1
+    # uncomment the following line when using "sed" instead of "perl"
+    search="${search%?}\("
     replace="${search%?}$2("
   else
-    search=$1'\([^a-zA-Z0-9_]\)'
+    search=$1'([^a-zA-Z0-9_]|\$)'
     replace=$1$2'\2'
   fi
-  sed -i '' -e 's/\([[:space:]!({]\)'$search'/\1'$replace'/g' $3
+  perl -pi -e 's/([]\s&*:\[!({])'$search'/\1'$replace'/g' $3
+  # sed -i '' -e 's/\([][:space:]&*:\[!({]\)'$search'/\1'$replace'/g' $3
 }
 
 function isInList() {
@@ -55,12 +58,12 @@ for d in internal/service/*; do
     echo $service/$fname
     targetFile=$combinedFolder/${service}_${fname}
 
-    if [ -e $targetFile ]; then
-      continue
-    fi
-    if [ -d internal/service/$service/$fname ]; then
-      continue
-    fi
+#    if [ -e $targetFile ]; then
+#      continue
+#    fi
+#    if [ -d internal/service/$service/$fname ]; then
+#      continue
+#    fi
 
     cp internal/service/$service/$fname $targetFile
 
@@ -129,6 +132,9 @@ for d in internal/service/*; do
       replaceInFile resourceDomainNameDelete $service $targetFile
       replaceInFile expandMutualTLSAuthentication $service $targetFile
       replaceInFile flattenMutualTLSAuthentication $service $targetFile
+      replaceInFile expandTLSConfig $service $targetFile
+      replaceInFile flattenTLSConfig $service $targetFile
+      replaceInFile flattenAccessLogSettings $service $targetFile
       replaceInFile dataSourceExportRead $service $targetFile
       replaceInFile resourceIntegrationCreate $service $targetFile
       replaceInFile resourceIntegrationRead $service $targetFile
@@ -181,7 +187,22 @@ for d in internal/service/*; do
       replaceInFile resourceRouteUpdate $service $targetFile
       replaceInFile resourceRouteDelete $service $targetFile
       replaceInFile resourceRouteImport $service $targetFile
+      replaceInFile testAccVPCLinkConfig_basic $service $targetFile
+      replaceInFile testAccDomainNameConfig_basic $service $targetFile
       replaceInFile "ResourceRoute(" $service $targetFile
+    fi
+
+    if [ "$(isInList $service kinesis logs)" == "1" ]; then
+      replaceInFile ResourceStream $service $targetFile
+      replaceInFile resourceStreamCreate $service $targetFile
+      replaceInFile resourceStreamRead $service $targetFile
+      replaceInFile resourceStreamDelete $service $targetFile
+      replaceInFile resourceStreamImport $service $targetFile
+    fi
+
+    if [ "$(isInList $service kinesis logs qldb)" == "1" ]; then
+      replaceInFile testAccCheckStreamDestroy $service $targetFile
+      replaceInFile testAccStreamConfig_basic $service $targetFile
     fi
 
     if [ "$(isInList $service applicationautoscaling autoscaling resourcegroups iam)" == "1" ]; then
@@ -195,6 +216,7 @@ for d in internal/service/*; do
       replaceInFile resourceGroupDelete $service $targetFile
       replaceInFile dataSourceGroupRead $service $targetFile
       replaceInFile dataSourceGroupsRead $service $targetFile
+      replaceInFile testAccGroupDataSourceConfig $service $targetFile
       replaceInFile "DataSourceGroup(" $service $targetFile
       replaceInFile "DataSourceGroups(" $service $targetFile
     fi
@@ -208,6 +230,14 @@ for d in internal/service/*; do
       replaceInFile testAccCheckPolicyExists $service $targetFile
       replaceInFile "ResourceGroup(" $service $targetFile
       replaceInFile "ResourcePolicy(" $service $targetFile
+    fi
+
+    if [ "$(isInList $service logs resourcegroups)" == "1" ]; then
+      replaceInFile ResourceGroup $service $targetFile
+    fi
+
+    if [ "$(isInList $service firehose s3control)" == "1" ]; then
+      replaceInFile flattenVPCConfiguration $service $targetFile
     fi
 
     if [[ $service == elb* ]]; then
@@ -238,6 +268,11 @@ for d in internal/service/*; do
 
     if [[ "$(isInList $service appsync amplify cloudformation cloudtrail codepipeline emr)" == "1" ]]; then
       replaceInFile testAccCheckDestroy $service $targetFile
+    fi
+
+    if [[ "$(isInList $service amplify sagemaker)" == "1" ]]; then
+      replaceInFile testAccAppConfig_tags1 $service $targetFile
+      replaceInFile testAccAppConfig_tags2 $service $targetFile
     fi
 
     if [[ "$service" == cloudwatchlogs ]]; then
@@ -272,6 +307,7 @@ for d in internal/service/*; do
       replaceInFile resourceTagDelete $service $targetFile
       replaceInFile testAccCheckTagDestroy $service $targetFile
       replaceInFile testAccCheckTagExists $service $targetFile
+      replaceInFile testAccTagConfig_basic $service $targetFile
       replaceInFile "ResourceTag(" $service $targetFile
     fi
 
@@ -281,6 +317,9 @@ for d in internal/service/*; do
       replaceInFile resourceRepositoryUpdate $service $targetFile
       replaceInFile resourceRepositoryDelete $service $targetFile
       replaceInFile dataSourceRepositoryRead $service $targetFile
+      replaceInFile testAccCheckRepositoryExists $service $targetFile
+      replaceInFile testAccCheckRepositoryDestroy $service $targetFile
+
       replaceInFile "ResourceRepository(" $service $targetFile
       replaceInFile "DataSourceRepository(" $service $targetFile
     fi
@@ -306,6 +345,8 @@ for d in internal/service/*; do
       replaceInFile resourceSecurityGroupAuthorizeRule $service $targetFile
       replaceInFile resourceSecurityGroupStateRefreshFunc $service $targetFile
       replaceInFile testAccCheckParameterGroupExists $service $targetFile
+      replaceInFile validEventSubscriptionNamePrefix $service $targetFile
+      replaceInFile testAccCheckSubnetGroupDestroy $service $targetFile
       replaceInFile "ResourceSubnetGroup(" $service $targetFile
       replaceInFile "ExpandParameters(" $service $targetFile
       replaceInFile "FlattenParameters(" $service $targetFile
@@ -403,6 +444,12 @@ for d in internal/service/*; do
       replaceInFile testAccClusterRemoveIAMRolesConfig $service $targetFile
       replaceInFile testAccCheckEventSubscriptionExists $service $targetFile
       replaceInFile testAccCheckEventSubscriptionDestroy $service $targetFile
+      replaceInFile testAccCheckGlobalClusterDestroy $service $targetFile
+      replaceInFile testAccCheckGlobalClusterExists $service $targetFile
+      replaceInFile testAccCheckGlobalClusterDisappears $service $targetFile
+      replaceInFile testAccCheckGlobalClusterNotRecreated $service $targetFile
+      replaceInFile testAccCheckGlobalClusterRecreated $service $targetFile
+      replaceInFile testAccPreCheckGlobalCluster $service $targetFile
       replaceInFile TestValidEventSubscriptionName $service $targetFile
       replaceInFile TestValidParamGroupName $service $targetFile
       replaceInFile TestValidSubnetGroupName $service $targetFile
@@ -438,6 +485,34 @@ for d in internal/service/*; do
       replaceInFile validSubnetGroupName $service $targetFile
       replaceInFile validSubnetGroupNamePrefix $service $targetFile
       replaceInFile validEventSubscriptionName $service $targetFile
+      replaceInFile clusterParameterGroupMaxParamsBulkEdit $service $targetFile
+      replaceInFile setIAMRoleToCluster $service $targetFile
+      replaceInFile removeIAMRoleFromCluster $service $targetFile
+      replaceInFile waitForClusterUpdate $service $targetFile
+      replaceInFile FindEventSubscriptionByID $service $targetFile
+      replaceInFile waitEventSubscriptionDeleted $service $targetFile
+      replaceInFile statusEventSubscription $service $targetFile
+      replaceInFile testAccSubnetGroupConfig_generatedName $service $targetFile
+      replaceInFile testAccSubnetGroupConfig_namePrefix $service $targetFile
+      replaceInFile testAccSubnetGroupConfig_updatedDescription $service $targetFile
+      replaceInFile testAccOrderableDBInstanceDataSourceConfig_preferred $service $targetFile
+      replaceInFile testAccOrderableDBInstanceDataSourceConfig_basic $service $targetFile
+      replaceInFile testAccClusterConfig_generatedName $service $targetFile
+      replaceInFile testAccEngineVersionDataSourceConfig_basic $service $targetFile
+      replaceInFile testAccClusterConfig_namePrefix $service $targetFile
+      replaceInFile testAccClusterConfig_deleteProtection $service $targetFile
+      replaceInFile testAccClusterSnapshotConfig_basic $service $targetFile
+      replaceInFile testAccCheckClusterSnapshotDestroy $service $targetFile
+      replaceInFile testAccCheckClusterSnapshotExists $service $targetFile
+      replaceInFile testAccClusterInstanceConfig_kmsKey $service $targetFile
+      replaceInFile testAccClusterInstanceConfig_modified $service $targetFile
+      replaceInFile testAccClusterParameterGroupConfig_tags $service $targetFile
+      replaceInFile testAccClusterParameterGroupConfig_basic $service $targetFile
+      replaceInFile testAccEngineVersionDataSourceConfig_preferred $service $targetFile
+      replaceInFile testAccClusterParameterGroupConfig_description $service $targetFile
+      replaceInFile testAccClusterInstanceConfig_basic $service $targetFile
+      replaceInFile testAccEngineVersionDataSourceConfig_defaultOnly $service $targetFile
+
       replaceInFile "ResourceClusterParameterGroup(" $service $targetFile
       replaceInFile "ResourceClusterInstance(" $service $targetFile
       replaceInFile "ResourceClusterSnapshot(" $service $targetFile
@@ -456,8 +531,14 @@ for d in internal/service/*; do
       replaceInFile resourceInstanceRead $service $targetFile
       replaceInFile resourceInstanceDelete $service $targetFile
       replaceInFile resourceInstanceUpdate $service $targetFile
+      replaceInFile FindSnapshot $service $targetFile
       replaceInFile "ResourceInstance(" $service $targetFile
       replaceInFile "DataSourceInstance(" $service $targetFile
+    fi
+
+    if [ "$(isInList $service docdb redshift)" == "1" ]; then
+      replaceInFile testAccEventSubscriptionConfig_tags1 $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_tags2 $service $targetFile
     fi
 
     if [ "$(isInList $service appconfig elasticbeanstalk elb kinesisanalytics kinesisanalyticsv2)" == "1" ]; then
@@ -474,10 +555,91 @@ for d in internal/service/*; do
       replaceInFile "ResourceApplication(" $service $targetFile
     fi
 
+    if [ "$(isInList $service dynamodb kafka)" == "1" ]; then
+      replaceInFile expandProvisionedThroughput $service $targetFile
+    fi
+
     if [ "$(isInList $service cloudsearch elasticsearch firehose opensearch)" == "1" ]; then
       replaceInFile expandDomainEndpointOptions $service $targetFile
       replaceInFile flattenDomainEndpointOptions $service $targetFile
       replaceInFile testAccPreCheckIamServiceLinkedRoleEs $service $targetFile
+      replaceInFile testAccPreCheckIAMServiceLinkedRoleEs $service $targetFile
+      replaceInFile resourceDomainImport $service $targetFile
+      replaceInFile inPlaceEncryptionEnableVersion $service $targetFile
+      replaceInFile suppressEquivalentKMSKeyIDs $service $targetFile
+      replaceInFile getKibanaEndpoint $service $targetFile
+      replaceInFile isDedicatedMasterDisabled $service $targetFile
+      replaceInFile isCustomEndpointDisabled $service $targetFile
+      replaceInFile expandNodeToNodeEncryptionOptions $service $targetFile
+      replaceInFile flattenNodeToNodeEncryptionOptions $service $targetFile
+      replaceInFile expandClusterConfig $service $targetFile
+      replaceInFile expandZoneAwarenessConfig $service $targetFile
+      replaceInFile expandColdStorageOptions $service $targetFile
+      replaceInFile flattenClusterConfig $service $targetFile
+      replaceInFile flattenZoneAwarenessConfig $service $targetFile
+      replaceInFile flattenColdStorageOptions $service $targetFile
+      replaceInFile advancedOptionsIgnoreDefault $service $targetFile
+      replaceInFile DataSourceDomain $service $targetFile
+      replaceInFile dataSourceDomainRead $service $targetFile
+      replaceInFile ResourceDomainPolicy $service $targetFile
+      replaceInFile resourceDomainPolicyRead $service $targetFile
+      replaceInFile resourceDomainPolicyUpsert $service $targetFile
+      replaceInFile resourceDomainPolicyDelete $service $targetFile
+      replaceInFile ResourceDomainSAMLOptions $service $targetFile
+      replaceInFile domainSamlOptionsDiffSupress $service $targetFile
+      replaceInFile resourceDomainSAMLOptionsRead $service $targetFile
+      replaceInFile resourceDomainSAMLOptionsPut $service $targetFile
+      replaceInFile resourceDomainSAMLOptionsDelete $service $targetFile
+      replaceInFile expandAdvancedSecurityOptions $service $targetFile
+      replaceInFile expandAutoTuneOptions $service $targetFile
+      replaceInFile expandAutoTuneOptionsInput $service $targetFile
+      replaceInFile expandAutoTuneMaintenanceSchedules $service $targetFile
+      replaceInFile expandAutoTuneMaintenanceScheduleDuration $service $targetFile
+      replaceInFile expandESSAMLOptions $service $targetFile
+      replaceInFile expandSAMLOptionsIdp $service $targetFile
+      replaceInFile flattenAdvancedSecurityOptions $service $targetFile
+      replaceInFile flattenAutoTuneOptions $service $targetFile
+      replaceInFile flattenAutoTuneMaintenanceSchedules $service $targetFile
+      replaceInFile flattenAutoTuneMaintenanceScheduleDuration $service $targetFile
+      replaceInFile flattenESSAMLOptions $service $targetFile
+      replaceInFile flattenESSAMLIdpOptions $service $targetFile
+      replaceInFile getMasterUserOptions $service $targetFile
+      replaceInFile getUserDBEnabled $service $targetFile
+      replaceInFile expandLogPublishingOptions $service $targetFile
+      replaceInFile flattenLogPublishingOptions $service $targetFile
+      replaceInFile expandCognitoOptions $service $targetFile
+      replaceInFile expandEBSOptions $service $targetFile
+      replaceInFile expandVPCOptions $service $targetFile
+      replaceInFile flattenCognitoOptions $service $targetFile
+      replaceInFile flattenEBSOptions $service $targetFile
+      replaceInFile flattenEncryptAtRestOptions $service $targetFile
+      replaceInFile flattenSnapshotOptions $service $targetFile
+      replaceInFile flattenVPCDerivedInfo $service $targetFile
+      replaceInFile UpgradeStatusUnknown $service $targetFile
+      replaceInFile ConfigStatusNotFound $service $targetFile
+      replaceInFile ConfigStatusUnknown $service $targetFile
+      replaceInFile ConfigStatusExists $service $targetFile
+      replaceInFile statusUpgradeStatus $service $targetFile
+      replaceInFile domainConfigStatus $service $targetFile
+      replaceInFile domainUpgradeSuccessMinTimeout $service $targetFile
+      replaceInFile domainUpgradeSuccessDelay $service $targetFile
+      replaceInFile waitUpgradeSucceeded $service $targetFile
+      replaceInFile WaitForDomainCreation $service $targetFile
+      replaceInFile waitForDomainUpdate $service $targetFile
+      replaceInFile waitForDomainDelete $service $targetFile
+    fi
+
+    if [ "$(isInList $service kinesis qldb)" == "1" ]; then
+      replaceInFile ResourceStream $service $targetFile
+      replaceInFile resourceStreamCreate $service $targetFile
+      replaceInFile resourceStreamRead $service $targetFile
+      replaceInFile resourceStreamUpdate $service $targetFile
+      replaceInFile resourceStreamDelete $service $targetFile
+      replaceInFile waitStreamCreated $service $targetFile
+      replaceInFile waitStreamDeleted $service $targetFile
+      replaceInFile testAccCheckStreamExists $service $targetFile
+      replaceInFile testAccStreamConfig_tags1 $service $targetFile
+      replaceInFile testAccStreamConfig_tags2 $service $targetFile
     fi
 
     if [ "$(isInList $service cloudtrail dynamodb)" == "1" ]; then
@@ -522,6 +684,10 @@ for d in internal/service/*; do
       replaceInFile userDataHashSum $service $targetFile
       replaceInFile resourceScheduledActionRead $service $targetFile
       replaceInFile resourceScheduledActionDelete $service $targetFile
+      replaceInFile errCodeInvalidParameterValue $service $targetFile
+      replaceInFile DataSourceSubnetGroup $service $targetFile
+      replaceInFile dataSourceSubnetGroupRead $service $targetFile
+
       replaceInFile "ResourceScheduledAction(" $service $targetFile
     fi
 
@@ -537,7 +703,7 @@ for d in internal/service/*; do
       replaceInFile "ResourcePolicyAttachment(" $service $targetFile
     fi
 
-    if [ "$(isInList $service ecr ecs lambda s3)" == "1" ]; then
+    if [ "$(isInList $service autoscaling cloudwatch cognitoidp docdb dynamodb ec2 ecr ecs eks elasticache emr events iot lambda organizations route53 s3 sagemaker)" == "1" ]; then
       replaceInFile testAccErrorCheckSkip $service $targetFile
     fi
 
@@ -551,35 +717,103 @@ for d in internal/service/*; do
       replaceInFile "ResourceUserGroup(" $service $targetFile
     fi
 
-    if [ "$(isInList $service route53resolver sagemaker)" == "1" ]; then
+    if [ "$(isInList $service ec2 emr opensearch route53resolver sagemaker)" == "1" ]; then
+      replaceInFile ErrCodeValidationException $service $targetFile
+      replaceInFile WaitImageDeleted $service $targetFile
       replaceInFile resourceEndpointCreate $service $targetFile
       replaceInFile resourceEndpointRead $service $targetFile
       replaceInFile resourceEndpointUpdate $service $targetFile
       replaceInFile resourceEndpointDelete $service $targetFile
+      replaceInFile testAccCheckEndpointExists $service $targetFile
+      replaceInFile testAccCheckEndpointDestroy $service $targetFile
+      replaceInFile testAccDomainConfig_tags1 $service $targetFile
+      replaceInFile testAccDomainConfig_tags2 $service $targetFile
       replaceInFile "ResourceEndpoint(" $service $targetFile
     fi
 
-    if [ "$(isInList $service elasticsearch sagemaker)" == "1" ]; then
+    if [ "$(isInList $service dynamodb elasticsearch opensearch sagemaker)" == "1" ]; then
+      replaceInFile expandEncryptAtRestOptions $service $targetFile
+      replaceInFile testAccDomainConfig_basic $service $targetFile
       replaceInFile "FindDomainByName(" $service $targetFile
     fi
 
-    if [ "$(isInList $service events eks)" == "1" ]; then
+    if [ "$(isInList $service apigatewayv2 sagemaker)" == "1" ]; then
+      replaceInFile testAccModelConfig_basic $service $targetFile
+    fi
+
+    if [ "$(isInList $service cloudsearch elasticsearch opensearch)" == "1" ]; then
+      replaceInFile testAccCheckAdvancedSecurityOptions $service $targetFile
+      replaceInFile testAccCheckNumberOfSecurityGroups $service $targetFile
+      replaceInFile testAccCheckSnapshotHour $service $targetFile
+      replaceInFile testAccCheckDomainEndpointOptions $service $targetFile
+      replaceInFile testAccCheckCustomEndpoint $service $targetFile
+      replaceInFile testAccCheckEBSVolumeSize $service $targetFile
+      replaceInFile testAccCheckEBSVolumeEnabled $service $targetFile
+      replaceInFile testAccCheckNumberOfInstances $service $targetFile
+      replaceInFile testAccCheckDomainEncrypted $service $targetFile
+      replaceInFile testAccCheckNodeToNodeEncrypted $service $targetFile
+      replaceInFile testAccCheckCognitoOptions $service $targetFile
+      replaceInFile testAccCheckDomainNotRecreated $service $targetFile
+      replaceInFile testAccGetValidStartAtTime $service $targetFile
+      replaceInFile testAccPreCheckCognitoIdentityProvider $service $targetFile
+      replaceInFile testAccCheckELBDestroy $service $targetFile
+      replaceInFile testAccDomainConfig_complex $service $targetFile
+      replaceInFile testAccDomainConfig_vpc $service $targetFile
+      replaceInFile testAccDomainConfig_internetToVPCEndpoint $service $targetFile
+      replaceInFile testAccDomainConfig_advancedSecurityOptionsUserDB $service $targetFile
+      replaceInFile testAccCheckESDomainSAMLOptions $service $targetFile
+      replaceInFile testAccCheckESDomainSAMLOptionsDestroy $service $targetFile
+      replaceInFile buildDomainARN $service $targetFile
+      replaceInFile testAccCheckPolicyMatch $service $targetFile
+      replaceInFile testAccDomainConfig $service $targetFile
+    fi
+
+    if [ "$(isInList $service autoscaling eks events)" == "1" ]; then
       replaceInFile allDiagFunc $service $targetFile
+      replaceInFile flattenLaunchTemplateSpecification $service $targetFile
     fi
 
     if [ "$(isInList $service emr s3)" == "1" ]; then
       replaceInFile removeNil $service $targetFile
     fi
 
+    if [ "$(isInList $service events route53resolver)" == "1" ]; then
+      replaceInFile testAccCheckRuleDestroy $service $targetFile
+      replaceInFile testAccCheckRuleExists $service $targetFile
+    fi
+
+    if [ "$(isInList $service eks lambda)" == "1" ]; then
+      replaceInFile flattenVPCConfigResponse $service $targetFile
+    fi
+
+    if [ "$(isInList $service iam lambda)" == "1" ]; then
+      replaceInFile policyModelMarshallJSONStartSliceSize $service $targetFile
+      replaceInFile IAMPolicyDoc $service $targetFile
+      replaceInFile IAMPolicyStatement $service $targetFile
+      replaceInFile IAMPolicyStatementPrincipal $service $targetFile
+      replaceInFile IAMPolicyStatementCondition $service $targetFile
+      replaceInFile IAMPolicyStatementPrincipalSet $service $targetFile
+      replaceInFile IAMPolicyStatementConditionSet $service $targetFile
+    fi
+
     if [ "$(isInList $service emr glue redshift)" == "1" ]; then
       replaceInFile resourceSecurityConfigurationCreate $service $targetFile
       replaceInFile resourceSecurityConfigurationRead $service $targetFile
       replaceInFile resourceSecurityConfigurationDelete $service $targetFile
+      replaceInFile testAccCheckSecurityConfigurationExists $service $targetFile
+      replaceInFile testAccCheckSecurityConfigurationDestroy $service $targetFile
+      replaceInFile testAccSecurityConfigurationConfig_basic $service $targetFile
+
       replaceInFile "FindClusterByID(" $service $targetFile
       replaceInFile "ResourceSecurityConfiguration(" $service $targetFile
     fi
 
-    if [ "$(isInList $service kafka neptune redshift rds)" == "1" ]; then
+    if [ "$(isInList $service athena dynamodb glue)" == "1" ]; then
+      replaceInFile testAccCheckTableDestroy $service $targetFile
+      replaceInFile testAccCheckDatabaseDestroy $service $targetFile
+    fi
+
+    if [ "$(isInList $service docdb kafka neptune redshift rds)" == "1" ]; then
       replaceInFile testAccClusterDataSourceConfig $service $targetFile
       replaceInFile testAccClusterConfigTags1 $service $targetFile
       replaceInFile testAccClusterConfigTags2 $service $targetFile
@@ -596,12 +830,27 @@ for d in internal/service/*; do
       replaceInFile testAccCheckSecurityGroupDestroy $service $targetFile
       replaceInFile TestExpandParameters $service $targetFile
       replaceInFile TestFlattenParameters $service $targetFile
+      replaceInFile testAccClusterDataSourceConfig_basic $service $targetFile
+      replaceInFile testAccClusterConfig_finalSnapshot $service $targetFile
+      replaceInFile testAccClusterConfig_tags1 $service $targetFile
+      replaceInFile testAccClusterConfig_tags2 $service $targetFile
+      replaceInFile testAccCheckSubnetGroupExists $service $targetFile
+      replaceInFile testAccCheckSubnetGroupDestroy $service $targetFile
+      replaceInFile testAccSubnetGroupConfig_basic $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_updateSourceIDs $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_updateCategories $service $targetFile
+      replaceInFile testAccParameterGroupConfig_basic $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_update $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_sourceIDs $service $targetFile
+      replaceInFile testAccEventSubscriptionConfig_basic $service $targetFile
     fi
 
     if [ "$(isInList $service codecommit glue)" == "1" ]; then
       replaceInFile resourceTriggerCreate $service $targetFile
       replaceInFile resourceTriggerRead $service $targetFile
       replaceInFile resourceTriggerDelete $service $targetFile
+      replaceInFile testAccCheckTriggerExists $service $targetFile
+      replaceInFile testAccCheckTriggerDestroy $service $targetFile
       replaceInFile "ResourceTrigger(" $service $targetFile
     fi
 
@@ -609,6 +858,10 @@ for d in internal/service/*; do
       replaceInFile testAccErrorCheckSkipRoute53 $service $targetFile
       replaceInFile dataSourceEndpointRead $service $targetFile
       replaceInFile "DataSourceEndpoint(" $service $targetFile
+    fi
+
+    if [ "$(isInList $service glue rds route53)" == "1" ]; then
+      replaceInFile testAccErrorCheckSkip $service $targetFile
     fi
 
     if [ "$(isInList $service events route53resolver)" == "1" ]; then
@@ -636,6 +889,7 @@ for d in internal/service/*; do
       replaceInFile resourceBucketPolicyRead $service $targetFile
       replaceInFile resourceBucketPolicyUpdate $service $targetFile
       replaceInFile resourceBucketPolicyDelete $service $targetFile
+      replaceInFile testAccCheckBucketPolicyExists $service $targetFile
       replaceInFile "ResourceBucket(" $service $targetFile
       replaceInFile "ResourceBucketPolicy(" $service $targetFile
       replaceInFile "ResourceBucketLifecycleConfiguration(" $service $targetFile
@@ -647,6 +901,7 @@ for d in internal/service/*; do
       replaceInFile resourceAccessPointUpdate $service $targetFile
       replaceInFile resourceAccessPointDelete $service $targetFile
       replaceInFile expandVPCConfiguration $service $targetFile
+      replaceInFile testAccCheckAccessPointExists $service $targetFile
       replaceInFile "ResourceAccessPoint(" $service $targetFile
     fi
 
@@ -657,6 +912,7 @@ for d in internal/service/*; do
       replaceInFile resourceConnectionDelete $service $targetFile
       replaceInFile dataSourceConnectionRead $service $targetFile
       replaceInFile testAccCheckConnectionExists $service $targetFile
+      replaceInFile testAccCheckConnectionDestroy $service $targetFile
       replaceInFile "ResourceConnection(" $service $targetFile
       replaceInFile "DataSourceConnection(" $service $targetFile
       replaceInFile "FindConnectionByName(" $service $targetFile
@@ -679,19 +935,32 @@ for d in internal/service/*; do
       replaceInFile "DataSourceLoadBalancer(" $service $targetFile
     fi
 
-    if [ "$(isInList $service ec2 elbv2)" == "1" ]; then
+    if [ "$(isInList $service ec2 elb elbv2)" == "1" ]; then
+      replaceInFile DataSourceHostedZoneID $service $targetFile
+      replaceInFile dataSourceHostedZoneIDRead $service $targetFile
       replaceInFile testAccPreCheckElbv2GatewayLoadBalancer $service $targetFile
     fi
 
     if [ "$(isInList $service cloudtrail elb elbv2 redshift)" == "1" ]; then
       replaceInFile dataSourceServiceAccountRead $service $targetFile
       replaceInFile ServiceAccountPerRegionMap $service $targetFile
+      replaceInFile testAccServiceAccountDataSourceConfig_basic $service $targetFile
+      replaceInFile testAccServiceAccountDataSourceConfig_explicitRegion $service $targetFile
       replaceInFile "DataSourceServiceAccount(" $service $targetFile
     fi
 
     if [ "$(isInList $service cloudformation cloudfront docdb)" == "1" ]; then
       replaceInFile expandParameters $service $targetFile
       replaceInFile flattenParameters $service $targetFile
+      replaceInFile flattenLoggingConfig $service $targetFile
+    fi
+
+    if [ "$(isInList $service autoscaling cloudformation)" == "1" ]; then
+      replaceInFile ErrCodeValidationError $service $targetFile
+    fi
+
+    if [ "$(isInList $service eks kafka)" == "1" ]; then
+      replaceInFile testAccClusterConfig_version $service $targetFile
     fi
 
     if [ "$(isInList $service apigateway iot)" == "1" ]; then
@@ -727,9 +996,12 @@ for d in internal/service/*; do
       replaceInFile "ResourceVault(" $service $targetFile
     fi
 
-    if [ "$(isInList $service events glue)" == "1" ]; then
-      replaceInFile testAccCheckConnectionExists $service $targetFile
-      replaceInFile testAccCheckConnectionDestroy $service $targetFile
+    if [ "$(isInList $service glue logs)" == "1" ]; then
+      replaceInFile ResourceResourcePolicy $service $targetFile
+      replaceInFile resourceResourcePolicyPut $service $targetFile
+      replaceInFile resourceResourcePolicyRead $service $targetFile
+      replaceInFile resourceResourcePolicyDelete $service $targetFile
+      replaceInFile testAccCheckResourcePolicyDestroy $service $targetFile
     fi
 
     if [ "$(isInList $service apigateway lakeformation)" == "1" ]; then
@@ -756,6 +1028,23 @@ for d in internal/service/*; do
       replaceInFile waitIAMPropagation $service $targetFile
       replaceInFile statusApplication $service $targetFile
       replaceInFile resourceApplicationImport $service $targetFile
+      replaceInFile startApplication $service $targetFile
+      replaceInFile stopApplication $service $targetFile
+      replaceInFile expandCloudWatchLoggingOptions $service $targetFile
+      replaceInFile expandInputProcessingConfiguration $service $targetFile
+      replaceInFile expandInputUpdate $service $targetFile
+      replaceInFile expandInput $service $targetFile
+      replaceInFile expandOutput $service $targetFile
+      replaceInFile expandOutputs $service $targetFile
+      replaceInFile expandRecordColumns $service $targetFile
+      replaceInFile expandRecordFormat $service $targetFile
+      replaceInFile expandReferenceDataSource $service $targetFile
+      replaceInFile expandReferenceDataSourceUpdate $service $targetFile
+      replaceInFile expandSourceSchema $service $targetFile
+      replaceInFile flattenSourceSchema $service $targetFile
+      replaceInFile flattenCloudWatchLoggingOptionDescriptions $service $targetFile
+      replaceInFile testAccCheckApplicationDestroy $service $targetFile
+
       replaceInFile "FindApplicationDetailByName(" $service $targetFile
       replaceInFile "FindApplicationDetail(" $service $targetFile
     fi
@@ -778,8 +1067,38 @@ for d in internal/service/*; do
       replaceInFile "ResourceGroup(" $service $targetFile
     fi
 
+    if [ "$(isInList $service ec2 iam)" == "1" ]; then
+      replaceInFile InstanceProfileResourcePrefix $service $targetFile
+      replaceInFile InstanceProfileARNToName $service $targetFile
+      replaceInFile TestInstanceProfileARNToName $service $targetFile
+    fi
+
     if [ "$(isInList $service autoscaling ec2)" == "1" ]; then
       replaceInFile testAccCheckAmiExists $service $targetFile
+      replaceInFile testAccCheckAMIExists $service $targetFile
+      replaceInFile expandInstanceMetadataOptions $service $targetFile
+      replaceInFile flattenInstanceMetadataOptions $service $targetFile
+      replaceInFile expandLaunchTemplateSpecification $service $targetFile
+      replaceInFile expandAcceleratorCountRequest $service $targetFile
+      replaceInFile expandAcceleratorTotalMemoryMiBRequest $service $targetFile
+      replaceInFile expandBaselineEBSBandwidthMbpsRequest $service $targetFile
+      replaceInFile expandMemoryGiBPerVCPURequest $service $targetFile
+      replaceInFile expandMemoryMiBRequest $service $targetFile
+      replaceInFile expandNetworkInterfaceCountRequest $service $targetFile
+      replaceInFile flattenMemoryGiBPerVCPU $service $targetFile
+      replaceInFile flattenInstanceRequirements $service $targetFile
+      replaceInFile expandTotalLocalStorageGBRequest $service $targetFile
+      replaceInFile flattenAcceleratorCount $service $targetFile
+      replaceInFile flattenAcceleratorTotalMemoryMiB $service $targetFile
+      replaceInFile flattenBaselineEBSBandwidthMbps $service $targetFile
+      replaceInFile flattenMemoryMiB $service $targetFile
+      replaceInFile flattenNetworkInterfaceCount $service $targetFile
+      replaceInFile expandLaunchTemplateOverrides $service $targetFile
+      replaceInFile expandLaunchTemplateOverrideses $service $targetFile
+      replaceInFile expandInstanceRequirements $service $targetFile
+      replaceInFile flattenLaunchTemplateOverrides $service $targetFile
+      replaceInFile flattenLaunchTemplateOverrideses $service $targetFile
+
     fi
 
     if [ "$(isInList $service rds ec2)" == "1" ]; then
@@ -814,8 +1133,18 @@ for d in internal/service/*; do
       replaceInFile testAccCheckPermissionDestroy $service $targetFile
     fi
 
-    if [ "$(isInList $service ec2 efs)" == "1" ]; then
+    if [ "$(isInList $service ec2 ecr efs)" == "1" ]; then
       replaceInFile testAccCheckVpnGatewayDestroy $service $targetFile
+      replaceInFile testAccCheckVPNGatewayDestroy $service $targetFile
+      replaceInFile ResourceReplicationConfiguration $service $targetFile
+      replaceInFile resourceReplicationConfigurationRead $service $targetFile
+      replaceInFile resourceReplicationConfigurationDelete $service $targetFile
+      replaceInFile testAccCheckReplicationConfigurationDestroy $service $targetFile
+      replaceInFile testAccCheckReplicationConfigurationExists $service $targetFile
+    fi
+
+    if [ "$(isInList $service efs s3control)" == "1" ]; then
+      replaceInFile testAccCheckAccessPointDestroy $service $targetFile
     fi
 
     if [ "$(isInList $service apigateway cloudfront)" == "1" ]; then
@@ -847,4 +1176,11 @@ sed -i '' -e 's|acctest.RegisterServiceErrorCheckFunc|// acctest.RegisterService
 sed -i '' -e 's|\("github.com/.*/apigatewayv2\)|// \1|g' $combinedFolder/apigatewayv2_errorcheck_test.go
 sed -i '' -e 's|acctest.RegisterServiceErrorCheckFunc|// acctest.RegisterServiceErrorCheckFunc|g' $combinedFolder/docdb_cluster_test.go
 
+)
+
+# compile code
+(
+  cd terraform-provider-aws
+  # export GOOS=linux
+  go test -gcflags="-e" -c ./internal/allservices
 )

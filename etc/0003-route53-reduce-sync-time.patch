@@ -1,180 +1,89 @@
-diff --git a/docs/contributing/pullrequest-submission-and-lifecycle.md b/docs/contributing/pullrequest-submission-and-lifecycle.md
-index 00e69e6c2c..6cb50a3d33 100644
---- a/docs/contributing/pullrequest-submission-and-lifecycle.md
-+++ b/docs/contributing/pullrequest-submission-and-lifecycle.md
-@@ -139,7 +139,7 @@ This Contribution Guide also includes separate sections on topics such as [Error
-
-   ```go
-   var output *kms.CreateKeyOutput
--  err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+  err := resource.Retry(5*time.Second, func() *resource.RetryError {
-     var err error
-
-     output, err = conn.CreateKey(input)
-diff --git a/internal/service/acm/certificate_validation.go b/internal/service/acm/certificate_validation.go
-index e1c9c738e7..5fec88450d 100644
---- a/internal/service/acm/certificate_validation.go
-+++ b/internal/service/acm/certificate_validation.go
-@@ -111,7 +111,7 @@ func resourceCertificateCheckValidationRecords(validationRecordFqdns []interface
- 		}
- 		var err error
- 		var output *acm.DescribeCertificateOutput
--		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 			log.Printf("[DEBUG] Certificate domain validation options empty for %s, retrying", aws.StringValue(cert.CertificateArn))
- 			output, err = conn.DescribeCertificate(input)
- 			if err != nil {
 diff --git a/internal/service/acmpca/certificate_authority.go b/internal/service/acmpca/certificate_authority.go
-index a5d5bab032..8e6d87b108 100644
+index 49a18686d2..ff3798f440 100644
 --- a/internal/service/acmpca/certificate_authority.go
 +++ b/internal/service/acmpca/certificate_authority.go
 @@ -313,7 +313,7 @@ func resourceCertificateAuthorityCreate(d *schema.ResourceData, meta interface{}
 
- 	log.Printf("[DEBUG] Creating ACM PCA Certificate Authority: %s", input)
- 	var output *acmpca.CreateCertificateAuthorityOutput
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		output, err = conn.CreateCertificateAuthority(input)
- 		if err != nil {
-diff --git a/internal/service/autoscaling/launch_configuration.go b/internal/service/autoscaling/launch_configuration.go
-index 468e5690c5..9dbad5cd72 100644
---- a/internal/service/autoscaling/launch_configuration.go
-+++ b/internal/service/autoscaling/launch_configuration.go
-@@ -605,7 +605,7 @@ func resourceLaunchConfigurationDelete(d *schema.ResourceData, meta interface{})
-
- 	log.Printf("[DEBUG] Deleting Autoscaling Launch Configuration: %s", d.Id())
- 	// Retry for Autoscaling eventual consistency
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := autoscalingconn.DeleteLaunchConfiguration(input)
-
- 		if tfawserr.ErrCodeEquals(err, autoscaling.ErrCodeResourceInUseFault) {
-diff --git a/internal/service/autoscaling/launch_configuration_test.go b/internal/service/autoscaling/launch_configuration_test.go
-index e8b2b52b66..b9dc8082f6 100644
---- a/internal/service/autoscaling/launch_configuration_test.go
-+++ b/internal/service/autoscaling/launch_configuration_test.go
-@@ -1018,7 +1018,7 @@ func testAccCheckAmiExists(n string, ami *ec2.Image) resource.TestCheckFunc {
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).EC2Conn
-
- 		var resp *ec2.DescribeImagesOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			opts := &ec2.DescribeImagesInput{
- 				ImageIds: []*string{aws.String(rs.Primary.ID)},
- 			}
+        log.Printf("[DEBUG] Creating ACM PCA Certificate Authority: %s", input)
+        var output *acmpca.CreateCertificateAuthorityOutput
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                output, err = conn.CreateCertificateAuthority(input)
+                if err != nil {
 diff --git a/internal/service/cloudfront/distribution.go b/internal/service/cloudfront/distribution.go
-index aeb4242008..b4b87a60fa 100644
+index 65a7afb931..80229ea0b5 100644
 --- a/internal/service/cloudfront/distribution.go
 +++ b/internal/service/cloudfront/distribution.go
-@@ -831,7 +831,7 @@ func resourceDistributionCreate(d *schema.ResourceData, meta interface{}) error
+@@ -833,7 +833,7 @@ func resourceDistributionCreate(d *schema.ResourceData, meta interface{}) error
 
- 	var resp *cloudfront.CreateDistributionWithTagsOutput
- 	// Handle eventual consistency issues
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		resp, err = conn.CreateDistributionWithTags(params)
+        var resp *cloudfront.CreateDistributionWithTagsOutput
+        // Handle eventual consistency issues
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                resp, err = conn.CreateDistributionWithTags(params)
 
-@@ -944,7 +944,7 @@ func resourceDistributionUpdate(d *schema.ResourceData, meta interface{}) error
- 	}
+@@ -946,7 +946,7 @@ func resourceDistributionUpdate(d *schema.ResourceData, meta interface{}) error
+        }
 
- 	// Handle eventual consistency issues
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.UpdateDistribution(params)
+        // Handle eventual consistency issues
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.UpdateDistribution(params)
 
- 		// ACM and IAM certificate eventual consistency
+                // ACM and IAM certificate eventual consistency
 diff --git a/internal/service/configservice/sweep.go b/internal/service/configservice/sweep.go
 index f874d11951..6897e7becf 100644
 --- a/internal/service/configservice/sweep.go
 +++ b/internal/service/configservice/sweep.go
 @@ -168,7 +168,7 @@ func sweepDeliveryChannels(region string) error {
 
- 	req := &configservice.DescribeDeliveryChannelsInput{}
- 	var resp *configservice.DescribeDeliveryChannelsOutput
--	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		resp, err = conn.DescribeDeliveryChannels(req)
- 		if err != nil {
-diff --git a/internal/service/ec2/ami.go b/internal/service/ec2/ami.go
-index 1a6fb3a67f..834da86a0a 100644
---- a/internal/service/ec2/ami.go
-+++ b/internal/service/ec2/ami.go
-@@ -358,7 +358,7 @@ func resourceAMIRead(d *schema.ResourceData, meta interface{}) error {
- 	}
-
- 	var res *ec2.DescribeImagesOutput
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		res, err = client.DescribeImages(req)
- 		if err != nil {
-diff --git a/internal/service/ec2/ami_test.go b/internal/service/ec2/ami_test.go
-index d2b2de47ed..12254ac67f 100644
---- a/internal/service/ec2/ami_test.go
-+++ b/internal/service/ec2/ami_test.go
-@@ -469,7 +469,7 @@ func testAccCheckAmiExists(n string, ami *ec2.Image) resource.TestCheckFunc {
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).EC2Conn
-
- 		var resp *ec2.DescribeImagesOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			opts := &ec2.DescribeImagesInput{
- 				ImageIds: []*string{aws.String(rs.Primary.ID)},
- 			}
-diff --git a/internal/service/ec2/ebs_snapshot.go b/internal/service/ec2/ebs_snapshot.go
-index a2041d68f2..831e217b21 100644
---- a/internal/service/ec2/ebs_snapshot.go
-+++ b/internal/service/ec2/ebs_snapshot.go
-@@ -121,7 +121,7 @@ func resourceEBSSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
- 	}
-
- 	var res *ec2.Snapshot
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		res, err = conn.CreateSnapshot(request)
-
+        req := &configservice.DescribeDeliveryChannelsInput{}
+        var resp *configservice.DescribeDeliveryChannelsOutput
+-       err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                resp, err = conn.DescribeDeliveryChannels(req)
+                if err != nil {
 diff --git a/internal/service/ec2/sweep.go b/internal/service/ec2/sweep.go
-index 3efdac71ef..f567617560 100644
+index 5a21f87017..21ade054b3 100644
 --- a/internal/service/ec2/sweep.go
 +++ b/internal/service/ec2/sweep.go
-@@ -1455,7 +1455,7 @@ func sweepSecurityGroups(region string) error {
- 			}
+@@ -1458,7 +1458,7 @@ func sweepSecurityGroups(region string) error {
+                        }
 
- 			// Handle EC2 eventual consistency
--			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+			err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 				_, err := conn.DeleteSecurityGroup(input)
+                        // Handle EC2 eventual consistency
+-                       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++                       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                                _, err := conn.DeleteSecurityGroup(input)
 
- 				if tfawserr.ErrCodeEquals(err, "DependencyViolation") {
+                                if tfawserr.ErrCodeEquals(err, "DependencyViolation") {
 diff --git a/internal/service/ecrpublic/repository.go b/internal/service/ecrpublic/repository.go
-index 69e665d434..8c8b394315 100644
+index d9e8363101..7e5c36d705 100644
 --- a/internal/service/ecrpublic/repository.go
 +++ b/internal/service/ecrpublic/repository.go
 @@ -151,7 +151,7 @@ func resourceRepositoryRead(d *schema.ResourceData, meta interface{}) error {
- 	}
+        }
 
- 	var err error
--	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 		out, err = conn.DescribeRepositories(input)
- 		if d.IsNewResource() && tfawserr.ErrCodeEquals(err, ecrpublic.ErrCodeRepositoryNotFoundException) {
- 			return resource.RetryableError(err)
+        var err error
+-       err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                out, err = conn.DescribeRepositories(input)
+                if d.IsNewResource() && tfawserr.ErrCodeEquals(err, ecrpublic.ErrCodeRepositoryNotFoundException) {
+                        return resource.RetryableError(err)
 diff --git a/internal/service/ecs/service_test.go b/internal/service/ecs/service_test.go
-index 8e7846a073..90917c92f1 100644
+index 712a9894a6..10642e2a7d 100644
 --- a/internal/service/ecs/service_test.go
 +++ b/internal/service/ecs/service_test.go
-@@ -1322,7 +1322,7 @@ func testAccCheckServiceExists(name string, service *ecs.Service) resource.TestC
- 			Services: []*string{aws.String(rs.Primary.ID)},
- 		}
- 		var output *ecs.DescribeServicesOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			var err error
- 			output, err = conn.DescribeServices(input)
+@@ -1323,7 +1323,7 @@ func testAccCheckServiceExists(name string, service *ecs.Service) resource.TestC
+                        Services: []*string{aws.String(rs.Primary.ID)},
+                }
+                var output *ecs.DescribeServicesOutput
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        var err error
+                        output, err = conn.DescribeServices(input)
 
 diff --git a/internal/service/elbv2/listener_certificate.go b/internal/service/elbv2/listener_certificate.go
 index 65f55a8675..2cc4c53662 100644
@@ -182,443 +91,432 @@ index 65f55a8675..2cc4c53662 100644
 +++ b/internal/service/elbv2/listener_certificate.go
 @@ -58,7 +58,7 @@ func resourceListenerCertificateCreate(d *schema.ResourceData, meta interface{})
 
- 	log.Printf("[DEBUG] Adding certificate: %s of listener: %s", certificateArn, listenerArn)
+        log.Printf("[DEBUG] Adding certificate: %s of listener: %s", certificateArn, listenerArn)
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.AddListenerCertificates(params)
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.AddListenerCertificates(params)
 
- 		// Retry for IAM Server Certificate eventual consistency
+                // Retry for IAM Server Certificate eventual consistency
 @@ -97,7 +97,7 @@ func resourceListenerCertificateRead(d *schema.ResourceData, meta interface{}) e
- 	log.Printf("[DEBUG] Reading certificate: %s of listener: %s", certificateArn, listenerArn)
+        log.Printf("[DEBUG] Reading certificate: %s of listener: %s", certificateArn, listenerArn)
 
- 	var certificate *elbv2.Certificate
--	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		certificate, err = findListenerCertificate(certificateArn, listenerArn, true, nil, conn)
- 		if err != nil {
+        var certificate *elbv2.Certificate
+-       err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                certificate, err = findListenerCertificate(certificateArn, listenerArn, true, nil, conn)
+                if err != nil {
 diff --git a/internal/service/elbv2/listener_rule.go b/internal/service/elbv2/listener_rule.go
-index e19287c65a..c784af8765 100644
+index fe8e19292e..38dd85edc0 100644
 --- a/internal/service/elbv2/listener_rule.go
 +++ b/internal/service/elbv2/listener_rule.go
 @@ -553,7 +553,7 @@ func resourceListenerRuleRead(d *schema.ResourceData, meta interface{}) error {
- 		RuleArns: []*string{aws.String(d.Id())},
- 	}
+                RuleArns: []*string{aws.String(d.Id())},
+        }
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		resp, err = conn.DescribeRules(req)
- 		if err != nil {
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                resp, err = conn.DescribeRules(req)
+                if err != nil {
 diff --git a/internal/service/emr/cluster.go b/internal/service/emr/cluster.go
-index 53bde9a9ff..ed6f7593e5 100644
+index e32fe2869b..147bdb2145 100644
 --- a/internal/service/emr/cluster.go
 +++ b/internal/service/emr/cluster.go
-@@ -1244,7 +1244,7 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+@@ -1263,7 +1263,7 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
- 			// RemoveAutoScalingPolicy seems to have eventual consistency.
- 			// Retry reading Instance Group configuration until the policy is removed.
--			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+			err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 				autoscalingPolicy, err := getEmrCoreInstanceGroupAutoscalingPolicy(conn, d.Id())
+                        // RemoveAutoScalingPolicy seems to have eventual consistency.
+                        // Retry reading Instance Group configuration until the policy is removed.
+-                       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++                       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                                autoscalingPolicy, err := getCoreInstanceGroupAutoScalingPolicy(conn, d.Id())
 
- 				if err != nil {
+                                if err != nil {
 diff --git a/internal/service/events/permission_test.go b/internal/service/events/permission_test.go
-index 367601defa..3c959085c1 100644
+index b1d4e27a34..5f9d8aed44 100644
 --- a/internal/service/events/permission_test.go
 +++ b/internal/service/events/permission_test.go
 @@ -318,7 +318,7 @@ func testAccCheckPermissionDestroy(s *terraform.State) error {
- 		input := &eventbridge.DescribeEventBusInput{
- 			Name: aws.String(eventBusName),
- 		}
--		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 			debo, err := conn.DescribeEventBus(input)
- 			if tfawserr.ErrCodeEquals(err, eventbridge.ErrCodeResourceNotFoundException) {
- 				return nil
-diff --git a/internal/service/lambda/permission.go b/internal/service/lambda/permission.go
-index a3609aef92..312255d877 100644
---- a/internal/service/lambda/permission.go
-+++ b/internal/service/lambda/permission.go
-@@ -134,7 +134,7 @@ func resourcePermissionCreate(d *schema.ResourceData, meta interface{}) error {
- 	log.Printf("[DEBUG] Adding new Lambda permission: %s", input)
- 	var out *lambda.AddPermissionOutput
- 	// Retry for IAM and Lambda eventual consistency
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		out, err = conn.AddPermission(&input)
-
-@@ -204,7 +204,7 @@ func resourcePermissionRead(d *schema.ResourceData, meta interface{}) error {
- 	log.Printf("[DEBUG] Looking for Lambda permission: %s", input)
- 	var out *lambda.GetPolicyOutput
- 	var statement *PolicyStatement
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		// IAM is eventually consistent :/
- 		var err error
- 		out, err = conn.GetPolicy(&input)
+                input := &eventbridge.DescribeEventBusInput{
+                        Name: aws.String(eventBusName),
+                }
+-               err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                        debo, err := conn.DescribeEventBus(input)
+                        if tfawserr.ErrCodeEquals(err, eventbridge.ErrCodeResourceNotFoundException) {
+                                return nil
 diff --git a/internal/service/lexmodels/intent_test.go b/internal/service/lexmodels/intent_test.go
-index d65c919088..b6490a2e2d 100644
+index 9537a5c63f..f737d60abb 100644
 --- a/internal/service/lexmodels/intent_test.go
 +++ b/internal/service/lexmodels/intent_test.go
 @@ -575,7 +575,7 @@ func TestAccLexModelsIntent_updateWithExternalChange(t *testing.T) {
- 					Type: aws.String("ReturnIntent"),
- 				},
- 			}
--			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+			err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 				_, err := conn.PutIntent(input)
+                                        Type: aws.String("ReturnIntent"),
+                                },
+                        }
+-                       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++                       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                                _, err := conn.PutIntent(input)
 
- 				if tfawserr.ErrCodeEquals(err, lexmodelbuildingservice.ErrCodeConflictException) {
+                                if tfawserr.ErrCodeEquals(err, lexmodelbuildingservice.ErrCodeConflictException) {
 diff --git a/internal/service/neptune/cluster.go b/internal/service/neptune/cluster.go
-index 245f757b5d..80d31fa88d 100644
+index dd3248d45d..2b3b1d524f 100644
 --- a/internal/service/neptune/cluster.go
 +++ b/internal/service/neptune/cluster.go
-@@ -724,7 +724,7 @@ func resourceClusterDelete(d *schema.ResourceData, meta interface{}) error {
+@@ -732,7 +732,7 @@ func resourceClusterDelete(d *schema.ResourceData, meta interface{}) error {
 
- 	log.Printf("[DEBUG] Neptune Cluster delete options: %s", deleteOpts)
+        log.Printf("[DEBUG] Neptune Cluster delete options: %s", deleteOpts)
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.DeleteDBCluster(&deleteOpts)
- 		if err != nil {
- 			if tfawserr.ErrMessageContains(err, neptune.ErrCodeInvalidDBClusterStateFault, "is not currently in the available state") {
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.DeleteDBCluster(&deleteOpts)
+                if err != nil {
+                        if tfawserr.ErrMessageContains(err, neptune.ErrCodeInvalidDBClusterStateFault, "is not currently in the available state") {
 diff --git a/internal/service/rds/sweep.go b/internal/service/rds/sweep.go
-index 7af82b991b..a87c9345f7 100644
+index e0089e8271..33efcab7fe 100644
 --- a/internal/service/rds/sweep.go
 +++ b/internal/service/rds/sweep.go
-@@ -424,7 +424,7 @@ func sweepOptionGroups(region string) error {
- 			OptionGroupName: og.OptionGroupName,
- 		}
+@@ -429,7 +429,7 @@ func sweepOptionGroups(region string) error {
+                        OptionGroupName: og.OptionGroupName,
+                }
 
--		ret := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		ret := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.DeleteOptionGroup(deleteOpts)
- 			if err != nil {
- 				if tfawserr.ErrCodeEquals(err, rds.ErrCodeInvalidOptionGroupStateFault) {
+-               ret := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               ret := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.DeleteOptionGroup(deleteOpts)
+                        if err != nil {
+                                if tfawserr.ErrCodeEquals(err, rds.ErrCodeInvalidOptionGroupStateFault) {
 diff --git a/internal/service/route53/record.go b/internal/service/route53/record.go
-index 689d21387b..499fcfe8fe 100644
+index 689d21387b..b1e8076b30 100644
 --- a/internal/service/route53/record.go
 +++ b/internal/service/route53/record.go
 @@ -22,8 +22,8 @@ import (
  )
 
  const (
--	recordSetSyncMinDelay = 10
--	recordSetSyncMaxDelay = 30
-+	recordSetSyncMinDelay = 1
-+	recordSetSyncMaxDelay = 3
+-       recordSetSyncMinDelay = 10
+-       recordSetSyncMaxDelay = 30
++       recordSetSyncMinDelay = 1
++       recordSetSyncMaxDelay = 3
  )
 
  var (
 @@ -463,7 +463,7 @@ func resourceRecordCreate(d *schema.ResourceData, meta interface{}) error {
 
  func ChangeRecordSet(conn *route53.Route53, input *route53.ChangeResourceRecordSetsInput) (interface{}, error) {
- 	var out *route53.ChangeResourceRecordSetsOutput
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		out, err = conn.ChangeResourceRecordSets(input)
- 		if tfawserr.ErrCodeEquals(err, route53.ErrCodeNoSuchHostedZone) {
-@@ -490,8 +490,8 @@ func WaitForRecordSetToSync(conn *route53.Route53, requestId string) error {
- 		Target:       []string{route53.ChangeStatusInsync},
- 		Delay:        time.Duration(rand.Int63n(recordSetSyncMaxDelay-recordSetSyncMinDelay)+recordSetSyncMinDelay) * time.Second,
- 		MinTimeout:   5 * time.Second,
--		PollInterval: 20 * time.Second,
--		Timeout:      30 * time.Minute,
-+		PollInterval: 2 * time.Second,
-+		Timeout:      3 * time.Minute,
- 		Refresh: func() (result interface{}, state string, err error) {
- 			changeRequest := &route53.GetChangeInput{
- 				Id: aws.String(requestId),
+        var out *route53.ChangeResourceRecordSetsOutput
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                out, err = conn.ChangeResourceRecordSets(input)
+                if tfawserr.ErrCodeEquals(err, route53.ErrCodeNoSuchHostedZone) {
+diff --git a/internal/service/s3/bucket.go b/internal/service/s3/bucket.go
+index 048418def7..3353124ef2 100644
+--- a/internal/service/s3/bucket.go
++++ b/internal/service/s3/bucket.go
+@@ -1920,7 +1920,7 @@ func resourceBucketInternalPolicyUpdate(conn *s3.S3, d *schema.ResourceData) err
+                Policy: aws.String(policy),
+        }
+
+-       err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.PutBucketPolicy(params)
+                if tfawserr.ErrCodeEquals(err, ErrCodeMalformedPolicy, s3.ErrCodeNoSuchBucket) {
+                        return resource.RetryableError(err)
+@@ -1974,7 +1974,7 @@ func resourceBucketInternalReplicationConfigurationUpdate(conn *s3.S3, d *schema
+                ReplicationConfiguration: expandBucketReplicationConfiguration(replicationConfiguration),
+        }
+
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.PutBucketReplication(input)
+                if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) || tfawserr.ErrMessageContains(err, ErrCodeInvalidRequest, "Versioning must be 'Enabled' on the bucket") {
+                        return resource.RetryableError(err)
 diff --git a/internal/service/s3/bucket_analytics_configuration.go b/internal/service/s3/bucket_analytics_configuration.go
-index c0708c0a6d..8a31ca18bd 100644
+index ad49ac9d0e..360f8a1bd4 100644
 --- a/internal/service/s3/bucket_analytics_configuration.go
 +++ b/internal/service/s3/bucket_analytics_configuration.go
 @@ -147,7 +147,7 @@ func resourceBucketAnalyticsConfigurationPut(d *schema.ResourceData, meta interf
- 		AnalyticsConfiguration: analyticsConfiguration,
- 	}
+                AnalyticsConfiguration: analyticsConfiguration,
+        }
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.PutBucketAnalyticsConfiguration(input)
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.PutBucketAnalyticsConfiguration(input)
 
- 		if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
+                if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
 diff --git a/internal/service/s3/bucket_inventory_test.go b/internal/service/s3/bucket_inventory_test.go
-index 63ead5f3d3..48fea67a3b 100644
+index 0cc00f7a46..65ce60437e 100644
 --- a/internal/service/s3/bucket_inventory_test.go
 +++ b/internal/service/s3/bucket_inventory_test.go
 @@ -171,7 +171,7 @@ func testAccCheckBucketInventoryDestroy(s *terraform.State) error {
- 			return err
- 		}
+                        return err
+                }
 
--		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 			input := &s3.GetBucketInventoryConfigurationInput{
- 				Bucket: aws.String(bucket),
- 				Id:     aws.String(name),
+-               err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                        input := &s3.GetBucketInventoryConfigurationInput{
+                                Bucket: aws.String(bucket),
+                                Id:     aws.String(name),
 diff --git a/internal/service/s3/bucket_metric_test.go b/internal/service/s3/bucket_metric_test.go
-index 77bfcefaa8..09bcc8a943 100644
+index 2c89312599..d23354b69f 100644
 --- a/internal/service/s3/bucket_metric_test.go
 +++ b/internal/service/s3/bucket_metric_test.go
 @@ -572,7 +572,7 @@ func testAccCheckBucketMetricDestroy(s *terraform.State) error {
- 			return err
- 		}
+                        return err
+                }
 
--		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 			input := &s3.GetBucketMetricsConfigurationInput{
- 				Bucket: aws.String(bucket),
- 				Id:     aws.String(name),
+-               err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                        input := &s3.GetBucketMetricsConfigurationInput{
+                                Bucket: aws.String(bucket),
+                                Id:     aws.String(name),
 diff --git a/internal/service/s3/bucket_notification_test.go b/internal/service/s3/bucket_notification_test.go
-index efca65700c..72f3df0bd5 100644
+index 8adc892532..9788bbc377 100644
 --- a/internal/service/s3/bucket_notification_test.go
 +++ b/internal/service/s3/bucket_notification_test.go
 @@ -298,7 +298,7 @@ func testAccCheckBucketNotificationDestroy(s *terraform.State) error {
- 		if rs.Type != "aws_s3_bucket_notification" {
- 			continue
- 		}
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
- 				Bucket: aws.String(rs.Primary.ID),
- 			})
-@@ -334,7 +334,7 @@ func testAccCheckBucketTopicNotification(n, i, t string, events []string, filter
- 		topicArn := s.RootModule().Resources[t].Primary.ID
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
+                if rs.Type != "aws_s3_bucket_notification" {
+                        continue
+                }
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
+                                Bucket: aws.String(rs.Primary.ID),
+                        })
+@@ -337,7 +337,7 @@ func testAccCheckBucketTopicNotification(n, i, t string, events []string, filter
+                topicArn := s.RootModule().Resources[t].Primary.ID
+                conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
 
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
- 				Bucket: aws.String(rs.Primary.ID),
- 			})
-@@ -390,7 +390,7 @@ func testAccCheckBucketEventBridgeNotification(n string) resource.TestCheckFunc
- 		rs := s.RootModule().Resources[n]
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
+                                Bucket: aws.String(rs.Primary.ID),
+                        })
+@@ -393,7 +393,7 @@ func testAccCheckBucketEventBridgeNotification(n string) resource.TestCheckFunc
+                rs := s.RootModule().Resources[n]
+                conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
 
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
- 				Bucket: aws.String(rs.Primary.ID),
- 			})
-@@ -416,7 +416,7 @@ func testAccCheckBucketQueueNotification(n, i, t string, events []string, filter
- 		queueArn := s.RootModule().Resources[t].Primary.Attributes["arn"]
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
+                                Bucket: aws.String(rs.Primary.ID),
+                        })
+@@ -419,7 +419,7 @@ func testAccCheckBucketQueueNotification(n, i, t string, events []string, filter
+                queueArn := s.RootModule().Resources[t].Primary.Attributes["arn"]
+                conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
 
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
- 				Bucket: aws.String(rs.Primary.ID),
- 			})
-@@ -473,7 +473,7 @@ func testAccCheckBucketLambdaFunctionConfiguration(n, i, t string, events []stri
- 		funcArn := s.RootModule().Resources[t].Primary.Attributes["arn"]
- 		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
+                                Bucket: aws.String(rs.Primary.ID),
+                        })
+@@ -476,7 +476,7 @@ func testAccCheckBucketLambdaFunctionConfiguration(n, i, t string, events []stri
+                funcArn := s.RootModule().Resources[t].Primary.Attributes["arn"]
+                conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
 
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
- 				Bucket: aws.String(rs.Primary.ID),
- 			})
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        out, err := conn.GetBucketNotificationConfiguration(&s3.GetBucketNotificationConfigurationRequest{
+                                Bucket: aws.String(rs.Primary.ID),
+                        })
 diff --git a/internal/service/s3/bucket_policy.go b/internal/service/s3/bucket_policy.go
-index 44008e2040..6ef14b2c51 100644
+index a099c5df39..f9e25fa3cd 100644
 --- a/internal/service/s3/bucket_policy.go
 +++ b/internal/service/s3/bucket_policy.go
-@@ -63,7 +63,7 @@ func resourceBucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
- 		Policy: aws.String(policy),
- 	}
+@@ -62,7 +62,7 @@ func resourceBucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
+                Policy: aws.String(policy),
+        }
 
--	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.PutBucketPolicy(params)
- 		if tfawserr.ErrCodeEquals(err, "MalformedPolicy") {
- 			return resource.RetryableError(err)
+-       err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.PutBucketPolicy(params)
+                if tfawserr.ErrCodeEquals(err, "MalformedPolicy") {
+                        return resource.RetryableError(err)
 diff --git a/internal/service/s3/bucket_public_access_block.go b/internal/service/s3/bucket_public_access_block.go
-index 613b338d31..eeb8f60339 100644
+index 9af056173e..6184cbc13f 100644
 --- a/internal/service/s3/bucket_public_access_block.go
 +++ b/internal/service/s3/bucket_public_access_block.go
 @@ -73,7 +73,7 @@ func resourceBucketPublicAccessBlockCreate(d *schema.ResourceData, meta interfac
- 	}
+        }
 
- 	log.Printf("[DEBUG] S3 bucket: %s, public access block: %v", bucket, input.PublicAccessBlockConfiguration)
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.PutPublicAccessBlock(input)
+        log.Printf("[DEBUG] S3 bucket: %s, public access block: %v", bucket, input.PublicAccessBlockConfiguration)
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.PutPublicAccessBlock(input)
 
- 		if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
+                if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
 diff --git a/internal/service/s3/bucket_public_access_block_test.go b/internal/service/s3/bucket_public_access_block_test.go
-index 96fbb53381..fdef25165d 100644
+index c76093995b..6cec00dbaa 100644
 --- a/internal/service/s3/bucket_public_access_block_test.go
 +++ b/internal/service/s3/bucket_public_access_block_test.go
 @@ -277,7 +277,7 @@ func testAccCheckBucketPublicAccessBlockExists(n string, config *s3.PublicAccess
- 		}
+                }
 
- 		var output *s3.GetPublicAccessBlockOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			var err error
- 			output, err = conn.GetPublicAccessBlock(input)
+                var output *s3.GetPublicAccessBlockOutput
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        var err error
+                        output, err = conn.GetPublicAccessBlock(input)
 
 @@ -331,7 +331,7 @@ func testAccCheckBucketPublicAccessBlockDisappears(n string) resource.TestCheckF
- 			Bucket: aws.String(rs.Primary.ID),
- 		}
+                        Bucket: aws.String(rs.Primary.ID),
+                }
 
--		return resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		return resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.GetPublicAccessBlock(getInput)
+-               return resource.Retry(1*time.Minute, func() *resource.RetryError {
++               return resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.GetPublicAccessBlock(getInput)
 
- 			if tfawserr.ErrCodeEquals(err, tfs3.ErrCodeNoSuchPublicAccessBlockConfiguration) {
+                        if tfawserr.ErrCodeEquals(err, tfs3.ErrCodeNoSuchPublicAccessBlockConfiguration) {
 diff --git a/internal/service/s3/bucket_test.go b/internal/service/s3/bucket_test.go
-index a6f917eb1f..321e613d50 100644
+index d001a73429..528e5f8e09 100644
 --- a/internal/service/s3/bucket_test.go
 +++ b/internal/service/s3/bucket_test.go
-@@ -901,7 +901,7 @@ func testAccCheckBucketDestroyWithProvider(s *terraform.State, provider *schema.
- 		}
+@@ -2645,7 +2645,7 @@ func testAccCheckBucketDestroyWithProvider(s *terraform.State, provider *schema.
+                }
 
- 		// Retry for S3 eventual consistency
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.HeadBucket(input)
+                // Retry for S3 eventual consistency
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.HeadBucket(input)
 
- 			if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) || tfawserr.ErrCodeEquals(err, "NotFound") {
+                        if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) || tfawserr.ErrCodeEquals(err, "NotFound") {
 diff --git a/internal/service/s3/sweep.go b/internal/service/s3/sweep.go
-index b6e711e555..9432124278 100644
+index f044c89bed..97f49468a9 100644
 --- a/internal/service/s3/sweep.go
 +++ b/internal/service/s3/sweep.go
 @@ -176,7 +176,7 @@ func sweepBuckets(region string) error {
- 		}
+                }
 
- 		log.Printf("[INFO] Deleting S3 Bucket: %s", name)
--		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err = resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.DeleteBucket(input)
+                log.Printf("[INFO] Deleting S3 Bucket: %s", name)
+-               err = resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err = resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.DeleteBucket(input)
 
- 			if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
+                        if tfawserr.ErrCodeEquals(err, s3.ErrCodeNoSuchBucket) {
 diff --git a/internal/service/s3/tags.go b/internal/service/s3/tags.go
-index eacf80fee1..2957013390 100644
+index 6a19661bee..757ce13153 100644
 --- a/internal/service/s3/tags.go
 +++ b/internal/service/s3/tags.go
-@@ -97,7 +97,7 @@ func ObjectListTags(conn *s3.S3, bucket, key string) (tftags.KeyValueTags, error
+@@ -96,7 +96,7 @@ func ObjectListTags(conn *s3.S3, bucket, key string) (tftags.KeyValueTags, error
 
- 	var output *s3.GetObjectTaggingOutput
+        var output *s3.GetObjectTaggingOutput
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		var err error
- 		output, err = conn.GetObjectTagging(input)
- 		if awsErr, ok := err.(awserr.Error); ok {
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                var err error
+                output, err = conn.GetObjectTagging(input)
+
 diff --git a/internal/service/s3control/account_public_access_block_test.go b/internal/service/s3control/account_public_access_block_test.go
-index c9f179c6ff..c22a2cfe53 100644
+index 5c4b281b94..e7e651a692 100644
 --- a/internal/service/s3control/account_public_access_block_test.go
 +++ b/internal/service/s3control/account_public_access_block_test.go
 @@ -301,7 +301,7 @@ func testAccCheckAccountPublicAccessBlockExists(resourceName string, configurati
 
- 		// Retry for eventual consistency
- 		var output *s3control.GetPublicAccessBlockOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			var err error
- 			output, err = conn.GetPublicAccessBlock(input)
+                // Retry for eventual consistency
+                var output *s3control.GetPublicAccessBlockOutput
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        var err error
+                        output, err = conn.GetPublicAccessBlock(input)
 
 @@ -343,7 +343,7 @@ func testAccCheckAccountPublicAccessBlockDestroy(s *terraform.State) error {
- 		}
+                }
 
- 		// Retry for eventual consistency
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.GetPublicAccessBlock(input)
+                // Retry for eventual consistency
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.GetPublicAccessBlock(input)
 
- 			if tfawserr.ErrCodeEquals(err, s3control.ErrCodeNoSuchPublicAccessBlockConfiguration) {
+                        if tfawserr.ErrCodeEquals(err, s3control.ErrCodeNoSuchPublicAccessBlockConfiguration) {
 @@ -385,7 +385,7 @@ func testAccCheckAccountPublicAccessBlockDisappears() resource.TestCheckFunc {
- 		}
+                }
 
- 		// Retry for eventual consistency
--		return resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		return resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.GetPublicAccessBlock(getInput)
+                // Retry for eventual consistency
+-               return resource.Retry(1*time.Minute, func() *resource.RetryError {
++               return resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.GetPublicAccessBlock(getInput)
 
- 			if tfawserr.ErrCodeEquals(err, s3control.ErrCodeNoSuchPublicAccessBlockConfiguration) {
+                        if tfawserr.ErrCodeEquals(err, s3control.ErrCodeNoSuchPublicAccessBlockConfiguration) {
 diff --git a/internal/service/secretsmanager/secret.go b/internal/service/secretsmanager/secret.go
-index 9603ae4fb1..bf35e22c40 100644
+index fb5d78bcfe..57a8d2cfac 100644
 --- a/internal/service/secretsmanager/secret.go
 +++ b/internal/service/secretsmanager/secret.go
-@@ -248,7 +248,7 @@ func resourceSecretCreate(d *schema.ResourceData, meta interface{}) error {
- 		}
+@@ -240,7 +240,7 @@ func resourceSecretCreate(d *schema.ResourceData, meta interface{}) error {
+                }
 
- 		log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			_, err := conn.RotateSecret(input)
- 			if err != nil {
- 				// AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
-@@ -445,7 +445,7 @@ func resourceSecretUpdate(d *schema.ResourceData, meta interface{}) error {
- 			}
+                log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        _, err := conn.RotateSecret(input)
+                        if err != nil {
+                                // AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
+@@ -419,7 +419,7 @@ func resourceSecretUpdate(d *schema.ResourceData, meta interface{}) error {
+                        }
 
- 			log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
--			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+			err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 				_, err := conn.RotateSecret(input)
- 				if err != nil {
- 					// AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
+                        log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
+-                       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++                       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                                _, err := conn.RotateSecret(input)
+                                if err != nil {
+                                        // AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
 diff --git a/internal/service/secretsmanager/secret_rotation.go b/internal/service/secretsmanager/secret_rotation.go
-index 5890cb98ce..05bd4b5066 100644
+index 41382903c6..eb034a1260 100644
 --- a/internal/service/secretsmanager/secret_rotation.go
 +++ b/internal/service/secretsmanager/secret_rotation.go
 @@ -70,7 +70,7 @@ func resourceSecretRotationCreate(d *schema.ResourceData, meta interface{}) erro
 
- 		log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
- 		var output *secretsmanager.RotateSecretOutput
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			var err error
- 			output, err = conn.RotateSecret(input)
- 			if err != nil {
+                log.Printf("[DEBUG] Enabling Secrets Manager Secret rotation: %s", input)
+                var output *secretsmanager.RotateSecretOutput
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        var err error
+                        output, err = conn.RotateSecret(input)
+                        if err != nil {
 @@ -170,7 +170,7 @@ func resourceSecretRotationUpdate(d *schema.ResourceData, meta interface{}) erro
- 			}
+                        }
 
- 			log.Printf("[DEBUG] Enabling Secrets Manager Secret Rotation: %s", input)
--			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+			err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 				_, err := conn.RotateSecret(input)
- 				if err != nil {
- 					// AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
+                        log.Printf("[DEBUG] Enabling Secrets Manager Secret Rotation: %s", input)
+-                       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++                       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                                _, err := conn.RotateSecret(input)
+                                if err != nil {
+                                        // AccessDeniedException: Secrets Manager cannot invoke the specified Lambda function.
 diff --git a/internal/service/ses/template_test.go b/internal/service/ses/template_test.go
-index 68ad7163d6..bc78f26363 100644
+index e360d1949d..98bcd50487 100644
 --- a/internal/service/ses/template_test.go
 +++ b/internal/service/ses/template_test.go
-@@ -159,7 +159,7 @@ func testAccCheckSesTemplateDestroy(s *terraform.State) error {
- 		if rs.Type != "aws_ses_template" {
- 			continue
- 		}
--		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			input := ses.GetTemplateInput{
- 				TemplateName: aws.String(rs.Primary.ID),
- 			}
+@@ -159,7 +159,7 @@ func testAccCheckTemplateDestroy(s *terraform.State) error {
+                if rs.Type != "aws_ses_template" {
+                        continue
+                }
+-               err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        input := ses.GetTemplateInput{
+                                TemplateName: aws.String(rs.Primary.ID),
+                        }
 diff --git a/internal/service/sfn/activity_test.go b/internal/service/sfn/activity_test.go
-index bf079fdb68..7baab2d6a7 100644
+index 31815714e3..bc190b3b30 100644
 --- a/internal/service/sfn/activity_test.go
 +++ b/internal/service/sfn/activity_test.go
 @@ -116,7 +116,7 @@ func testAccCheckActivityDestroy(s *terraform.State) error {
- 		}
+                }
 
- 		// Retrying as Read after Delete is not always consistent
--		retryErr := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+		retryErr := resource.Retry(5*time.Second, func() *resource.RetryError {
- 			var err error
+                // Retrying as Read after Delete is not always consistent
+-               retryErr := resource.Retry(1*time.Minute, func() *resource.RetryError {
++               retryErr := resource.Retry(5*time.Second, func() *resource.RetryError {
+                        var err error
 
- 			_, err = conn.DescribeActivity(&sfn.DescribeActivityInput{
+                        _, err = conn.DescribeActivity(&sfn.DescribeActivityInput{
 diff --git a/internal/service/ssm/resource_data_sync.go b/internal/service/ssm/resource_data_sync.go
-index 63eddb11e4..91fe2a744d 100644
+index 6814cb6a71..ce9b6f7037 100644
 --- a/internal/service/ssm/resource_data_sync.go
 +++ b/internal/service/ssm/resource_data_sync.go
-@@ -75,7 +75,7 @@ func resourceResourceDataSyncCreate(d *schema.ResourceData, meta interface{}) er
- 		SyncName:      aws.String(d.Get("name").(string)),
- 	}
+@@ -80,7 +80,7 @@ func resourceResourceDataSyncCreate(d *schema.ResourceData, meta interface{}) er
+                SyncName:      aws.String(name),
+        }
 
--	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-+	err := resource.Retry(5*time.Second, func() *resource.RetryError {
- 		_, err := conn.CreateResourceDataSync(input)
- 		if err != nil {
- 			if tfawserr.ErrMessageContains(err, ssm.ErrCodeResourceDataSyncInvalidConfigurationException, "S3 write failed for bucket") {
+-       err := resource.Retry(1*time.Minute, func() *resource.RetryError {
++       err := resource.Retry(5*time.Second, func() *resource.RetryError {
+                _, err := conn.CreateResourceDataSync(input)
+                if err != nil {
+                        if tfawserr.ErrMessageContains(err, ssm.ErrCodeResourceDataSyncInvalidConfigurationException, "S3 write failed for bucket") {
