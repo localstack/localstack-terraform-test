@@ -159,6 +159,7 @@ def _pull_docker_image(client, localstack_image):
     if len(docker_image_list) == 0:
         print(f"Pulling image {localstack_image}")
         client.images.pull(localstack_image)
+    docker_image_list = client.images.list(name=localstack_image)
     print(f"Using LocalStack image: {docker_image_list[0].id}")
 
 
