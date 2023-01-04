@@ -1,11 +1,12 @@
 version: 2.1
 
-orbs:
-  localstack: localstack/platform@dev:alpha
+# orbs:
+#   localstack: localstack/platform@dev:alpha
 
 jobs:
   build:
-    executor: localstack/default
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
 
