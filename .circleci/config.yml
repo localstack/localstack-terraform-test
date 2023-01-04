@@ -15,7 +15,7 @@ jobs:
           name: "Installing prerequisites"
           command: |
             sudo apt-get update
-            sudo apt install -y python3.8 libsasl2-dev
+            sudo apt install -y python3 libsasl2-dev
             pip install -r requirements.txt
 
       - run:

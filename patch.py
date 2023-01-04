@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE
 from constants import BASE_PATH, PATCH_PATH, PATCH_FILES
 from os.path import realpath
 
+
 def patch_repo():
     print(f'Patching {BASE_PATH}...')
     for patch_file in PATCH_FILES:
