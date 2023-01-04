@@ -15,13 +15,13 @@ jobs:
           name: "Installing prerequisites"
           command: |
             sudo apt-get update
-            sudo apt install -y python3 libsasl2-dev
-            pip install -r requirements.txt
+            sudo apt install -y libsasl2-dev
+            pip3 install -r requirements.txt
 
       - run:
           name: "Configuring repos for tests"
           command: |
-            python main.py patch
+            python3 main.py patch
             cd terraform-provider-aws
             go mod vendor
 
