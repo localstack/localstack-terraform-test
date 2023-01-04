@@ -21,9 +21,10 @@ jobs:
       - run:
           name: "Configuring repos for tests"
           command: |
-            python3 main.py patch
             cd terraform-provider-aws
             go mod vendor
+            cd ../
+            python3 main.py patch
 
       - run:
           name: "Run test suite"
