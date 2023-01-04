@@ -8,6 +8,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202101-01
+    resource_class: medium
     steps:
       - checkout
       - go/install:
@@ -40,6 +41,4 @@ workflows:
         - equal: [ build-new, << pipeline.git.branch >> ]
         - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
-      - build:
-          name: build
-          resource_class: medium
+      - build
