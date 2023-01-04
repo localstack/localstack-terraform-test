@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   go: circleci/go@1.7.1
-  python: circleci/python@1.2
 #   localstack: localstack/platform@dev:alpha
 
 jobs:
@@ -11,13 +10,12 @@ jobs:
       image: ubuntu-2004:202101-01
     steps:
       - checkout
-
+      - go/install:
+            version: 1.18
       - run: git submodule update --init --recursive
       - run:
           name: "Installing prerequisites"
           command: |
-            python --version
-            go version
             sudo apt-get update
             sudo apt install -y libsasl2-dev
             pip3 install -r requirements.txt
