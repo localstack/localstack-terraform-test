@@ -40,4 +40,6 @@ workflows:
         - equal: [ build-new, << pipeline.git.branch >> ]
         - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
-      - build
+      - build:
+          name: build
+          resource_class: medium
