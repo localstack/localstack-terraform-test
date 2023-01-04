@@ -19,7 +19,7 @@ jobs:
             pip install -r requirements.txt
 
       - run:
-          name: "Install go mod dependancies"
+          name: "Configuring repos for tests"
           command: |
             python main.py patch
             cd terraform-provider-aws
