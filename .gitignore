@@ -1,10 +1,5 @@
-*~
-*.swp
-*.log
-*.bak
-
-.vscode
+.DS_Store
 .idea
-*.iml
-
-build/
+.venv
+.pytest_cache
+__pycache__
