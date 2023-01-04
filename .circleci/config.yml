@@ -1,6 +1,8 @@
 version: 2.1
 
-# orbs:
+orbs:
+  go: circleci/go@1.8
+  python: circleci/python@1.2
 #   localstack: localstack/platform@dev:alpha
 
 jobs:
@@ -14,6 +16,8 @@ jobs:
       - run:
           name: "Installing prerequisites"
           command: |
+            python --version
+            go version
             sudo apt-get update
             sudo apt install -y libsasl2-dev
             pip3 install -r requirements.txt
@@ -21,8 +25,7 @@ jobs:
       - run:
           name: "Configuring repos for tests"
           command: |
-            cd terraform-provider-aws
-            go mod vendor
+            cd terraform-provider-aws && go mod vendor
             cd ../
             python3 main.py patch
 
