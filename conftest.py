@@ -41,7 +41,7 @@ class GoItem(pytest.Item):
         service_path = dirname(Path(*relpath(self.path).split(os.sep)[1:]))
         service = service_path.split(os.sep)[-1]
 
-        _build_test_bin(service=service, tf_root_path=tf_root_path, service_path=service_path)
+        # _build_test_bin(service=service, tf_root_path=tf_root_path, service_path=service_path)
 
         env = dict(os.environ)
         env.update({
@@ -51,13 +51,17 @@ class GoItem(pytest.Item):
             'AWS_DEFAULT_REGION': 'us-east-1'
         })
 
+        # cmd = [
+        #     f"./test-bin/{service}.test",
+        #     "-test.v",
+        #     "-test.parallel=1",
+        #     "-test.count=1",
+        #     "-test.timeout=60m",
+        #     "-test.run", f"{self.name}"
+        # ]
+
         cmd = [
-            f"./test-bin/{service}.test",
-            "-test.v",
-            "-test.parallel=1",
-            "-test.count=1",
-            "-test.timeout=60m",
-            "-test.run", f"{self.name}"
+            "go", "test", f"{service_path}", "-count=1", "-v", "-timeout=60", f"-run {self.name}"
         ]
 
         proc = Popen(
