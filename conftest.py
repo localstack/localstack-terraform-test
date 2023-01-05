@@ -54,7 +54,6 @@ class GoItem(pytest.Item):
             'AWS_ALTERNATE_REGION': 'us-east-2',
         })
 
-
         # cmd = [
         #     f"./test-bin/{service}.test",
         #     "-test.v",
@@ -67,7 +66,6 @@ class GoItem(pytest.Item):
         cmd = [
             "go", "test", f"./{service_path}", "-test.count=1", "-test.v", f"-test.run={self.name}"
         ]
-        # print("-------> command: ", cmd)
 
         proc = Popen(
             cmd, stdout=PIPE, stderr=PIPE,
@@ -161,6 +159,7 @@ def _localstack_health_check():
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     session.get(localstack_health_url)
+    session.close()
 
 
 def _pull_docker_image(client, localstack_image):
