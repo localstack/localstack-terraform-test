@@ -48,8 +48,12 @@ class GoItem(pytest.Item):
             'TF_ACC': '1',
             'AWS_ACCESS_KEY_ID': 'test',
             'AWS_SECRET_ACCESS_KEY': 'test',
-            'AWS_DEFAULT_REGION': 'us-east-1'
+            'AWS_DEFAULT_REGION': 'us-east-1',
+            'AWS_ALTERNATE_ACCESS_KEY_ID': 'test',
+            'AWS_ALTERNATE_SECRET_ACCESS_KEY': 'test',
+            'AWS_ALTERNATE_REGION': 'us-east-2',
         })
+
 
         # cmd = [
         #     f"./test-bin/{service}.test",
@@ -59,11 +63,11 @@ class GoItem(pytest.Item):
         #     "-test.timeout=60m",
         #     "-test.run", f"{self.name}"
         # ]
-
+        # go test ./internal/service/$1 -test.count 1 -test.v -test.timeout 60m -parallel $VALUE -run $2
         cmd = [
-            "go", "test", f"./{service_path}", "-test.count=1", "-test.v", f"-test.run {self.name}"
+            "go", "test", f"./{service_path}", "-test.count=1", "-test.v", f"-test.run={self.name}"
         ]
-        # print("command: ", cmd)
+        # print("-------> command: ", cmd)
 
         proc = Popen(
             cmd, stdout=PIPE, stderr=PIPE,
@@ -129,7 +133,7 @@ def _docker_service_health(client):
 
 
 def _start_docker_container(client, config, localstack_image):
-    env_vars = ["DEBUG=1"]
+    env_vars = ["DEBUG=1", "PROVIDER_OVERRIDE_S3=asf"]
     port_mappings = {
         '53/tcp': ('127.0.0.1', 53),
         '53/udp': ('127.0.0.1', 53),
