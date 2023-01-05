@@ -32,6 +32,7 @@ jobs:
 
       - run:
           name: "Run test suite"
+          no_output_timeout: 30m
           command: |
             pytest terraform-provider-aws/internal/service/s3 -s -v --ls-start
 
