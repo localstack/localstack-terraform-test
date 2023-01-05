@@ -35,10 +35,11 @@ jobs:
           no_output_timeout: 30m
           command: |
             cd terraform-provider-aws
-            docker-compose up -d
-            sleep 20
-            TF_ACC=1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 go test -v ./internal/service/s3
-#            pytest terraform-provider-aws/internal/service/s3 -s -v --ls-start
+            export PYTHONUNBUFFERED=1
+            pytest terraform-provider-aws/internal/service/s3 -s -v --ls-start
+#            docker-compose up -d
+#            sleep 20
+#            TF_ACC=1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 go test -v ./internal/service/s3
 
 workflows:
   main:
