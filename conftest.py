@@ -61,7 +61,7 @@ class GoItem(pytest.Item):
         # ]
 
         cmd = [
-            "go", "test", f"{service_path}", "-count=1", "-v", "-timeout=60", f"-run {self.name}"
+            "go", "test", f"{service_path}", "-count=1", "-v", "-timeout=60m", f"-run {self.name}"
         ]
 
         proc = Popen(
