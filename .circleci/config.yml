@@ -27,7 +27,8 @@ jobs:
             cd terraform-provider-aws && go mod vendor
             cd ../
             python3 main.py patch
-            python3 main.py build -s s3
+            cd terraform-provider-aws && go test -c ./internal/service/s3 -o ./test-bin/s3.test
+#            python3 main.py build -s s3
 
       - run:
           name: "Run test suite"
