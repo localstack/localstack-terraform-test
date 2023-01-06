@@ -1,13 +1,14 @@
-import pytest
 import re
-from subprocess import PIPE, Popen
-from pathlib import Path
-import os
-from os.path import realpath, relpath, dirname
+import pytest
 import docker
 import requests
 from requests.adapters import HTTPAdapter, Retry
-from os.path import exists
+from subprocess import PIPE, Popen, run
+from pathlib import Path
+import os
+from os import system, getcwd, chdir
+from os.path import realpath, relpath, dirname, exists
+from tempfile import NamedTemporaryFile
 
 
 def pytest_addoption(parser):
@@ -54,29 +55,41 @@ class GoItem(pytest.Item):
             'AWS_ALTERNATE_REGION': 'us-east-2',
         })
 
-        # cmd = [
-        #     f"./test-bin/{service}.test",
-        #     "-test.v",
-        #     "-test.parallel=1",
-        #     "-test.count=1",
-        #     "-test.timeout=60m",
-        #     "-test.run", f"{self.name}"
-        # ]
-        # go test ./internal/service/$1 -test.count 1 -test.v -test.timeout 60m -parallel $VALUE -run $2
         cmd = [
-            "go", "test", f"./{service_path}", "-test.count=1", "-test.v", f"-test.run={self.name}"
+            f"./test-bin/{service}.test",
+            "-test.v",
+            "-test.parallel=1",
+            "-test.count=1",
+            "-test.timeout=60m",
+            "-test.run", f"{self.name}"
         ]
 
-        proc = Popen(
-            cmd, stdout=PIPE, stderr=PIPE,
-            env=env, bufsize=1, universal_newlines=True,
-            cwd=tf_root_path
-        )
-        stdout, stderr = proc.communicate()
-        proc.terminate()
-        if proc.returncode != 0:
-            raise GoException(proc.returncode, stdout, stderr)
-        return proc.returncode
+        return_code, stdout = _execute_command(cmd, env, tf_root_path)
+        if return_code != 0:
+            raise GoException(returncode=return_code, stdout=stdout)
+        return return_code
+
+        # go test ./internal/service/$1 -test.count 1 -test.v -test.timeout 60m -parallel $VALUE -run $2
+        # cmd = [
+        #     "go", "test", f"./{service_path}", "-test.count=1", "-test.v", f"-test.run={self.name}"
+        # ]
+
+        # cmd_str = " ".join(str(c) for c in cmd)
+        # cmd_str = f"cd {tf_root_path} &&  TF_ACC=1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test {cmd_str}"
+        # return_code = os.system(cmd_str)
+        # proc = run(cmd, env=env, cwd=tf_root_path, check=True)
+        # print(f"proc: {proc}")
+        # return proc.returncode
+        # proc = Popen(
+        #     cmd, stdout=PIPE, stderr=PIPE,
+        #     env=env, bufsize=1, universal_newlines=True,
+        #     cwd=tf_root_path
+        # )
+        # stdout, stderr = proc.communicate()
+        # proc.terminate()
+        # if proc.returncode != 0:
+        #     raise GoException(proc.returncode, stdout, stderr)
+        # return proc.returncode
 
     def repr_failure(self, excinfo, **kwargs):
         """Called when self.runtest() raises an exception."""
@@ -169,6 +182,29 @@ def _pull_docker_image(client, localstack_image):
         client.images.pull(localstack_image)
     docker_image_list = client.images.list(name=localstack_image)
     print(f"Using LocalStack image: {docker_image_list[0].id}")
+
+
+def _execute_command(cmd, env=None, cwd=None):
+    """
+    Execute a command and return the return code.
+    """
+    _lwd = getcwd()
+    if isinstance(cmd, list):
+        cmd = ' '.join(cmd)
+    else:
+        raise Exception("Please provide command as list(str)")
+    if cwd:
+        chdir(cwd)
+    if env:
+        _env = ' '.join([f'{k}="{str(v)}"' for k, v in env.items()])
+        cmd = f'{_env} {cmd}'
+    log_file = NamedTemporaryFile()
+    _err = system(f'{cmd} &> {log_file.name}')
+    _log_file = open(log_file.name, 'r')
+    _out = _log_file.read()
+    _log_file.close()
+    chdir(_lwd)
+    return _err, _out
 
 
 def pytest_configure(config):

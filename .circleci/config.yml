@@ -2,9 +2,38 @@ version: 2.1
 
 orbs:
   go: circleci/go@1.7.1
-#   localstack: localstack/platform@dev:alpha
 
 jobs:
+  test:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: xlarge
+    steps:
+      - checkout
+      - go/install:
+          version: '1.19'
+      - run: git submodule update --init --recursive
+      - run:
+          name: "Installing prerequisites"
+          command: |
+            sudo apt-get update
+            sudo apt install -y libsasl2-dev
+            pip3 install -r requirements.txt
+
+      - run:
+          name: "Configuring repos for tests"
+          command: |
+            cd terraform-provider-aws && go mod vendor
+            cd ../
+            python3 main.py patch
+
+      - run:
+          name: "Run test suite"
+          no_output_timeout: 10m
+          command: |
+            cd terraform-provider-aws
+            go test -c ./internal/service/s3
+
   build:
     machine:
       image: ubuntu-2004:202101-01
@@ -27,8 +56,6 @@ jobs:
             cd terraform-provider-aws && go mod vendor
             cd ../
             python3 main.py patch
-#            cd terraform-provider-aws && go test -c ./internal/service/s3 -o ./test-bin/s3.test
-#            python3 main.py build -s s3
 
       - run:
           name: "Run test suite"
@@ -55,4 +82,4 @@ workflows:
         - equal: [ build-new, << pipeline.git.branch >> ]
         - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
-      - build
+      - test
