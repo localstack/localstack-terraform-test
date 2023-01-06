@@ -51,8 +51,8 @@ def build_test_bin(service, tf_root_path):
 
     return_code, stdout = execute_command(cmd, cwd=tf_root_path)
 
-    if exists(bin_path):
-        chmod(bin_path, 0o755)
+    if exists(realpath(bin_path)):
+        chmod(realpath(bin_path), 0o755)
 
     return return_code, stdout
 
