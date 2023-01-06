@@ -78,7 +78,6 @@ jobs:
     machine:
       image: ubuntu-2004:202101-01
     steps:
-      - run: mkdir workspace && cd workspace
       - checkout
       - run: touch testfile.txt
       - run: ls
