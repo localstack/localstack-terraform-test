@@ -32,7 +32,7 @@ jobs:
           no_output_timeout: 20m
           command: |
             python3 main.py build -s s3
-            ls
+            ls terraform-provider-aws
 
       - persist_to_workspace:
           root: .
