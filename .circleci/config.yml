@@ -98,5 +98,7 @@ workflows:
         - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
       - generate
-      - test
+      - test:
+          requires:
+            - generate
 
