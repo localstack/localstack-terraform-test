@@ -8,7 +8,7 @@ def cli():
 
 @click.command(name='patch', help='Patch the golang test runner')
 def patch():
-    from patch import patch_repo
+    from utils import patch_repo
     patch_repo()
 
 
@@ -23,7 +23,7 @@ def build(service, force):
         print('use --service or -s to specify services to build; for more help try --help to see more options')
         return
     if service == 'all':
-        from build import get_all_services
+        from utils import get_all_services
         services = get_all_services()
     else:
         if ',' in service:
@@ -32,8 +32,15 @@ def build(service, force):
             services = [service]
 
     for service in services:
-        from build import build_bin
-        build_bin(service=service, force=force)
+        from utils import build_test_bin
+        from utils import BASE_PATH
+        from os.path import realpath
+        print(f'Building {service}...')
+        try:
+            build_test_bin(service=service, tf_root_path=realpath(BASE_PATH))
+        except KeyboardInterrupt:
+            print('Interrupted')
+            return
 
 
 cli.add_command(build)

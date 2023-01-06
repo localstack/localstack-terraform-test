@@ -3,12 +3,10 @@ import pytest
 import docker
 import requests
 from requests.adapters import HTTPAdapter, Retry
-from subprocess import PIPE, Popen, run
 from pathlib import Path
 import os
-from os import system, getcwd, chdir
 from os.path import realpath, relpath, dirname, exists
-from tempfile import NamedTemporaryFile
+from utils import execute_command, build_test_bin
 
 
 def pytest_addoption(parser):
@@ -42,7 +40,9 @@ class GoItem(pytest.Item):
         service_path = dirname(Path(*relpath(self.path).split(os.sep)[1:]))
         service = service_path.split(os.sep)[-1]
 
-        # _build_test_bin(service=service, tf_root_path=tf_root_path, service_path=service_path)
+        return_code, stdout = build_test_bin(service=service, tf_root_path=tf_root_path)
+        if return_code != 0:
+            raise GoException(returncode=return_code, stdout=stdout)
 
         env = dict(os.environ)
         env.update({
@@ -64,7 +64,7 @@ class GoItem(pytest.Item):
             "-test.run", f"{self.name}"
         ]
 
-        return_code, stdout = _execute_command(cmd, env, tf_root_path)
+        return_code, stdout = execute_command(cmd, env, tf_root_path)
         if return_code != 0:
             raise GoException(returncode=return_code, stdout=stdout)
         return return_code
@@ -112,31 +112,6 @@ class GoException(Exception):
         self.stderr = stderr
 
 
-def _build_test_bin(service, tf_root_path, service_path):
-    bin_path = f'./test-bin/{service}.test'
-
-    if exists(f"{tf_root_path}/{bin_path}"):
-        return
-    cmd = [
-        "go",
-        "test",
-        "-c",
-        f"./{service_path}",
-        "-o",
-        bin_path,
-    ]
-    proc = Popen(
-        cmd, stdout=PIPE, stderr=PIPE,
-        bufsize=1, universal_newlines=True,
-        cwd=tf_root_path
-    )
-    stdout, stderr = proc.communicate()
-    proc.terminate()
-    if proc.returncode != 0:
-        raise GoException(proc.returncode, stdout, stderr)
-    return
-
-
 def _docker_service_health(client):
     if not client.ping():
         print("\nPlease start docker daemon and try again")
@@ -182,29 +157,6 @@ def _pull_docker_image(client, localstack_image):
         client.images.pull(localstack_image)
     docker_image_list = client.images.list(name=localstack_image)
     print(f"Using LocalStack image: {docker_image_list[0].id}")
-
-
-def _execute_command(cmd, env=None, cwd=None):
-    """
-    Execute a command and return the return code.
-    """
-    _lwd = getcwd()
-    if isinstance(cmd, list):
-        cmd = ' '.join(cmd)
-    else:
-        raise Exception("Please provide command as list(str)")
-    if cwd:
-        chdir(cwd)
-    if env:
-        _env = ' '.join([f'{k}="{str(v)}"' for k, v in env.items()])
-        cmd = f'{_env} {cmd}'
-    log_file = NamedTemporaryFile()
-    _err = system(f'{cmd} &> {log_file.name}')
-    _log_file = open(log_file.name, 'r')
-    _out = _log_file.read()
-    _log_file.close()
-    chdir(_lwd)
-    return _err, _out
 
 
 def pytest_configure(config):
