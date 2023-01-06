@@ -4,7 +4,7 @@ orbs:
   go: circleci/go@1.7.1
 
 jobs:
-  test:
+  generate-test-binary:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: large
@@ -34,7 +34,7 @@ jobs:
             cd terraform-provider-aws
             go test -c ./internal/service/s3
 
-  build:
+  run-tests:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: medium
@@ -74,12 +74,29 @@ jobs:
 #            export PYTHONUNBUFFERED=1
 #            pytest terraform-provider-aws/internal/service/s3 -s -v --ls-start
 
+  generate:
+    machine:
+      image: ubuntu-2004:202101-01
+    steps:
+      - checkout
+      - run: touch testfile.txt
+      - run: ls
+
+  test:
+    machine:
+      image: ubuntu-2004:202101-01
+    steps:
+      - run: ls
+
+
 workflows:
   main:
     when:
       or:
         - equal: [ build, << pipeline.git.branch >> ]
         - equal: [ build-new, << pipeline.git.branch >> ]
-        - equal: [ pytest-pluginn, << pipeline.git.branch >> ]
+        - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
+      - generate
       - test
+
