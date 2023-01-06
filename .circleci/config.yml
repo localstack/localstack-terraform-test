@@ -97,4 +97,3 @@ workflows:
       - run-tests:
           requires:
             - generate-test-binary
-
