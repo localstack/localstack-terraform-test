@@ -54,7 +54,7 @@ def build_test_bin(service, tf_root_path):
         "-o",
         _test_bin_abs_path,
     ]
-
+    print(f'----> cmd: {cmd}')
     return_code, stdout = execute_command(cmd, cwd=tf_root_path)
     if return_code != 0:
         raise Exception(f"Error while building test binary for {service}")
