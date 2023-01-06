@@ -3,9 +3,6 @@ from os.path import exists, realpath
 from tempfile import NamedTemporaryFile
 
 
-PATCH_PATH = 'etc'
-PATCH_FILES = ['001-hardcode-endpoint.patch']
-
 TF_REPO_NAME = 'terraform-provider-aws'
 TF_REPO_PATH = f'{realpath(TF_REPO_NAME)}'
 
@@ -77,7 +74,7 @@ def get_all_services():
 
 def patch_repo():
     print(f'Patching {TF_REPO_NAME}...')
-    for patch_file in PATCH_FILES:
+    for patch_file in TF_REPO_PATCH_FILES:
         cmd = [
             'git',
             'apply',

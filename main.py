@@ -33,11 +33,11 @@ def build(service, force):
 
     for service in services:
         from utils import build_test_bin
-        from utils import BASE_PATH
+        from utils import TF_REPO_NAME
         from os.path import realpath
         print(f'Building {service}...')
         try:
-            build_test_bin(service=service, tf_root_path=realpath(BASE_PATH))
+            build_test_bin(service=service, tf_root_path=realpath(TF_REPO_NAME))
         except KeyboardInterrupt:
             print('Interrupted')
             return
