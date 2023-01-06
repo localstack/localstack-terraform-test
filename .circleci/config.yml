@@ -7,7 +7,7 @@ jobs:
   test:
     machine:
       image: ubuntu-2004:202101-01
-    resource_class: xlarge
+    resource_class: large
     steps:
       - checkout
       - go/install:
