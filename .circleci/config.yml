@@ -77,7 +77,6 @@ jobs:
   generate:
     machine:
       image: ubuntu-2004:202101-01
-      working_directory: /tmp
     steps:
       - run: mkdir workspace && cd workspace
       - checkout
