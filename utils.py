@@ -2,13 +2,21 @@ from os import system, getcwd, chdir, chmod, listdir
 from os.path import exists, realpath
 from tempfile import NamedTemporaryFile
 
-BASE_PATH = 'terraform-provider-aws'
-SERVICE_BASE_PATH = './internal/service'
-
-BIN_PATH = 'test-bin'
 
 PATCH_PATH = 'etc'
 PATCH_FILES = ['001-hardcode-endpoint.patch']
+
+TF_REPO_NAME = 'terraform-provider-aws'
+TF_REPO_PATH = f'{realpath(TF_REPO_NAME)}'
+
+TF_REPO_PATCH_FILES = ['etc/001-hardcode-endpoint.patch']
+
+TF_TEST_BINARY_FOLDER = 'test-bin'
+TF_REPO_SERVICE_FOLDER = './internal/service'
+
+
+def _get_test_bin_abs_path(service):
+    return f'{TF_REPO_PATH}/{TF_TEST_BINARY_FOLDER}/{service}.test'
 
 
 def execute_command(cmd, env=None, cwd=None):
@@ -35,44 +43,47 @@ def execute_command(cmd, env=None, cwd=None):
 
 
 def build_test_bin(service, tf_root_path):
-    bin_path = f'./{BIN_PATH}/{service}.test'
+    _test_bin_abs_path = _get_test_bin_abs_path(service)
+    _tf_repo_service_folder = f'{TF_REPO_SERVICE_FOLDER}/{service}'
 
-    if exists(f"{realpath(BASE_PATH)}/{bin_path}"):
+    if exists(_test_bin_abs_path):
         return
 
     cmd = [
         "go",
         "test",
         "-c",
-        f"{SERVICE_BASE_PATH}/{service}",
+        _tf_repo_service_folder,
         "-o",
-        bin_path,
+        _test_bin_abs_path,
     ]
 
     return_code, stdout = execute_command(cmd, cwd=tf_root_path)
+    if return_code != 0:
+        raise Exception(f"Error while building test binary for {service}")
 
-    if exists(realpath(bin_path)):
-        chmod(realpath(bin_path), 0o755)
+    if exists(_test_bin_abs_path):
+        chmod(_test_bin_abs_path, 0o755)
 
     return return_code, stdout
 
 
 def get_all_services():
     services = []
-    for service in listdir(f'{BASE_PATH}/{SERVICE_BASE_PATH}'):
+    for service in listdir(f'{TF_REPO_PATH}/{TF_REPO_SERVICE_FOLDER}'):
         services.append(service)
     return sorted(services)
 
 
 def patch_repo():
-    print(f'Patching {BASE_PATH}...')
+    print(f'Patching {TF_REPO_NAME}...')
     for patch_file in PATCH_FILES:
         cmd = [
             'git',
             'apply',
-            f'{realpath(PATCH_PATH)}/{patch_file}',
+            f'{realpath(patch_file)}',
         ]
-        return_code, stdout = execute_command(cmd, cwd=realpath(BASE_PATH))
+        return_code, stdout = execute_command(cmd, cwd=realpath(TF_REPO_NAME))
         if return_code != 0:
             print("----- error while patching repo -----")
         if stdout:
