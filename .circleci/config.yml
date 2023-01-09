@@ -31,7 +31,7 @@ jobs:
           name: "Generate Testing Binary"
           no_output_timeout: 20m
           command: |
-            python3 main.python3 build -s s3
+            python3 main.py build -s s3
             ls terraform-provider-aws
             ls terraform-provider-aws/test-bin
 #            cd terraform-provider-aws
