@@ -43,10 +43,7 @@ class GoItem(pytest.Item):
         # return_code, stdout = build_test_bin(service=service, tf_root_path=tf_root_path)
         # if return_code != 0:
         #     raise GoException(returncode=return_code, stdout=stdout)
-        return_code, stdout = execute_command(["ls -al"], cwd=tf_root_path)
-        print("---> return_code", return_code, stdout)
-        return_code, stdout = execute_command(["pwd"], cwd=tf_root_path)
-        print("---> pwd", return_code, stdout)
+
         env = dict(os.environ)
         env.update({
             'TF_ACC': '1',
