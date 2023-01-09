@@ -15,7 +15,6 @@ def patch():
 @click.command(name='build', help='Build binary for testing')
 @click.option('--service', '-s', default=None, help='''Service to build; use "all" to build all services, example: 
 --service=all; --service=ec2; --service=ec2,iam''')
-@click.option('--force', '-f', default=False, is_flag=True, help='Force build')
 def build(service):
     """Build binary for testing"""
     if not service:
