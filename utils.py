@@ -47,6 +47,9 @@ def build_test_bin(service, tf_root_path):
     if exists(_test_bin_abs_path):
         return
 
+    cmd = ["ls"]
+    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
+    print(f'-----> ls: {stdout}')
     cmd = [
         "go",
         "test",
