@@ -1,6 +1,7 @@
 from os import system, getcwd, chdir, chmod, listdir
 from os.path import exists, realpath
 from tempfile import NamedTemporaryFile
+from uuid import uuid4
 
 
 TF_REPO_NAME = 'terraform-provider-aws'
@@ -30,9 +31,10 @@ def execute_command(cmd, env=None, cwd=None):
     if env:
         _env = ' '.join([f'{k}="{str(v)}"' for k, v in env.items()])
         cmd = f'{_env} {cmd}'
-    log_file = NamedTemporaryFile()
-    _err = system(f'{cmd} &> {log_file.name}')
-    _log_file = open(log_file.name, 'r')
+    # log_file = NamedTemporaryFile()
+    log_file: str = '/tmp/%s' % uuid4().hex
+    _err = system(f'{cmd} &> {log_file}')
+    _log_file = open(log_file, 'r')
     _out = _log_file.read()
     _log_file.close()
     chdir(_lwd)
@@ -47,9 +49,6 @@ def build_test_bin(service, tf_root_path):
     if exists(_test_bin_abs_path):
         return
 
-    cmd = ["ls"]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    print(f'-----> ls: {stdout}')
     cmd = [
         "go",
         "test",
