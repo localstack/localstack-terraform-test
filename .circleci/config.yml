@@ -98,6 +98,6 @@ workflows:
         - equal: [ pytest-plugin, << pipeline.git.branch >> ]
     jobs:
       - generate-test-binary
-#      - run-tests:
-#          requires:
-#            - generate-test-binary
+      - run-tests:
+          requires:
+            - generate-test-binary

@@ -44,7 +44,7 @@ def execute_command(cmd, env=None, cwd=None):
 
 
 def build_test_bin(service, tf_root_path):
-    _test_bin_rel_path = f'./{TF_TEST_BINARY_FOLDER}/{service}.test'
+    # _test_bin_rel_path = f'./{TF_TEST_BINARY_FOLDER}/{service}.test'
     _test_bin_abs_path = _get_test_bin_abs_path(service)
     _tf_repo_service_folder = f'{TF_REPO_SERVICE_FOLDER}/{service}'
 
@@ -57,16 +57,11 @@ def build_test_bin(service, tf_root_path):
         "-c",
         _tf_repo_service_folder,
         "-o",
-        _test_bin_rel_path,
+        _test_bin_abs_path,
     ]
-    print(f'----> cmd: {cmd}')
-    print(f'----> tf_root_path: {tf_root_path}')
     return_code, stdout = execute_command(cmd, cwd=tf_root_path)
     if return_code != 0:
         raise Exception(f"Error while building test binary for {service}")
-
-    print(f"----> return_code: {return_code}")
-    print(f"----> stdout: {stdout}")
 
     if exists(_test_bin_abs_path):
         chmod(_test_bin_abs_path, 0o755)
