@@ -32,12 +32,14 @@ def execute_command(cmd, env=None, cwd=None):
         _env = ' '.join([f'{k}="{str(v)}"' for k, v in env.items()])
         cmd = f'{_env} {cmd}'
     # log_file = NamedTemporaryFile()
-    log_file: str = '/tmp/%s' % uuid4().hex
-    _err = system(f'{cmd} &> {log_file}')
-    _log_file = open(log_file, 'r')
-    _out = _log_file.read()
-    _log_file.close()
+    # log_file: str = '/tmp/%s' % uuid4().hex
+    # _err = system(f'{cmd} &> {log_file}')
+    _err = system(f'{cmd}')
+    # _log_file = open(log_file, 'r')
+    # _out = _log_file.read()
+    # _log_file.close()
     chdir(_lwd)
+    _out = ""
     return _err, _out
 
 
