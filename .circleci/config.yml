@@ -32,9 +32,9 @@ jobs:
           no_output_timeout: 20m
           command: |
             cd terraform-provider-aws
-            go test -c ./internal/service/s3 -o /home/circleci/project/terraform-provider-aws/test-bin/s3.test  
+#            go test -c ./internal/service/s3 -o /home/circleci/project/terraform-provider-aws/test-bin/s3.test
+            python3 main.py build -s s3
             ls terraform-provider-aws
-#            python3 main.py build -s s3
 
       - persist_to_workspace:
           root: .
