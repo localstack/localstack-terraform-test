@@ -59,3 +59,10 @@ jobs:
       run: |
         python main.py build -s s3
         ls -la terraform-provider-aws/test-bin
+
+    - name: Run Localstack
+      run: docker-compose up -d
+
+    - name: Run ${{ matrix.service }} Tests
+      run: |
+        pytest terraform-provider-aws/internal/service/ -s -v
