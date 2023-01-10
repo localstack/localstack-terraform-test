@@ -2,3 +2,4 @@ click
 pytest
 docker
 requests
+pytest-xdist
