@@ -65,4 +65,4 @@ jobs:
 
     - name: Run ${{ matrix.service }} Tests
       run: |
-        pytest terraform-provider-aws/internal/service/ -s -v
+        pytest terraform-provider-aws/internal/service/${{ matrix.service }} -s -v
