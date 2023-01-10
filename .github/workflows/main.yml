@@ -57,7 +57,7 @@ jobs:
 
     - name: Build ${{ matrix.service }} Binary
       run: |
-        python main.py build -s s3
+        python main.py build -s ${{ matrix.service }}
         ls -la terraform-provider-aws/test-bin
 
     - name: Run Localstack
