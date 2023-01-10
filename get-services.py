@@ -2,11 +2,11 @@ import json
 import os
 
 blacklist_services = ["controltower"]
-whitelist_service = ["s3"]
+whitelist_services = ["s3"]
 
 services = []
 for service in os.listdir('terraform-provider-aws/internal/service'):
-    if service in whitelist_service:
+    if service in whitelist_services:
         services.append(service)
     # if service not in blacklist_services:
     #     services.append(service)
