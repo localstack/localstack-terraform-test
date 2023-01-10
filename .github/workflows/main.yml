@@ -13,7 +13,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "::set-output name=matrix::$(python get-services.py)"
+        run: echo "matrix=$(python get-services.py)" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
+        service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
     runs-on: ubuntu-latest
     env:
       DNS_ADDRESS: 0
