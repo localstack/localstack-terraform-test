@@ -65,8 +65,10 @@ jobs:
           name: "Run test suite"
           no_output_timeout: 30m
           command: |
+            docker-compose up -d
+            sleep 10
             export PYTHONUNBUFFERED=1
-            pytest terraform-provider-aws/internal/service/s3 -s -v --ls-start
+            pytest terraform-provider-aws/internal/service/s3 -s -v -n 4
 
   generate:
     machine:

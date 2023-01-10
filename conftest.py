@@ -66,6 +66,7 @@ class GoItem(pytest.Item):
 
         return_code, stdout = execute_command(cmd, env, tf_root_path)
         if return_code != 0:
+            print(f"error: {stdout}")
             raise GoException(returncode=return_code, stdout=stdout)
         return return_code
 
@@ -159,31 +160,31 @@ def _pull_docker_image(client, localstack_image):
     print(f"Using LocalStack image: {docker_image_list[0].id}")
 
 
-def pytest_configure(config):
-    is_collect_only = config.getoption(name='--collect-only')
-    is_localstack_start = config.getoption(name='--ls-start')
-    localstack_image = config.getoption(name='--ls-image')
-
-    if not is_collect_only and is_localstack_start:
-
-        print("\nStarting LocalStack...")
-
-        client = docker.from_env()
-        _docker_service_health(client)
-        _pull_docker_image(client, localstack_image)
-        _start_docker_container(client, config, localstack_image)
-        _localstack_health_check()
-        client.close()
-
-        print("LocalStack is ready...")
-
-
-def pytest_unconfigure(config):
-    is_collect_only = config.getoption(name='--collect-only')
-    is_localstack_start = config.getoption(name='--ls-start')
-
-    if not is_collect_only and is_localstack_start:
-        print("\nStopping LocalStack...")
-        client = docker.from_env()
-        _stop_docker_container(client, config)
-        client.close()
+# def pytest_configure(config):
+#     is_collect_only = config.getoption(name='--collect-only')
+#     is_localstack_start = config.getoption(name='--ls-start')
+#     localstack_image = config.getoption(name='--ls-image')
+#
+#     if not is_collect_only and is_localstack_start:
+#
+#         print("\nStarting LocalStack...")
+#
+#         client = docker.from_env()
+#         _docker_service_health(client)
+#         _pull_docker_image(client, localstack_image)
+#         _start_docker_container(client, config, localstack_image)
+#         _localstack_health_check()
+#         client.close()
+#
+#         print("LocalStack is ready...")
+#
+#
+# def pytest_unconfigure(config):
+#     is_collect_only = config.getoption(name='--collect-only')
+#     is_localstack_start = config.getoption(name='--ls-start')
+#
+#     if not is_collect_only and is_localstack_start:
+#         print("\nStopping LocalStack...")
+#         client = docker.from_env()
+#         _stop_docker_container(client, config)
+#         client.close()

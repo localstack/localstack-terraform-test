@@ -1,6 +1,6 @@
+import signal
 from os import system, getcwd, chdir, chmod, listdir
 from os.path import exists, realpath
-from tempfile import NamedTemporaryFile
 from uuid import uuid4
 
 
@@ -31,10 +31,11 @@ def execute_command(cmd, env=None, cwd=None):
     if env:
         _env = ' '.join([f'{k}="{str(v)}"' for k, v in env.items()])
         cmd = f'{_env} {cmd}'
-    # log_file = NamedTemporaryFile()
     log_file: str = '/tmp/%s' % uuid4().hex
-    _err = system(f'{cmd} > /dev/null 2> {log_file}')
-    # _err = system(f'{cmd} > ')
+    _err = system(f'{cmd} > {log_file} 2>&1')
+    if _err == signal.SIGINT:
+        print("SIGNINT is caught")
+        raise KeyboardInterrupt
     _out = open(log_file, 'r').read()
     chdir(_lwd)
     return _err, _out
