@@ -97,7 +97,7 @@ workflows:
       or:
         - equal: [ build, << pipeline.git.branch >> ]
         - equal: [ build-new, << pipeline.git.branch >> ]
-        - equal: [ pytest-plugin, << pipeline.git.branch >> ]
+        - equal: [ pytest-pluginn, << pipeline.git.branch >> ]
     jobs:
       - generate-test-binary
       - run-tests:

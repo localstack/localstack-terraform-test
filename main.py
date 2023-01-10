@@ -1,5 +1,5 @@
 import click
-
+from timeit import default_timer as timer
 
 @click.group(name='pytest-golang', help='Golang Test Runner for localstack')
 def cli():
@@ -17,6 +17,10 @@ def patch():
 --service=all; --service=ec2; --service=ec2,iam''')
 def build(service):
     """Build binary for testing"""
+
+    ## skips building for the service
+    skip_services = ["controltower"]
+
     if not service:
         print('No service provided')
         print('use --service or -s to specify services to build; for more help try --help to see more options')
@@ -31,15 +35,22 @@ def build(service):
             services = [service]
 
     for service in services:
+        if service in skip_service:
+            continue
         from utils import build_test_bin
         from utils import TF_REPO_NAME
         from os.path import realpath
         print(f'Building {service}...')
         try:
+            start = timer()
             build_test_bin(service=service, tf_root_path=realpath(TF_REPO_NAME))
+            end = timer()
+            print(f'Build {service} in {end - start} seconds')
         except KeyboardInterrupt:
             print('Interrupted')
             return
+        except Exception as e:
+            print(f'Failed to build binary for {service}: {e}')
 
 
 cli.add_command(build)

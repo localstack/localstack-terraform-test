@@ -1,0 +1,35 @@
+on:
+  push:
+    branches:
+      - pytest-plugin
+
+name: Terraform Tests
+jobs:
+
+  prepare_list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - id: set-matrix
+        run: echo "::set-output name=matrix::$(ls terraform-provider-aws/internal/service)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  test_service:
+    needs: prepare_list
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    env:
+      DNS_ADDRESS: 0
+      AWS_DEFAULT_REGION: us-east-2
+      AWS_ALTERNATE_REGION: eu-west-1
+
+    steps:
+    - name: Get list of tests for this service
+      id: get-list
+      run: echo "${{ matrix.service }}"
