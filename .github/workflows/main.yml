@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ needs.prepare_list.outputs.matrix }}
+        include: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
     runs-on: ubuntu-latest
     env:
       DNS_ADDRESS: 0
