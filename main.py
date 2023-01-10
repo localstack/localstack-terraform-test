@@ -35,7 +35,7 @@ def build(service):
             services = [service]
 
     for service in services:
-        if service in skip_service:
+        if service in skip_services:
             continue
         from utils import build_test_bin
         from utils import TF_REPO_NAME
