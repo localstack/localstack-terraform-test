@@ -24,12 +24,38 @@ jobs:
       matrix:
         service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
     runs-on: ubuntu-latest
-    env:
-      DNS_ADDRESS: 0
-      AWS_DEFAULT_REGION: us-east-2
-      AWS_ALTERNATE_REGION: eu-west-1
 
     steps:
-    - name: Get list of tests for this service
-      id: get-list
-      run: echo "${{ matrix.service }}"
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.18.x
+    - name: Set up Python 3.10.5
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10.5'
+    - name: Cache Python .venv
+      id: python-cache
+      uses: actions/cache@v2
+      with:
+        path: ./.venv/
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/setup.cfg') }}
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install libsasl2-dev -y
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Patch Terraform Provider
+      run: |
+        cd terraform-provider-aws && go mod vendor
+        cd ../
+        python3 main.py patch
+
+    - name: Build ${{ matrix.service }} Binary
+      run: |
+        python main.py build -s s3
+        ls -la terraform-provider-aws/test-bin
