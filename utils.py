@@ -12,6 +12,8 @@ TF_REPO_PATCH_FILES = ['etc/001-hardcode-endpoint.patch']
 TF_TEST_BINARY_FOLDER = 'test-bin'
 TF_REPO_SERVICE_FOLDER = './internal/service'
 
+BLACKLISTED_SERVICES = ['controltower', 'greengrass']
+
 
 def _get_test_bin_abs_path(service):
     return f'{TF_REPO_PATH}/{TF_TEST_BINARY_FOLDER}/{service}.test'

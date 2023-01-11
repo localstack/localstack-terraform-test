@@ -1,10 +1,24 @@
 import json
-import os
+import sys
 
-blacklist_services = ["controltower"]
+import utils
 
 services = []
-for service in os.listdir('terraform-provider-aws/internal/service'):
-    if service not in blacklist_services:
-        services.append(service)
-print(json.dumps(services))
+
+if len(sys.argv) > 1:
+    service = sys.argv[1]
+    if service == 'all':
+        from utils import get_all_services
+        services = get_all_services()
+    else:
+        if ',' in service:
+            services = service.split(',')
+            services = [s for s in services if s != '' and s not in utils.BLACKLISTED_SERVICES]
+        else:
+            services = [service]
+    print(json.dumps(services))
+    exit(0)
+else:
+    print('No service provided')
+    exit(1)
+

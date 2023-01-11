@@ -1,6 +1,9 @@
 import click
 from timeit import default_timer as timer
 
+import utils
+
+
 @click.group(name='pytest-golang', help='Golang Test Runner for localstack')
 def cli():
     pass
@@ -18,9 +21,7 @@ def patch():
 def build(service):
     """Build binary for testing"""
 
-    ## skips building for the service
-    skip_services = ["controltower"]
-
+    # skips building for the service
     if not service:
         print('No service provided')
         print('use --service or -s to specify services to build; for more help try --help to see more options')
@@ -31,12 +32,11 @@ def build(service):
     else:
         if ',' in service:
             services = service.split(',')
+            services = [s for s in services if s != '' and s not in utils.BLACKLISTED_SERVICES]
         else:
             services = [service]
 
     for service in services:
-        if service in skip_services:
-            continue
         from utils import build_test_bin
         from utils import TF_REPO_NAME
         from os.path import realpath
