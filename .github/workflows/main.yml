@@ -71,4 +71,11 @@ jobs:
 
     - name: Run ${{ matrix.service }} Tests
       run: |
-        pytest terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
+        pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
+
+    - name: Publish ${{ matrix.service }} Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
+      with:
+        files: target/reports/*.xml
+        check_name: ${{ matrix.service }} Terraform Test Results
