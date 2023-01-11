@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services | 'all' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -71,4 +71,4 @@ jobs:
 
     - name: Run ${{ matrix.service }} Tests
       run: |
-        pytest terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image }}
+        pytest terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image | 'localstack/localstack:latest' }}
