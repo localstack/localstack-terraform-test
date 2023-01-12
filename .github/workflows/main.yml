@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'acm' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -48,15 +48,12 @@ jobs:
 
     - uses: actions/setup-go@v3
       with:
-        go-version: 1.18.x
-        cache: true
-        cache-dependency-path: terraform-provider-aws/go.mod
+        go-version: '1.18.x'
 
     - name: Set up Python 3.10.5
       uses: actions/setup-python@v4
       with:
         python-version: '3.10.5'
-        cache: 'pip'
 
     - name: Install system dependencies
       run: |
