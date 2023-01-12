@@ -12,7 +12,7 @@ on:
         description: localstack docker image name to test against
   push:
     branches:
-      - pytest-plugin
+      - pytest-plugin-fork
 
 name: Terraform Tests
 jobs:
