@@ -49,7 +49,7 @@ class GoItem(pytest.Item):
             'TF_ACC': '1',
             'AWS_ACCESS_KEY_ID': 'test',
             'AWS_SECRET_ACCESS_KEY': 'test',
-            'AWS_DEFAULT_REGION': 'us-west-2',
+            'AWS_DEFAULT_REGION': 'us-east-1',
             'AWS_ALTERNATE_ACCESS_KEY_ID': 'test',
             'AWS_ALTERNATE_SECRET_ACCESS_KEY': 'test',
             'AWS_ALTERNATE_REGION': 'us-east-2',
@@ -60,24 +60,20 @@ class GoItem(pytest.Item):
             '-test.v',
             '-test.parallel=1',
             '-test.count=1',
-            '-test.timeout=5m',
-            'test.run", f"{self.name}'
+            '-test.timeout=60m',
+            f'-test.run={self.name}',
         ]
-
         return_code, stdout = execute_command(cmd, env, tf_root_path)
-        print(f'error: {stdout}')
         if return_code != 0:
-            print(f'error: {stdout}')
-            raise GoException(returncode=return_code, stdout=stdout)
-        return return_code
+            raise GoException(returncode=return_code, stderr=stdout)
 
     def repr_failure(self, excinfo, **kwargs):
         """Called when self.runtest() raises an exception."""
         if isinstance(excinfo.value, GoException):
             return '\n'.join(
                 [
-                    f'\nExecution failed with return code: {excinfo.value.returncode}',
-                    f'\nFailure Reason:\n{excinfo.value}',
+                    f'Execution failed with return code: {excinfo.value.returncode}',
+                    f'Failure Reason:\n{excinfo.value.stderr}',
                 ]
             )
 
@@ -85,10 +81,34 @@ class GoItem(pytest.Item):
         return self.path, 0, f'Test Case: {self.name}'
 
 
+class ReprCrash:
+    def __init__(self, message):
+        self.message = message
+
+
+class LongRepr:
+    def __init__(self, message, reason):
+        self.reprcrash = ReprCrash(message)
+        self.reason = reason
+
+    def __str__(self):
+        return self.reason
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    if report.failed:
+        splits = report.longrepr.split('\n', 1)
+        longrepr = LongRepr(splits[0], splits[1])
+        delattr(report, 'longrepr')
+        setattr(report, 'longrepr', longrepr)
+
+
 class GoException(Exception):
-    def __init__(self, returncode, stdout, stderr):
+    def __init__(self, returncode, stderr):
         self.returncode = returncode
-        self.stdout = stdout
         self.stderr = stderr
 
 
@@ -145,7 +165,6 @@ def pytest_configure(config):
     localstack_image = config.getoption(name='--ls-image')
 
     if not is_collect_only and is_localstack_start:
-
         print('\nStarting LocalStack...')
 
         client = docker.from_env()
