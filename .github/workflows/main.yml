@@ -80,5 +80,3 @@ jobs:
       with:
         junit_files: target/reports/*.xml
         check_name: ${{ matrix.service }} Terraform Test Results
-        report_individual_runs: "false"
-        check_run_annotations: "none"

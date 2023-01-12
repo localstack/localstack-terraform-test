@@ -19,7 +19,14 @@ LS_COMMUNITY_SERVICES = [
     "resourcegroupstaggingapi", "route53", "route53resolver", "s3", "s3control", "secretsmanager", "ses", "sns", "sqs",
     "ssm", "sts", "swf", "transcribe"
 ]
-LS_PRO_SERVICES = []
+LS_PRO_SERVICES = [
+    "amplify", "apigateway", "apigatewayv2", "appconfig", "appautoscaling", "appsync", "athena", "autoscaling",
+    "backup", "batch", "cloudformation", "cloudfront", "cloudtrail", "codecommit", "cognitoidp", "cognitoidentity",
+    "docdb", "dynamodb", "ec2", "ecr", "ecs", "efs", "eks", "elasticache", "elasticbeanstalk", "elb", "elbv2", "emr",
+    "events", "fis", "glacier", "glue", "iam", "iot", "iotanalytics", "kafka", "kinesisanalytics", "kms",
+    "lakeformation", "lambda", "logs", "mediastore", "mq", "mwaa", "neptune", "organizations", "qldb", "rds",
+    "redshift", "route53", "s3", "sagemaker", "secretsmanager", "serverlessrepo", "ses", "sns", "sqs", "ssm", "sts"
+]
 
 
 def _get_test_bin_abs_path(service):
