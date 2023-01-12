@@ -13,6 +13,13 @@ TF_TEST_BINARY_FOLDER = 'test-bin'
 TF_REPO_SERVICE_FOLDER = './internal/service'
 
 BLACKLISTED_SERVICES = ['controltower', 'greengrass']
+LS_COMMUNITY_SERVICES = [
+    "acm", "apigateway", "lambda", "cloudformation", "cloudwatch", "configservice", "dynamodb", "ec2", "elasticsearch",
+    "events", "firehose", "iam", "kinesis", "kms", "logs", "opensearch", "redshift", "resourcegroups",
+    "resourcegroupstaggingapi", "route53", "route53resolver", "s3", "s3control", "secretsmanager", "ses", "sns", "sqs",
+    "ssm", "sts", "swf", "transcribe"
+]
+LS_PRO_SERVICES = []
 
 
 def _get_test_bin_abs_path(service):
@@ -72,8 +79,26 @@ def build_test_bin(service, tf_root_path):
 def get_all_services():
     services = []
     for service in listdir(f'{TF_REPO_PATH}/{TF_REPO_SERVICE_FOLDER}'):
-        services.append(service)
+        if service not in BLACKLISTED_SERVICES:
+            services.append(service)
     return sorted(services)
+
+
+def get_services(service):
+    if service == 'ls-community':
+        services = LS_COMMUNITY_SERVICES
+    elif service == 'ls-pro':
+        services = LS_PRO_SERVICES
+    elif service == 'ls-all':
+        services = LS_COMMUNITY_SERVICES + LS_PRO_SERVICES
+    else:
+        if ',' in service:
+            services = service.split(',')
+            services = [s for s in services if s]
+        else:
+            services = [service]
+    services = [s for s in services if s not in BLACKLISTED_SERVICES]
+    return list(set(services))
 
 
 def patch_repo():

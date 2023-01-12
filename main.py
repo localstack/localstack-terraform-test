@@ -1,7 +1,7 @@
 import click
 from timeit import default_timer as timer
-
-import utils
+from utils import build_test_bin, TF_REPO_NAME, get_services
+from os.path import realpath
 
 
 @click.group(name='pytest-golang', help='Golang Test Runner for localstack')
@@ -16,30 +16,18 @@ def patch():
 
 
 @click.command(name='build', help='Build binary for testing')
-@click.option('--service', '-s', default=None, help='''Service to build; use "all" to build all services, example: 
---service=all; --service=ec2; --service=ec2,iam''')
+@click.option('--service', '-s', default=None, help='''Service to build; use "ls-all", "ls-community", "ls-pro" to build all services, example: 
+--service=ls-all; --service=ec2; --service=ec2,iam''')
 def build(service):
     """Build binary for testing"""
-
-    # skips building for the service
     if not service:
         print('No service provided')
         print('use --service or -s to specify services to build; for more help try --help to see more options')
         return
-    if service == 'all':
-        from utils import get_all_services
-        services = get_all_services()
-    else:
-        if ',' in service:
-            services = service.split(',')
-            services = [s for s in services if s != '' and s not in utils.BLACKLISTED_SERVICES]
-        else:
-            services = [service]
+
+    services = get_services(service)
 
     for service in services:
-        from utils import build_test_bin
-        from utils import TF_REPO_NAME
-        from os.path import realpath
         print(f'Building {service}...')
         try:
             start = timer()

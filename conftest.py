@@ -40,19 +40,16 @@ class GoItem(pytest.Item):
         service_path = dirname(Path(*relpath(self.path).split(os.sep)[1:]))
         service = service_path.split(os.sep)[-1]
 
-        # return_code, stdout = build_test_bin(service=service, tf_root_path=tf_root_path)
-        # if return_code != 0:
-        #     raise GoException(returncode=return_code, stdout=stdout)
-
         env = dict(os.environ)
         env.update({
             'TF_ACC': '1',
             'AWS_ACCESS_KEY_ID': 'test',
             'AWS_SECRET_ACCESS_KEY': 'test',
-            'AWS_DEFAULT_REGION': 'us-east-1',
+            'AWS_DEFAULT_REGION': 'us-west-2',
             'AWS_ALTERNATE_ACCESS_KEY_ID': 'test',
             'AWS_ALTERNATE_SECRET_ACCESS_KEY': 'test',
             'AWS_ALTERNATE_REGION': 'us-east-2',
+            'AWS_THIRD_REGION': 'eu-west-1',
         })
 
         cmd = [

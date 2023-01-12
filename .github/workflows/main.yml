@@ -2,9 +2,9 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        default: 'all'
+        default: 'ls-community'
         type: string
-        description: name of the service to execute tests for
+        description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       localstack-image:
         required: false
         type: string
@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'all' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
