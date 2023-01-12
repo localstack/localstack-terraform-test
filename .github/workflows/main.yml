@@ -1,4 +1,7 @@
 on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 19 * * 6'
   workflow_dispatch:
     inputs:
       services:
