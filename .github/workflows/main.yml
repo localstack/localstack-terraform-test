@@ -24,13 +24,14 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'acm' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
   test_service:
     needs: prepare_list
     strategy:
+      max-parallel: 10
       fail-fast: false
       matrix:
         service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
