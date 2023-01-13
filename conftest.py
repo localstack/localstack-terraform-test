@@ -48,6 +48,7 @@ class GoItem(pytest.Item):
             'AWS_DEFAULT_REGION': 'us-west-2',
             'AWS_ALTERNATE_ACCESS_KEY_ID': 'test',
             'AWS_ALTERNATE_SECRET_ACCESS_KEY': 'test',
+            'AWS_ALTERNATE_SECRET_ACCESS_KEY': 'test',
             'AWS_ALTERNATE_REGION': 'us-east-2',
             'AWS_THIRD_REGION': 'eu-west-1',
         })
