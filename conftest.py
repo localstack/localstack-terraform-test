@@ -66,7 +66,6 @@ class GoItem(pytest.Item):
             raise GoException(returncode=return_code, stderr=stdout)
 
     def repr_failure(self, excinfo, **kwargs):
-        """Called when self.runtest() raises an exception."""
         if isinstance(excinfo.value, GoException):
             return '\n'.join(
                 [
