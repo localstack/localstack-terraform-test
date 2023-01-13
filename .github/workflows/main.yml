@@ -12,9 +12,10 @@ on:
         type: string
         default: 'localstack/localstack:latest'
         description: localstack docker image name to test against
-  push:
-    branches:
-      - pytest-plugin-fork
+# disabled pipeline for push events, as we want to run the pipeline only on a schedule or manually
+#  push:
+#    branches:
+#      - pytest-plugin-fork
 
 name: Terraform Tests
 jobs:
@@ -26,14 +27,14 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'sts' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
   test_service:
     needs: prepare_list
     strategy:
-#      max-parallel: 10
+      max-parallel: 10
       fail-fast: false
       matrix:
         service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
