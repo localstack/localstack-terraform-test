@@ -58,7 +58,6 @@ def execute_command(cmd, env=None, cwd=None):
 
 
 def build_test_bin(service, tf_root_path):
-    # _test_bin_rel_path = f'./{TF_TEST_BINARY_FOLDER}/{service}.test'
     _test_bin_abs_path = _get_test_bin_abs_path(service)
     _tf_repo_service_folder = f'{TF_REPO_SERVICE_FOLDER}/{service}'
 
