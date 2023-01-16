@@ -13,9 +13,9 @@ on:
         default: 'localstack/localstack:latest'
         description: localstack docker image name to test against
 # disabled pipeline for push events, as we want to run the pipeline only on a schedule or manually
-#  push:
-#    branches:
-#      - pytest-plugin-fork
+  push:
+    branches:
+      - pytest-plugin
 
 name: Terraform Tests
 jobs:
@@ -27,14 +27,14 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python get-services.py ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
   test_service:
     needs: prepare_list
     strategy:
-      max-parallel: 10
+#      max-parallel: 10
       fail-fast: false
       matrix:
         service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
@@ -62,23 +62,23 @@ jobs:
       run: |
         sudo apt update --fix-missing
         sudo apt install libsasl2-dev -y
-        pip install --upgrade pip
-        pip install -r requirements.txt
+        make venv
+        make install
 
     - name: Patch Terraform Provider
       run: |
         cd terraform-provider-aws && go mod vendor
         cd ../
-        python3 main.py patch
+        python -m terraform_pytest.main patch
 
     - name: Build ${{ matrix.service }} Binary
       run: |
-        python main.py build -s ${{ matrix.service }}
+        python -m terraform_pytest.main build -s ${{ matrix.service }}
         ls -la terraform-provider-aws/test-bin
 
     - name: Run ${{ matrix.service }} Tests
       run: |
-        pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
+        python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
 
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2

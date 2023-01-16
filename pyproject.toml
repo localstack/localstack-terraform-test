@@ -1,0 +1,17 @@
+# project configuration
+
+[tool.black]
+line_length = 100
+include = '(terraform_pytest\/.*\.py$|tests\/.*\.py$)'
+#extend_exclude = '()'
+
+[tool.isort]
+profile = 'black'
+#extend_skip = []
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = [
+    "terraform-provider-aws/internal/service/",
+]
+#confcutdir = "tests/conftest.py"
