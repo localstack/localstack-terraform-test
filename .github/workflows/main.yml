@@ -62,8 +62,8 @@ jobs:
       run: |
         sudo apt update --fix-missing
         sudo apt install libsasl2-dev -y
-        make venv
-        make install
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Patch Terraform Provider
       run: |
