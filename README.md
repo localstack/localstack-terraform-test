@@ -12,7 +12,7 @@ Purpose of this project is to externalize the test cases from the localstack rep
 ## How to run?
 1. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
 2. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
-3Now you are ready to use `python -m pytest` commands to list and run test cases from golang
+3. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
 
 ## How to run test cases?
 - To list down all the test case from a specific service, run `python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q`

@@ -13,9 +13,9 @@ on:
         default: 'localstack/localstack:latest'
         description: localstack docker image name to test against
 # disabled pipeline for push events, as we want to run the pipeline only on a schedule or manually
-#  push:
-#    branches:
-#      - pytest-plugin
+  push:
+    branches:
+      - pytest-plugin
 
 name: Terraform Tests
 jobs:

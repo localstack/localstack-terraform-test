@@ -123,7 +123,7 @@ def _docker_service_health(client):
 
 
 def _start_docker_container(client, config, localstack_image):
-    env_vars = ["DEBUG=1", "PROVIDER_OVERRIDE_S3=asf"]
+    env_vars = ["DEBUG=1", "PROVIDER_OVERRIDE_S3=asf", "FAIL_FAST=1"]
     port_mappings = {
         "53/tcp": ("127.0.0.1", 53),
         "53/udp": ("127.0.0.1", 53),

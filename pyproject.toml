@@ -14,4 +14,4 @@ line_length = 100
 testpaths = [
     "terraform-provider-aws/internal/service/",
 ]
-#confcutdir = "tests/conftest.py"
+filterwarnings =["ignore::DeprecationWarning"]
