@@ -85,31 +85,6 @@ class GoItem(pytest.Item):
         return self.path, 0, f"Test Case: {self.name}"
 
 
-# class ReprCrash:
-#     def __init__(self, message):
-#         self.message = message
-#
-#
-# class LongRepr:
-#     def __init__(self, message, reason):
-#         self.reprcrash = ReprCrash(message)
-#         self.reason = reason
-#
-#     def __str__(self):
-#         return self.reason
-#
-#
-# @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-# def pytest_runtest_makereport(item, call):
-#     outcome = yield
-#     report = outcome.get_result()
-#     if report.failed:
-#         splits = report.longrepr.split("\n", 1)
-#         longrepr = LongRepr(splits[0], splits[1])
-#         delattr(report, "longrepr")
-#         setattr(report, "longrepr", longrepr)
-
-
 class GoException(Exception):
     def __init__(self, returncode, stderr):
         self.returncode = returncode

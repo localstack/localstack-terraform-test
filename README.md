@@ -5,7 +5,9 @@ This is a test runner for localstack and terraform. It will run a test cases fro
 Purpose of this project is to externalize the test cases from the localstack repo and run them against localstack to gather parity metrics.
 
 ## Installation
-1. Clone the repository with submodules`
+1. Clone the repository with submodules
+   - `git clone git@github.com:localstack/localstack-terraform-test.git --recurse-submodules`
+   - Make sure you have the latest version of the submodules after switching to a different branch using `git submodule update --init --recursive`
 2. Run `make venv` to create a virtual environment
 3. Run `make install` to install the dependencies
 
@@ -19,7 +21,7 @@ Purpose of this project is to externalize the test cases from the localstack rep
 - To run a specific test case, run `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file> -k <test-case-name> --ls-start` or `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
 - Additional environment variables can be added by appending it in the start of the command, i.e. `AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
 
-## Default environment variables
+## Default environment variables for Terraform Tests
 - **TF_ACC**: `1`
 - **AWS_ACCESS_KEY_ID**: `test`
 - **AWS_SECRET_ACCESS_KEY**: `test`
@@ -29,6 +31,11 @@ Purpose of this project is to externalize the test cases from the localstack rep
 - **AWS_ALTERNATE_SECRET_ACCESS_KEY**: `test`
 - **AWS_ALTERNATE_REGION**: `us-east-2`
 - **AWS_THIRD_REGION**: `eu-west-1`
+
+## Environment variables for Localstack
+- **DEBUG**: `1`
+- **PROVIDER_OVERRIDE_S3**: `asf`
+- **FAIL_FAST**: `1`
 
 ## Options
 - `--ls-start`: Start localstack instance before running the test cases
