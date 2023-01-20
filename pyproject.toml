@@ -2,11 +2,12 @@
 
 [tool.black]
 line_length = 100
-include = '(terraform_pytest\/.*\.py$|tests\/.*\.py$)'
+include = '(^terraform_pytest\/.*\.py$|^conftest.py$)'
 #extend_exclude = '()'
 
 [tool.isort]
 profile = 'black'
+skip_glob = ["terraform-provider-aws"]
 #extend_skip = []
 line_length = 100
 
@@ -14,4 +15,4 @@ line_length = 100
 testpaths = [
     "terraform-provider-aws/internal/service/",
 ]
-#confcutdir = "tests/conftest.py"
+filterwarnings =["ignore::DeprecationWarning"]
