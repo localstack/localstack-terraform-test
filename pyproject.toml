@@ -2,17 +2,14 @@
 
 [tool.black]
 line_length = 100
-include = '(^terraform_pytest\/.*\.py$|^conftest.py$)'
-#extend_exclude = '()'
+extend_exclude = '(terraform-provider-aws)'
 
 [tool.isort]
 profile = 'black'
-skip_glob = ["terraform-provider-aws"]
-#extend_skip = []
+extend_skip = ["terraform-provider-aws"]
 line_length = 100
 
 [tool.pytest.ini_options]
 testpaths = [
     "terraform-provider-aws/internal/service/",
 ]
-filterwarnings =["ignore::DeprecationWarning"]

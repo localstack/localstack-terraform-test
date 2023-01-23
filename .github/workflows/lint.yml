@@ -1,0 +1,20 @@
+on: [push, pull_request]
+
+name: Linting
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10.5
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.5'
+          cache: 'pip'
+      - name: Install system dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Linting
+        run: |
+          make lint
