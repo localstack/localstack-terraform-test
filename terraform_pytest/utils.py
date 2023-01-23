@@ -175,6 +175,16 @@ def build_test_bin(service, tf_root_path, force_build=False):
     if return_code != 0:
         raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
 
+    cmd = ["go", "mod", "tidy"]
+    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
+    if return_code != 0:
+        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
+
+    cmd = ["go", "mod", "vendor"]
+    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
+    if return_code != 0:
+        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
+
     cmd = [
         "go",
         "test",
