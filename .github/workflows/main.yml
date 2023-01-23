@@ -26,7 +26,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ec2' }})" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -74,7 +74,6 @@ jobs:
         ls -la terraform-provider-aws/test-bin
 
     - name: Run ${{ matrix.service }} Tests
-      if: ${{ matrix.service != 'ec2' }}
       env:
         PYTEST_PARALLEL_CONFIG: "${{ matrix.service == 'ec2' && '-n 2' || '' }}"
       run: |
