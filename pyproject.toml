@@ -1,0 +1,15 @@
+# project configuration
+
+[tool.black]
+line_length = 100
+extend_exclude = '(terraform-provider-aws)'
+
+[tool.isort]
+profile = 'black'
+extend_skip = ["terraform-provider-aws"]
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = [
+    "terraform-provider-aws/internal/service/",
+]

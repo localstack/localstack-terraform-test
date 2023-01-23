@@ -1,9 +1,3 @@
-[submodule "localstack"]
-	path = localstack
-	url = https://github.com/localstack/localstack.git
 [submodule "terraform-provider-aws"]
 	path = terraform-provider-aws
 	url = https://github.com/hashicorp/terraform-provider-aws.git
-[submodule "moto"]
-	path = moto
-	url = git@github.com:localstack/moto

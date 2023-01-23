@@ -1,61 +1,43 @@
-Terraform vs LocalStack
-=======================
+# Localstack Terraform Test Runner
 
-This repository contains scripts and CI configurations to to run the Terraform Acceptance test suite of the AWS provider against LocalStack
+This is a test runner for localstack and terraform. It will run a test cases from the hashicrop [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
 
-## Utilities
+Purpose of this project is to externalize the test cases from the localstack repo and run them against localstack to gather parity metrics.
 
-Some utilities for local development:
+## Installation
+1. Clone the repository with submodules
+   - `git clone git@github.com:localstack/localstack-terraform-test.git --recurse-submodules`
+   - Make sure you have the latest version of the submodules after switching to a different branch using `git submodule update --init --recursive`
+2. Run `make venv` to create a virtual environment
+3. Run `make install` to install the dependencies
 
-* `bin/list-tests [--all]`: list the available tests by parsing the go test files.
-* `bin/install-aws-test` creates the binary for running the test suite (and installs it into `$HOME/.cache/localstack/aws.test`. requires go 1.16
-* `bin/run-tests [test]` run a specific test. this installs and runs localstack in a background process. add the flag `-t` to test against an already running localstack instance.
+## How to run?
+1. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
+   - **Note: This operation is not idempotent. Please apply the patch only once.**
+2. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
+3. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
 
-## Finding and running tests
+## How to run test cases?
+- To list down all the test case from a specific service, run `python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q`
+- To run a specific test case, run `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file> -k <test-case-name> --ls-start` or `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
+- Additional environment variables can be added by appending it in the start of the command, i.e. `AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
 
-After running `bin/install-aws-test`, use `bin/run-tests [OPTIONS...] [TESTS...]` to run individual tests or entire test suites.
+## Default environment variables for Terraform Tests
+- **TF_ACC**: `1`
+- **AWS_ACCESS_KEY_ID**: `test`
+- **AWS_SECRET_ACCESS_KEY**: `test`
+- **AWS_DEFAULT_REGION**: `us-west-1`
+- **AWS_ALTERNATE_ACCESS_KEY_ID**: `test`
+- **AWS_ALTERNATE_SECRET_ACCESS_KEY**: `test`
+- **AWS_ALTERNATE_SECRET_ACCESS_KEY**: `test`
+- **AWS_ALTERNATE_REGION**: `us-east-2`
+- **AWS_THIRD_REGION**: `eu-west-1`
 
-Here are some examples:
+## Environment variables for Localstack
+- **DEBUG**: `1`
+- **PROVIDER_OVERRIDE_S3**: `asf`
+- **FAIL_FAST**: `1`
 
-* `bin/run-tests TestAccAWSAPIGatewayResource`
-* `bin/run-tests -t TestAccAWSAPIGatewayResource`: same as above, but does not start localstack
-* `bin/run-tests TestAccAWSAPIGateway`: runs all tests that match `TestAccAWSAPIGateway` (run `bin/list-tests TestAccAWSAPIGateway` to see which ones will be executed)
-* `bin/run-tests -e TestAccAWSAPIGatewayV2 TestAccAWSAPIGateway`: same as above, but excludes all tests that match `TestAccAWSAPIGatewayV2`.
-* `bin/run-tests -i localstack-tests.incl.txt`: runs all tests listed in the text file
-
-You can use `bin/list-tests` with the same parameters to see which tests will be executed,
-or to find specific tests based on patterns.
-
-For example:
-
-```
- % bin/list-tests Queue
-TestAccAWSBatchJobQueue
-TestAccAWSGameliftGameSessionQueue
-TestAccAWSMediaConvertQueue
-TestAccAWSSQSQueue
-TestAccAWSSQSQueuePolicy
-TestAccDataSourceAwsBatchJobQueue
-TestAccDataSourceAwsSqsQueue
-```
-
-or
-
-```
- % bin/list-tests "Data.*Queue"
-TestAccDataSourceAwsBatchJobQueue
-TestAccDataSourceAwsSqsQueue
-```
-
-## Generating the test reports
-
-Test logs are aggregated into `build/tests/*.log`, the command `bin/create-report` will create junit-like xml reports.
-These can then be rendered into html using `bin/create-report-html`, which also creates a summary page in `build/report.html`.
-For rendering html, you need `junit2html`.
-
-## Travis config
-
-### Build cache
-
-The Travis-CI worker caches the built `aws.test` binary across builds.
-The first build may therefore take a while.
+## Options
+- `--ls-start`: Start localstack instance before running the test cases
+- `--ls-image`: Specify the localstack image to use, default is `localstack/localstack:latest`

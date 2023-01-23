@@ -1,6 +1,0 @@
-TestAccAWSEc2Fleet
-TestAccAWSEc2TransitGateway
-TestAccAWSEc2TransitGatewayVpcAttachment
-TestAccAWSKinesisAnalytics
-TestAccAWSSSMMaintenanceWindow
-TestAccAWSSSMMaintenanceWindowTask
