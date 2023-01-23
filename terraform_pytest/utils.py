@@ -249,7 +249,5 @@ def patch_repo():
         return_code, stdout = execute_command(cmd, cwd=realpath(TF_REPO_NAME))
         if return_code != 0:
             print("----- error while patching repo -----")
-            print("Patch has already been applied...")
-            print("This operation is not idempotent.")
         if stdout:
             print(f"stdout: {stdout}")
