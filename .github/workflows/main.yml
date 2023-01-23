@@ -12,9 +12,6 @@ on:
         type: string
         default: 'localstack/localstack:latest'
         description: localstack docker image name to test against
-  push:
-    branches:
-      - pytest-plugin
 
 name: Terraform Tests
 jobs:
