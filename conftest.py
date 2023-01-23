@@ -31,6 +31,8 @@ def pytest_collect_file(parent, file_path):
 
 
 class GoFile(pytest.File):
+    """class for collecting tests from a file."""
+
     def collect(self):
         """Collect test cases from the test file"""
         raw = self.path.open().read()
@@ -40,6 +42,8 @@ class GoFile(pytest.File):
 
 
 class GoItem(pytest.Item):
+    """class for individual test cases."""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
