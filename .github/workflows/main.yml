@@ -76,14 +76,6 @@ jobs:
       run: |
         python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
 
-    - name: Run ${{ matrix.service }} Tests
-      if: ${{ matrix.service == 'ec2' }}
-      run: |
-        IMAGE_TAG=${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }} docker-compose up -d
-        sleep 20
-        python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v -n 2
-
-
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
