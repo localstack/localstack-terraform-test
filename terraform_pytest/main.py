@@ -21,25 +21,21 @@ def patch():
     "--service",
     "-s",
     default=None,
+    required=True,
     help="""Service to build; use "ls-all", "ls-community", "ls-pro" to build all services, example: 
 --service=ls-all; --service=ec2; --service=ec2,iam""",
 )
-def build(service):
-    """Build binary for testing"""
-    if not service:
-        print("No service provided")
-        print(
-            "use --service or -s to specify services to build; for more help try --help to see more options"
-        )
-        return
-
+@click.option("--force-build", "-f", is_flag=True, default=False, help="Force rebuilds binary")
+def build(service, force_build):
     services = get_services(service)
 
     for service in services:
         print(f"Building {service}...")
         try:
             start = timer()
-            build_test_bin(service=service, tf_root_path=realpath(TF_REPO_NAME))
+            build_test_bin(
+                service=service, tf_root_path=realpath(TF_REPO_NAME), force_build=force_build
+            )
             end = timer()
             print(f"Build {service} in {end - start} seconds")
         except KeyboardInterrupt:
