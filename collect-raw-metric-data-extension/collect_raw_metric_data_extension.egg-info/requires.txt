@@ -1,0 +1,1 @@
+localstack>=1.0

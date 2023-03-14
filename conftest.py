@@ -1,5 +1,8 @@
+import csv
+import json
 import os
 import re
+import time
 from os.path import dirname, realpath, relpath
 from pathlib import Path
 
@@ -80,6 +83,8 @@ class GoItem(pytest.Item):
         return_code, stdout = execute_command(cmd, env, tf_root_path)
         if return_code != 0:
             raise GoException(returncode=return_code, stderr=stdout)
+        else:
+            check_if_test_failed(self.name)
 
     def repr_failure(self, excinfo, **kwargs):
         """Called when self.runtest() raises an exception.
@@ -142,7 +147,6 @@ def _start_docker_container(client, config, localstack_image):
     )
     setattr(config, "localstack_container_id", localstack_container.id)
 
-
 def _stop_docker_container(client, config):
     """Stop the docker container"""
     client.containers.get(getattr(config, "localstack_container_id")).stop()
@@ -179,6 +183,22 @@ def pytest_sessionstart(session):
 
     if getattr(session.config, "workerinput", None) is not None:
         return
+    """at the beginning of the test session: create the csv file where we will append the collected raw metrics"""
+    Path(BASE_PATH).mkdir(parents=True, exist_ok=True)
+    with open(FNAME_RAW_DATA_CSV, "w") as fd:
+        writer = csv.writer(fd)
+        writer.writerow(
+            [
+                "service",
+                "operation",
+                "parameters",
+                "response_code",
+                "response_data",
+                "exception",
+                "origin",
+                "test_node_id",
+            ]
+        )
 
     if not is_collect_only and is_localstack_start:
         print("\nStarting LocalStack...")
@@ -186,7 +206,8 @@ def pytest_sessionstart(session):
         client = docker.from_env()
         _docker_service_health(client)
         _pull_docker_image(client, localstack_image)
-        _start_docker_container(client, session.config, localstack_image)
+        #_start_docker_container(client, session.config, localstack_image)
+        _startup_localstack()
         _localstack_health_check()
         client.close()
 
@@ -205,5 +226,56 @@ def pytest_sessionfinish(session, exitstatus):
     if not is_collect_only and is_localstack_start:
         print("\nStopping LocalStack...")
         client = docker.from_env()
-        _stop_docker_container(client, session.config)
+        #_stop_docker_container(client, session.config)
+        _shutdown_localstack()
         client.close()
+
+
+BASE_PATH = os.path.join(os.path.dirname(__file__), "../../target/reports")
+
+FNAME_RAW_DATA_CSV = os.path.join(BASE_PATH, "metric_data_raw.csv")
+
+def _startup_localstack():
+    try:
+        _localstack_health_check()
+    except:
+        # TODO: APIKEY in workflow.yaml
+        key = "$LOCALSTACK_API_KEY"
+        os.system(
+            f"DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY={key} localstack start -d"
+        )
+
+        _localstack_health_check()
+
+    print("LocalStack running")
+
+def _shutdown_localstack():
+    print("check the logs now!")
+    time.sleep(30)
+    os.system("localstack stop")
+
+
+#@pytest.fixture(scope="function", autouse=True)
+def check_if_test_failed(name):
+    """monitors the test status, e.g. if the test failed or not
+    if the test succeeded, write the collected metrics
+    into the raw-data-collection csv file
+    """
+    node_id = name
+    print(f"test succeeded: {node_id}")
+
+    metric_response = requests.get("http://localhost:4566/metrics/raw")
+    try:
+        metric_json = json.loads(metric_response.content.decode("utf-8"))
+
+        with open(FNAME_RAW_DATA_CSV, "a") as fd:
+            writer = csv.writer(fd)
+            for m in metric_json.get("metrics"):
+                m["node_id"] = node_id
+                writer.writerow(m.values())
+    except json.JSONDecodeError:
+        print("could not decode metrics")
+
+    url = "http://localhost:4566/metrics/reset"
+    r = requests.delete(url, timeout=90)
+    assert r.status_code == 200
