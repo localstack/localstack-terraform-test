@@ -180,7 +180,7 @@ def _localstack_health_check():
     session.close()
 
 
-BASE_PATH = os.path.join(os.path.dirname(__file__), "../../target/reports")
+BASE_PATH = os.path.join(os.path.dirname(__file__), "../../../target/reports")
 
 FNAME_RAW_DATA_CSV = os.path.join(BASE_PATH, "metric_data_raw.csv")
 
