@@ -5,7 +5,6 @@ import re
 from os.path import dirname, realpath, relpath
 from pathlib import Path
 
-import docker
 import pytest
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -197,7 +196,9 @@ def pytest_sessionstart(session):
 
     def create_csv():
         """at the beginning of the test session: create the csv file where we will append the collected raw metrics"""
-        Path(BASE_PATH).mkdir(parents=True, exist_ok=True)
+        path = Path(BASE_PATH)
+        print(f"Creating metrics file {FNAME_RAW_DATA_CSV}")
+        path.mkdir(parents=True, exist_ok=True)
         with open(FNAME_RAW_DATA_CSV, "w") as fd:
             writer = csv.writer(fd)
             writer.writerow(
@@ -238,7 +239,6 @@ def _startup_localstack():
     try:
         _localstack_health_check()
     except:
-        # TODO: APIKEY in workflow.yaml
         # TODO: check if asf is default for S3 nowadays
         key = "$LOCALSTACK_API_KEY"
         os.system(

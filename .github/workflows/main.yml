@@ -114,6 +114,12 @@ jobs:
         name: test-metrics
         path: target/reports
 
+    - name: Logout LocalStack
+      if: always()
+      run: |
+        source .venv/bin/activate
+        localstack logout
+
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
