@@ -24,9 +24,7 @@ class MyExtension(Extension):
     def update_gateway_routes(self, router: http.Router[http.RouteHandler]):
         print("---> adding custom route endpoint")
         # add two endpoints to retrieve and reset the metrics data
-        router.add(
-            "/metrics/raw", endpoint=retrieve_collected_metric_handler, methods=["GET"]
-        )
+        router.add("/metrics/raw", endpoint=retrieve_collected_metric_handler, methods=["GET"])
         router.add(
             "/metrics/reset",
             endpoint=reset_collected_metric_handler,

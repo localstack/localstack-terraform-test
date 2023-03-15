@@ -185,6 +185,7 @@ BASE_PATH = os.path.join(os.path.dirname(__file__), "../../target/reports")
 
 FNAME_RAW_DATA_CSV = os.path.join(BASE_PATH, "metric_data_raw.csv")
 
+
 def pytest_sessionstart(session):
     """Called after the Session object has been created and before performing collection and entering the run test loop."""
     is_collect_only = session.config.getoption(name="--collect-only")
@@ -251,4 +252,3 @@ def _startup_localstack():
 
 def _shutdown_localstack():
     os.system("localstack stop")
-
