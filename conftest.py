@@ -111,7 +111,7 @@ class GoItem(pytest.Item):
         """write the collected metrics
         into the raw-data-collection csv file
         """
-        print(f"test succeeded: {self.name}")
+        print(f"Adding metrics for succeeded test: {self.name}")
 
         metric_response = requests.get("http://localhost:4566/metrics/raw")
         try:
@@ -122,6 +122,7 @@ class GoItem(pytest.Item):
                 for m in metric_json.get("metrics"):
                     m["node_id"] = self.name
                     writer.writerow(m.values())
+            print(f"File size after added metrics: {os.path.getsize(FNAME_RAW_DATA_CSV)}")
         except json.JSONDecodeError:
             print("could not decode metrics")
 
