@@ -168,11 +168,6 @@ def _start_docker_container(client, config, localstack_image):
     )
     setattr(config, "localstack_container_id", localstack_container.id)
 
-def _stop_docker_container(client, config):
-    """Stop the docker container"""
-    client.containers.get(getattr(config, "localstack_container_id")).stop()
-    print("LocalStack is stopped")
-
 
 def _localstack_health_check():
     """Check if the localstack service is healthy"""
@@ -184,16 +179,6 @@ def _localstack_health_check():
     session.mount("https://", adapter)
     session.get(localstack_health_url)
     session.close()
-
-
-def _pull_docker_image(client, localstack_image):
-    """Pull the docker image"""
-    docker_image_list = client.images.list(name=localstack_image)
-    if len(docker_image_list) == 0:
-        print(f"Pulling image {localstack_image}")
-        client.images.pull(localstack_image)
-    docker_image_list = client.images.list(name=localstack_image)
-    print(f"Using LocalStack image: {docker_image_list[0].id}")
 
 
 BASE_PATH = os.path.join(os.path.dirname(__file__), "../../target/reports")
@@ -253,9 +238,10 @@ def _startup_localstack():
         _localstack_health_check()
     except:
         # TODO: APIKEY in workflow.yaml
+        # TODO: check if asf is default for S3 nowadays
         key = "$LOCALSTACK_API_KEY"
         os.system(
-            f"DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY={key} localstack start -d"
+            f"DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY={key} PROVIDER_OVERRIDE_S3=asf localstack start -d"
         )
 
         _localstack_health_check()
