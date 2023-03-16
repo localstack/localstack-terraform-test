@@ -181,7 +181,7 @@ def _localstack_health_check():
     session.close()
 
 
-BASE_PATH = os.path.join(os.path.dirname(__file__), "../../../target/reports")
+BASE_PATH = os.path.join(os.path.dirname(__file__), "../../target/reports")
 
 FNAME_RAW_DATA_CSV = os.path.join(BASE_PATH, "metric_data_raw.csv")
 
@@ -234,6 +234,12 @@ def pytest_sessionfinish(session, exitstatus):
     if not is_collect_only and is_localstack_start:
         print("\nStopping LocalStack...")
         _shutdown_localstack()
+
+    # TODO REMOVE ME!
+    print(f"contents of report directory: {os.listdir(BASE_PATH)}")
+    import pathlib
+
+    print(f"absolute path of direcotry: {pathlib.Path(BASE_PATH).resolve()}")
 
 
 def _startup_localstack():
