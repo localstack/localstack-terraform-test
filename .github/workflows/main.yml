@@ -107,12 +107,6 @@ jobs:
         source .venv/bin/activate
         python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
 
-    - name: REMOVE ME - find reports and list
-      run: |
-        result=$(find ~ -type d -name "reports")
-        echo $result
-        ls $result
-
     - name: Archive Test Result
       if: always()
       uses: actions/upload-artifact@v3
