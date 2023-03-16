@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        default: 'ls-community'
+        default: 'ls-all'
         type: string
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       localstack-image:
@@ -31,7 +31,7 @@ jobs:
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
         # For testing purpose, remove
-        run: echo 'matrix=["sqs"]' >> $GITHUB_OUTPUT
+        run: echo 'matrix=["sqs", "sns"]' >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
