@@ -238,10 +238,8 @@ def _startup_localstack():
     try:
         _localstack_health_check()
     except:
-        # TODO: check if asf is default for S3 nowadays
-        key = "$LOCALSTACK_API_KEY"
         os.system(
-            f"DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY={key} PROVIDER_OVERRIDE_S3=asf localstack start -d"
+            "DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY PROVIDER_OVERRIDE_S3=asf localstack start -d"
         )
 
         _localstack_health_check()
