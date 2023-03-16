@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        default: 'ls-all'
+        default: 'ls-community'
         type: string
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       localstack-image:
@@ -76,6 +76,7 @@ jobs:
         cd ../
         python -m terraform_pytest.main patch
 
+    # TODO: check if downloadable instead of duplicate being part of the repo
     - name: Prepare Extension
       run: |
         cd collect-raw-metric-data-extension && make install

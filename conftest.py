@@ -14,6 +14,7 @@ from terraform_pytest.utils import execute_command
 
 def pytest_addoption(parser):
     """Add command line options to pytest"""
+    # TODO: remove --ls-image, since we start localstack via localstack-command now
     parser.addoption(
         "--ls-image",
         action="store",
@@ -111,8 +112,6 @@ class GoItem(pytest.Item):
         """write the collected metrics
         into the raw-data-collection csv file
         """
-        print(f"Adding metrics for succeeded test: {self.name}")
-
         metric_response = requests.get("http://localhost:4566/metrics/raw")
         try:
             metric_json = json.loads(metric_response.content.decode("utf-8"))
@@ -122,7 +121,6 @@ class GoItem(pytest.Item):
                 for m in metric_json.get("metrics"):
                     m["node_id"] = self.name
                     writer.writerow(m.values())
-            print(f"File size after added metrics: {os.path.getsize(FNAME_RAW_DATA_CSV)}")
         except json.JSONDecodeError:
             print("could not decode metrics")
 
@@ -199,9 +197,7 @@ def pytest_sessionstart(session):
 
     def create_csv():
         """at the beginning of the test session: create the csv file where we will append the collected raw metrics"""
-        path = Path(BASE_PATH)
-        print(f"Creating metrics file {FNAME_RAW_DATA_CSV}")
-        path.mkdir(parents=True, exist_ok=True)
+        Path(BASE_PATH).mkdir(parents=True, exist_ok=True)
         with open(FNAME_RAW_DATA_CSV, "w") as fd:
             writer = csv.writer(fd)
             writer.writerow(
@@ -236,12 +232,6 @@ def pytest_sessionfinish(session, exitstatus):
     if not is_collect_only and is_localstack_start:
         print("\nStopping LocalStack...")
         _shutdown_localstack()
-
-    # TODO REMOVE ME!
-    print(f"contents of report directory: {os.listdir(BASE_PATH)}")
-    import pathlib
-
-    print(f"absolute path of direcotry: {pathlib.Path(BASE_PATH).resolve()}")
 
 
 def _startup_localstack():
