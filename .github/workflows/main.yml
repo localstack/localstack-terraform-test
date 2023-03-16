@@ -77,9 +77,9 @@ jobs:
         python -m terraform_pytest.main patch
 
     # TODO: check if downloadable instead of duplicate being part of the repo
-    - name: Prepare Extension
-      run: |
-        cd collect-raw-metric-data-extension && make install
+    #- name: Prepare Extension
+      #run: |
+      #  cd collect-raw-metric-data-extension && make install
 
     - name: Build ${{ matrix.service }} Binary
       run: |
@@ -98,7 +98,8 @@ jobs:
         docker pull localstack/localstack-pro     # Make sure to pull the latest version of the image
         localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
         LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions init
-        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions dev enable ./collect-raw-metric-data-extension
+        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions install https://github.com/localstack/localstack-moto-test-coverage/tree/main/collect-raw-metric-data-extension#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension
+      #  LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions dev enable ./collect-raw-metric-data-extension
 
     - name: Run ${{ matrix.service }} Tests
       env:
