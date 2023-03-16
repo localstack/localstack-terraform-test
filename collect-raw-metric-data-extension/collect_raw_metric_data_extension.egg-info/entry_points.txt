@@ -1,2 +1,0 @@
-[localstack.extensions]
-collect-raw-metric-data-extension = collect_raw_metric_data_extension.extension:MyExtension
