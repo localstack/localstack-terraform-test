@@ -183,7 +183,9 @@ def _localstack_health_check():
 
 BASE_PATH = os.path.join(os.path.dirname(__file__), "target/reports")
 
-FNAME_RAW_DATA_CSV = os.path.join(BASE_PATH, "metric_data_raw.csv")
+FNAME_RAW_DATA_CSV = os.path.join(
+    BASE_PATH, f"terraform_{os.environ['SERVICE']}_metric_data_raw.csv"
+)
 
 
 def pytest_sessionstart(session):
