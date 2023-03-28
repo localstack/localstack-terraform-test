@@ -235,7 +235,7 @@ def get_services(service):
         if s not in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES:
             print(f"Service {s} is not supported...\nPlease check the service name")
         elif s in skipped_services:
-            print(f"Service {s} has no (functioning) tests, skipping...")
+            print(f"Service {s} doesn't have any (functioning) tests, skipping...")
         else:
             result.append(s)
     return list(set(result))
