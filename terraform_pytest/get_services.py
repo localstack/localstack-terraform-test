@@ -2,7 +2,7 @@ import json
 import sys
 
 from terraform_pytest.utils import get_services
-from terraform_pytest.get_tf_partitions import get_partitions,get_tests_for_partition
+from terraform_pytest.get_tf_partitions import get_partitions
 
 service_partitions = []
 
