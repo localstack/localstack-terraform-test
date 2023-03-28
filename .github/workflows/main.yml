@@ -31,7 +31,7 @@ jobs:
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
         # For testing purpose, remove the lines below
-        run: echo "matrix=$(python -m terraform_pytest.get_services 'sqs,sns,ecs')" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get_services 'sqs')" >> $GITHUB_OUTPUT
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
@@ -90,6 +90,8 @@ jobs:
         TMP_USER: ${{ secrets.TMP_USER }}
         TMP_PW: ${{ secrets.TMP_PW }}
       run: |
+      # remove the next line
+        set -x
         source .venv/bin/activate
         pip install --pre localstack
         docker pull localstack/localstack-pro     # Make sure to pull the latest version of the image
