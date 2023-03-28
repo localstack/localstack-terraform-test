@@ -220,11 +220,11 @@ def get_services(service):
     result = []
     skipped_services = BLACKLISTED_SERVICES + FAILING_SERVICES
     if service == "ls-community":
-        services = LS_COMMUNITY_SERVICES.remove(skipped_services)
+        services = [s for s in LS_COMMUNITY_SERVICES if s not in skipped_services]
     elif service == "ls-pro":
-        services = LS_PRO_SERVICES.remove(skipped_services)
+        services = [s for s in LS_PRO_SERVICES if s not in skipped_services]
     elif service == "ls-all":
-        services = (LS_COMMUNITY_SERVICES + LS_PRO_SERVICES).remove(skipped_services)
+        services = [s for s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES if s not in skipped_services]
     else:
         if "," in service:
             services = service.split(",")

@@ -191,7 +191,8 @@ def _localstack_health_check():
 BASE_PATH = os.path.join(os.path.dirname(__file__), "target/reports")
 
 FNAME_RAW_DATA_CSV = os.path.join(
-    BASE_PATH, f"terraform_{os.environ['SERVICE']}_metric_data_raw.csv"
+    BASE_PATH,
+    f"terraform_{os.environ.get('SERVICE', '<no_service_specified>')}_metric_data_raw.csv",
 )
 
 
