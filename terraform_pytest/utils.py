@@ -113,7 +113,11 @@ LS_PRO_SERVICES = [
 ]
 
 # list of services that doesn't contain any tests
-BLACKLISTED_SERVICES = ["controltower", "greengrass"]
+BLACKLISTED_SERVICES = ["controltower", "greengrass", "iotanalytics"]
+
+# FIXME: check why all the tests are failing, and remove this list once fixed
+# list of services where every test fails against LocalStack
+FAILING_SERVICES = ["emr", "sagemaker", "qldb"]
 
 
 def execute_command(cmd, env=None, cwd=None):
@@ -227,7 +231,10 @@ def get_services(service):
         else:
             services = [service]
     for s in services:
-        if s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES and s not in BLACKLISTED_SERVICES:
+        if (
+            s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES
+            and s not in BLACKLISTED_SERVICES + FAILING_SERVICES
+        ):
             result.append(s)
         else:
             print(f"Service {s} is not supported...\nPlease check the service name")

@@ -24,6 +24,15 @@ def pytest_addoption(parser):
     parser.addoption(
         "--ls-start", action="store_true", default=False, help="Start localstack service"
     )
+    parser.addoption(
+        "--gather-metrics",
+        action="store_true",
+        default=False,
+        help="Marks if metrics should be collected, requires extension",
+    )
+
+
+IS_GATHER_METRICS = False
 
 
 def pytest_collect_file(parent, file_path):
@@ -82,7 +91,7 @@ class GoItem(pytest.Item):
         return_code, stdout = execute_command(cmd, env, tf_root_path)
         if return_code != 0:
             raise GoException(returncode=return_code, stderr=stdout)
-        else:
+        elif IS_GATHER_METRICS:
             self.add_metrics()
 
     def repr_failure(self, excinfo, **kwargs):
@@ -190,6 +199,7 @@ def pytest_sessionstart(session):
     """Called after the Session object has been created and before performing collection and entering the run test loop."""
     is_collect_only = session.config.getoption(name="--collect-only")
     is_localstack_start = session.config.getoption(name="--ls-start")
+    is_gather_metrics = session.config.getoption(name="--gather-metrics")
     localstack_image = session.config.getoption(name="--ls-image")
 
     if getattr(session.config, "workerinput", None) is not None:
@@ -213,11 +223,16 @@ def pytest_sessionstart(session):
                 ]
             )
 
-    create_csv()
+    if not is_collect_only:
+        if is_gather_metrics:
+            global IS_GATHER_METRICS
+            IS_GATHER_METRICS = True
 
-    if not is_collect_only and is_localstack_start:
-        print("\nStarting LocalStack...")
-        _startup_localstack()
+            create_csv()
+
+        if is_localstack_start:
+            print("\nStarting LocalStack...")
+            _startup_localstack()
 
 
 def pytest_sessionfinish(session, exitstatus):
