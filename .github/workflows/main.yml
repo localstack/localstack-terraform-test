@@ -31,8 +31,8 @@ jobs:
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
         # For testing purpose, remove the lines below
-        #run: echo 'matrix=["sqs", "sns"]' >> $GITHUB_OUTPUT
-        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ 'ls-all' }})" >> $GITHUB_OUTPUT
+        run: echo 'matrix=["sqs", "sns"]' >> $GITHUB_OUTPUT
+        # run: echo "matrix=$(python -m terraform_pytest.get-services ${{ 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -89,13 +89,22 @@ jobs:
         LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
         TMP_USER: ${{ secrets.TMP_USER }}
         TMP_PW: ${{ secrets.TMP_PW }}
+        LOCALSTACK_VOLUME_DIR: ${{ runner.temp }}/volume
+        DEBUG: 1
       run: |
         source .venv/bin/activate
         pip install --pre localstack
         docker pull localstack/localstack-pro     # Make sure to pull the latest version of the image
         localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
-        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions init
-        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        echo "paths debug"
+        echo "calling localstack extensions init"
+        localstack extensions init
+        echo "${LOCALSTACK_VOLUME_DIR} now looks like"
+        tree ${LOCALSTACK_VOLUME_DIR}
+        echo "where will install look for?"
+        python -c 'from localstack import config;from localstack_ext.bootstrap.extensions import repository;import os;print(os.path.join(config.VOLUME_DIR, "lib", repository.VENV_DIRECTORY))'
+        localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        ls -la ~/.cache/localstack || true
 
     - name: Run ${{ matrix.service }} Tests
       env:
