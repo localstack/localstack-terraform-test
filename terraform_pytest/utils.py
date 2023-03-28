@@ -237,7 +237,7 @@ def get_services(service):
         ):
             result.append(s)
         else:
-            print(f"Service {s} is not supported...\nPlease check the service name")
+            print(f"Service {s} is not supported or blacklisted...\nPlease check the service name")
     return list(set(result))
 
 
