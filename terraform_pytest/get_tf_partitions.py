@@ -1,5 +1,6 @@
 # Prints a JSON dict mapping the different partitions in the terraform-tests.yaml to their service
 import json
+
 import yaml
 
 
@@ -22,4 +23,3 @@ def get_tests_for_partition(service: str, partition: str):
         service_partitions = yaml.load(f, Loader=yaml.FullLoader)
         if service in service_partitions.keys():
             return json.dumps(service_partitions[service][partition])
-

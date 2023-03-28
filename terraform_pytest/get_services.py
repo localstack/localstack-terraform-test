@@ -1,10 +1,11 @@
 import json
 import sys
 
-from terraform_pytest.utils import get_services
 from terraform_pytest.get_tf_partitions import get_partitions
+from terraform_pytest.utils import get_services
 
 service_partitions = []
+
 
 def main():
     if len(sys.argv) > 1:
@@ -19,5 +20,5 @@ def main():
         exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
