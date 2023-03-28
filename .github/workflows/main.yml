@@ -31,7 +31,7 @@ jobs:
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
         # For testing purpose, remove the lines below
-        run: echo "matrix=$(python -m terraform_pytest.get-services 'sqs,sns,ecs')" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python terraform_pytest/get-tf-partitions.py "$(python -m terraform_pytest.get-services 'sqs,sns,ecs')") >> $GITHUB_OUTPUT
         #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
