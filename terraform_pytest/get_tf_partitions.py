@@ -23,9 +23,8 @@ def get_tests_for_partition(service: str, partition: str):
     with open("terraform_pytest/service-partitions.yml") as f:
         service_partitions = yaml.load(f, Loader=yaml.FullLoader)
         if service in service_partitions.keys():
-            return json.dumps(service_partitions[service][partition])
+            return " ".join(service_partitions[service][partition])
 
 
 if __name__ == '__main__':
     print(get_tests_for_partition(sys.argv[1], sys.argv[2]))
-

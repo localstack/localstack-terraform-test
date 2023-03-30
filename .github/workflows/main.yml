@@ -103,6 +103,7 @@ jobs:
         PYTEST_PARALLEL_CONFIG: "${{ matrix.service_partition.service == 'ec2' && '-n 2' || '' }}"
         LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
         SERVICE: ${{ matrix.service_partition.service }}
+        PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 

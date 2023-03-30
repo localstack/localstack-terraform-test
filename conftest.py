@@ -192,7 +192,7 @@ BASE_PATH = os.path.join(os.path.dirname(__file__), "target/reports")
 
 FNAME_RAW_DATA_CSV = os.path.join(
     BASE_PATH,
-    f"terraform_{os.environ.get('SERVICE', '<no_service_specified>')}_metric_data_raw.csv",
+    f"terraform_{os.environ.get('SERVICE', '<no_service_specified>')}_{os.environ.get('PARTITION', 'all')}_metric_data_raw.csv",
 )
 
 
