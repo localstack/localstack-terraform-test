@@ -7,3 +7,4 @@ target
 **/*.test
 report.xml
 volume
+terraform-provider-aws
