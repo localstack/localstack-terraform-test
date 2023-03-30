@@ -26,5 +26,5 @@ def get_tests_for_partition(service: str, partition: str):
             return " ".join(service_partitions[service][partition])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(get_tests_for_partition(sys.argv[1], sys.argv[2]))
