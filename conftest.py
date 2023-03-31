@@ -14,13 +14,6 @@ from terraform_pytest.utils import execute_command
 
 def pytest_addoption(parser):
     """Add command line options to pytest"""
-    # TODO: remove --ls-image, since we start localstack via localstack-command now
-    parser.addoption(
-        "--ls-image",
-        action="store",
-        default="localstack/localstack:latest",
-        help="Base URL for the API tests",
-    )
     parser.addoption(
         "--ls-start", action="store_true", default=False, help="Start localstack service"
     )
@@ -201,7 +194,6 @@ def pytest_sessionstart(session):
     is_collect_only = session.config.getoption(name="--collect-only")
     is_localstack_start = session.config.getoption(name="--ls-start")
     is_gather_metrics = session.config.getoption(name="--gather-metrics")
-    localstack_image = session.config.getoption(name="--ls-image")
 
     if getattr(session.config, "workerinput", None) is not None:
         return
@@ -255,7 +247,7 @@ def _startup_localstack():
         _localstack_health_check()
     except:
         os.system(
-            "DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY PROVIDER_OVERRIDE_S3=asf localstack start -d"
+            "DEBUG=1 FAIL_FAST=1 DNS_ADDRESS=127.0.0.1 EXTENSION_DEV_MODE=1 DISABLE_EVENTS=1 LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack start -d"
         )
 
         _localstack_health_check()

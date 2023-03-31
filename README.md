@@ -1,6 +1,6 @@
 # Localstack Terraform Test Runner
 
-This is a test runner for localstack and terraform. It will run a test cases from the hashicrop [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
+This is a test runner for localstack and terraform. It will run a test cases from the hashicorp [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
 
 Purpose of this project is to externalize the test cases from the localstack repo and run them against localstack to gather parity metrics.
 
@@ -12,10 +12,11 @@ Purpose of this project is to externalize the test cases from the localstack rep
 3. Run `make install` to install the dependencies
 
 ## How to run?
-1. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
+1. Only relevant when using pro-image: set the env `LOCALSTACK_API_KEY`
+2. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
    - **Note: This operation is not idempotent. Please apply the patch only once.**
-2. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
-3. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
+3. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
+4. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
 
 ## How to run test cases?
 - To list down all the test case from a specific service, run `python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q`
@@ -33,11 +34,10 @@ Purpose of this project is to externalize the test cases from the localstack rep
 - **AWS_ALTERNATE_REGION**: `us-east-2`
 - **AWS_THIRD_REGION**: `eu-west-1`
 
-## Environment variables for Localstack
-- **DEBUG**: `1`
-- **PROVIDER_OVERRIDE_S3**: `asf`
-- **FAIL_FAST**: `1`
-
 ## Options
-- `--ls-start`: Start localstack instance before running the test cases
-- `--ls-image`: Specify the localstack image to use, default is `localstack/localstack:latest`
+- `--ls-start`: Start localstack instance before running the test cases. Will use the cli by running `localstack start -d`
+- `--gather-metrics`: Collects raw test metrics for the run. Requires manual installation of the extension first:
+   ```bash
+    localstack extensions init
+    localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+   ```

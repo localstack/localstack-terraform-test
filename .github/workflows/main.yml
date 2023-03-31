@@ -10,14 +10,14 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        default: 'ls-community'
+        default: 'ls-all'
         type: string
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       localstack-image:
         required: false
         type: string
-        default: 'localstack/localstack:latest'
-        description: localstack docker image name to test against
+        default: 'localstack/localstack-pro:latest'
+        description: localstack docker image name to test against (requires pro version)
 
 name: Terraform Tests
 jobs:
@@ -29,10 +29,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
-        # For testing purpose, remove the lines below
-        run: echo "matrix=$(python -m terraform_pytest.get_services 'sqs,ecs')" >> $GITHUB_OUTPUT
-        #run: echo "matrix=$(python -m terraform_pytest.get-services ${{ 'ls-all' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -93,10 +90,10 @@ jobs:
         set -x
         source .venv/bin/activate
         pip install --pre localstack
-        docker pull localstack/localstack-pro     # Make sure to pull the latest version of the image
+        docker pull ${{ github.event.inputs.localstack-image || 'localstack/localstack-pro' }} 
         localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
-        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions init
-        LOCALSTACK_API_KEY=$LOCALSTACK_API_KEY localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        localstack extensions init
+        localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
 
     - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
       env:
@@ -108,7 +105,7 @@ jobs:
         source .venv/bin/activate
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
-          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --gather-metrics --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
+          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --gather-metrics
         else
           python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
         fi

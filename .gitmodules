@@ -1,3 +1,5 @@
 [submodule "terraform-provider-aws"]
 	path = terraform-provider-aws
 	url = https://github.com/hashicorp/terraform-provider-aws.git
+	ignore = dirty
+
