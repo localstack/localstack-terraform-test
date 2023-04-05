@@ -116,7 +116,7 @@ LS_PRO_SERVICES = [
 BLACKLISTED_SERVICES = ["controltower", "greengrass", "iotanalytics"]
 
 # FIXME: check why all the tests are failing, and remove this list once fixed
-# list of services where every test fails against LocalStack
+# list of services that cause a timeout because every test fails against LocalStack
 FAILING_SERVICES = ["emr", "sagemaker", "qldb"]
 
 
