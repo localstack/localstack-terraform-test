@@ -17,7 +17,6 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_NumCacheNodes_increaseWithPreferredAvailabilityZones
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_vpc
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_multiAZInVPC
-    p2:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_AZMode_memcached
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_AZMode_redis
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_EngineVersion_memcached
@@ -34,7 +33,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_Engine_Redis_LogDeliveryConfigurations
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_tags
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_tagWithOtherModification
-    p3:
+    p2:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_basic
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_description
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_disappears
@@ -48,7 +47,6 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetEngineVersionOnCreate_MinorUpgrade_6x
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetEngineVersionOnCreate_MajorUpgrade
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetEngineVersionOnCreate_MajorUpgrade_6x
-    p4:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetEngineVersionOnCreate_MinorDowngrade
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnCreate_NoVersion
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnCreate_MinorUpgrade
@@ -60,7 +58,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnUpdate_NoVersion
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnUpdate_MinorUpgrade
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_UpdateParameterGroupName
-    p5:
+    p3:
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_basic
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_addParameter
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_removeAllParameters
@@ -76,7 +74,6 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_data_source_test.go::TestAccElastiCacheReplicationGroupDataSource_multiAZ
         - terraform-provider-aws/internal/service/elasticache/replication_group_data_source_test.go::TestAccElastiCacheReplicationGroupDataSource_nonExistent
         - terraform-provider-aws/internal/service/elasticache/replication_group_data_source_test.go::TestAccElastiCacheReplicationGroupDataSource_Engine_Redis_LogDeliveryConfigurations
-    p6:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_basic
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_basic_v5
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_uppercase
@@ -92,7 +89,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_depecatedAvailabilityZones_vpc
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzNotInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzNotInVPC_repeated
-    p7:
+    p4:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_deprecatedAvailabilityZones_multiAzNotInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_deprecatedAvailabilityZones_multiAzInVPC
@@ -108,7 +105,6 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_clusteringAndCacheNodesCausesError
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_enableSnapshotting
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_enableAuthTokenTransitEncryption
-    p8:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_enableAtRestEncryption
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_useCMKKMSKeyID
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_NumberCacheClusters_basic
@@ -124,7 +120,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_finalSnapshot
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_autoMinorVersionUpgrade
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_Validation_noNodeType
-    p9:
+    p5:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_Validation_globalReplicationGroupIdAndNodeType
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_GlobalReplicationGroupID_basic
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_GlobalReplicationGroupID_full
@@ -137,7 +133,6 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/subnet_group_test.go::TestAccElastiCacheSubnetGroup_basic
         - terraform-provider-aws/internal/service/elasticache/subnet_group_test.go::TestAccElastiCacheSubnetGroup_update
         - terraform-provider-aws/internal/service/elasticache/subnet_group_test.go::TestAccElastiCacheSubnetGroup_tags
-    p10:
         - terraform-provider-aws/internal/service/elasticache/user_data_source_test.go::TestAccElastiCacheUserDataSource_basic
         - terraform-provider-aws/internal/service/elasticache/user_group_association_test.go::TestAccElastiCacheUserGroupAssociation_basic
         - terraform-provider-aws/internal/service/elasticache/user_group_association_test.go::TestAccElastiCacheUserGroupAssociation_update
@@ -323,6 +318,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_UpdateIops_io1
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_UpdateIops_io2
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_kmsKey
+    p2:
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_noIops
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_invalidIopsForType
         - terraform-provider-aws/internal/service/ec2/ebs_volume_test.go::TestAccEC2EBSVolume_invalidThroughputForType
@@ -371,7 +367,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_ami_test.go::TestAccEC2AMI_outpost
         - terraform-provider-aws/internal/service/ec2/ec2_ami_test.go::TestAccEC2AMI_boot
         - terraform-provider-aws/internal/service/ec2/ec2_ami_test.go::TestAccEC2AMI_tpmSupport
-    p2:
+    p3:
         - terraform-provider-aws/internal/service/ec2/ec2_availability_zone_data_source_test.go::TestAccEC2AvailabilityZoneDataSource_allAvailabilityZones
         - terraform-provider-aws/internal/service/ec2/ec2_availability_zone_data_source_test.go::TestAccEC2AvailabilityZoneDataSource_filter
         - terraform-provider-aws/internal/service/ec2/ec2_availability_zone_data_source_test.go::TestAccEC2AvailabilityZoneDataSource_localZone
@@ -422,6 +418,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_association
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_PublicIPv4Pool_default
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_PublicIPv4Pool_custom
+    p4:
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_customerOwnedIPv4Pool
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_networkBorderGroup
         - terraform-provider-aws/internal/service/ec2/ec2_eip_test.go::TestAccEC2EIP_carrierIP
@@ -479,7 +476,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_fleet_test.go::TestAccEC2Fleet_terminateInstancesWithExpiration
         - terraform-provider-aws/internal/service/ec2/ec2_fleet_test.go::TestAccEC2Fleet_type
         - terraform-provider-aws/internal/service/ec2/ec2_fleet_test.go::TestAccEC2Fleet_templateMultipleNetworkInterfaces
-    p3:
+    p5:
         - terraform-provider-aws/internal/service/ec2/ec2_host_data_source_test.go::TestAccEC2HostDataSource_basic
         - terraform-provider-aws/internal/service/ec2/ec2_host_data_source_test.go::TestAccEC2HostDataSource_filter
         - terraform-provider-aws/internal/service/ec2/ec2_host_test.go::TestAccEC2Host_basic
@@ -530,6 +527,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_userDataBase64_updateWithBashFile
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_userDataBase64_updateWithZipFile
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_userDataBase64_update
+    p6:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_gp2IopsDevice
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_gp2WithIopsValue
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_blockDevices
@@ -572,7 +570,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDevice_modifyType
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDeviceModifyIOPS_io1
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDeviceModifyIOPS_io2
-    p4:
+    p7:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDeviceModifyThroughput_gp3
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDevice_modifyDeleteOnTermination
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_EBSRootDevice_modifyAll
@@ -622,6 +620,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_CreditSpecificationT3_updateCPUCredits
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_CreditSpecificationStandardCPUCredits_t2Tot3Taint
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_CreditSpecificationUnlimitedCPUCredits_t2Tot3Taint
+    p8:
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_UserData
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_UserData_update
         - terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_UserData_stringToEncodedString
@@ -663,7 +662,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_key_pair_test.go::TestAccEC2KeyPair_nameGenerated
         - terraform-provider-aws/internal/service/ec2/ec2_key_pair_test.go::TestAccEC2KeyPair_namePrefix
         - terraform-provider-aws/internal/service/ec2/ec2_key_pair_test.go::TestAccEC2KeyPair_disappears
-    p5:
+    p9:
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_data_source_test.go::TestAccEC2LaunchTemplateDataSource_name
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_data_source_test.go::TestAccEC2LaunchTemplateDataSource_id
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_data_source_test.go::TestAccEC2LaunchTemplateDataSource_filter
@@ -716,6 +715,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_baselineEBSBandwidthMbps
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_burstablePerformance
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_cpuManufacturers
+    p10:
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_excludedInstanceTypes
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_instanceGenerations
         - terraform-provider-aws/internal/service/ec2/ec2_launch_template_test.go::TestAccEC2LaunchTemplate_instanceRequirements_localStorage
@@ -783,7 +783,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/ec2_spot_fleet_request_test.go::TestAccEC2SpotFleetRequest_capacityRebalance
         - terraform-provider-aws/internal/service/ec2/ec2_spot_fleet_request_test.go::TestAccEC2SpotFleetRequest_withInstanceStoreAMI
         - terraform-provider-aws/internal/service/ec2/ec2_spot_fleet_request_test.go::TestAccEC2SpotFleetRequest_noTerminateInstancesWithExpiration
-    p6:
+    p11:
         - terraform-provider-aws/internal/service/ec2/ec2_spot_instance_request_test.go::TestAccEC2SpotInstanceRequest_basic
         - terraform-provider-aws/internal/service/ec2/ec2_spot_instance_request_test.go::TestAccEC2SpotInstanceRequest_disappears
         - terraform-provider-aws/internal/service/ec2/ec2_spot_instance_request_test.go::TestAccEC2SpotInstanceRequest_tags
@@ -838,6 +838,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_route_table_vpc_association_test.go::TestAccEC2OutpostsLocalGatewayRouteTableVPCAssociation_tags
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_route_tables_data_source_test.go::TestAccEC2OutpostsLocalGatewayRouteTablesDataSource_basic
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_route_tables_data_source_test.go::TestAccEC2OutpostsLocalGatewayRouteTablesDataSource_filter
+    p12:
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_route_test.go::TestAccEC2OutpostsLocalGatewayRoute_basic
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_route_test.go::TestAccEC2OutpostsLocalGatewayRoute_disappears
         - terraform-provider-aws/internal/service/ec2/outposts_local_gateway_virtual_interface_data_source_test.go::TestAccEC2OutpostsLocalGatewayVirtualInterfaceDataSource_filter
@@ -879,7 +880,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_default_security_group_test.go::TestAccVPCDefaultSecurityGroup_empty
         - terraform-provider-aws/internal/service/ec2/vpc_default_vpc_dhcp_options_test.go::TestAccVPCDefaultVPCDHCPOptions_serial
         - terraform-provider-aws/internal/service/ec2/vpc_default_vpc_test.go::TestAccVPCDefaultVPCAndSubnet_serial
-    p7:
+    p13:
         - terraform-provider-aws/internal/service/ec2/vpc_dhcp_options_association_test.go::TestAccVPCDHCPOptionsAssociation_basic
         - terraform-provider-aws/internal/service/ec2/vpc_dhcp_options_association_test.go::TestAccVPCDHCPOptionsAssociation_Disappears_vpc
         - terraform-provider-aws/internal/service/ec2/vpc_dhcp_options_association_test.go::TestAccVPCDHCPOptionsAssociation_Disappears_dhcp
@@ -929,6 +930,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_subnet_association_test.go::TestAccVPCEndpointSubnetAssociation_basic
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_subnet_association_test.go::TestAccVPCEndpointSubnetAssociation_disappears
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_subnet_association_test.go::TestAccVPCEndpointSubnetAssociation_multiple
+    p14:
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_test.go::TestAccVPCEndpoint_gatewayBasic
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_test.go::TestAccVPCEndpoint_interfaceBasic
         - terraform-provider-aws/internal/service/ec2/vpc_endpoint_test.go::TestAccVPCEndpoint_disappears
@@ -979,7 +981,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_entry_test.go::TestAccVPCManagedPrefixListEntry_expectInvalidCIDR
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_entry_test.go::TestAccVPCManagedPrefixListEntry_description
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_entry_test.go::TestAccVPCManagedPrefixListEntry_disappears
-    p8:
+    p15:
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_test.go::TestAccVPCManagedPrefixList_basic
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_test.go::TestAccVPCManagedPrefixList_disappears
         - terraform-provider-aws/internal/service/ec2/vpc_managed_prefix_list_test.go::TestAccVPCManagedPrefixList_AddressFamily_ipv6
@@ -1029,6 +1031,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_network_acl_test.go::TestAccVPCNetworkACL_ipv6ICMPRules
         - terraform-provider-aws/internal/service/ec2/vpc_network_acl_test.go::TestAccVPCNetworkACL_ipv6VPCRules
         - terraform-provider-aws/internal/service/ec2/vpc_network_acl_test.go::TestAccVPCNetworkACL_espProtocol
+    P16:
         - terraform-provider-aws/internal/service/ec2/vpc_network_acls_data_source_test.go::TestAccVPCNetworkACLsDataSource_basic
         - terraform-provider-aws/internal/service/ec2/vpc_network_acls_data_source_test.go::TestAccVPCNetworkACLsDataSource_filter
         - terraform-provider-aws/internal/service/ec2/vpc_network_acls_data_source_test.go::TestAccVPCNetworkACLsDataSource_tags
@@ -1089,7 +1092,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_options_test.go::TestAccVPCPeeringConnectionOptions_basic
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_options_test.go::TestAccVPCPeeringConnectionOptions_differentRegionSameAccount
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_options_test.go::TestAccVPCPeeringConnectionOptions_sameRegionDifferentAccount
-    p9:
+    p17:
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_test.go::TestAccVPCPeeringConnection_basic
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_test.go::TestAccVPCPeeringConnection_disappears
         - terraform-provider-aws/internal/service/ec2/vpc_peering_connection_test.go::TestAccVPCPeeringConnection_tags
@@ -1143,6 +1146,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_route_table_test.go::TestAccVPCRouteTable_gatewayVPCEndpoint
         - terraform-provider-aws/internal/service/ec2/vpc_route_table_test.go::TestAccVPCRouteTable_multipleRoutes
         - terraform-provider-aws/internal/service/ec2/vpc_route_table_test.go::TestAccVPCRouteTable_prefixListToInternetGateway
+    p18:
         - terraform-provider-aws/internal/service/ec2/vpc_route_tables_data_source_test.go::TestAccVPCRouteTablesDataSource_basic
         - terraform-provider-aws/internal/service/ec2/vpc_route_test.go::TestAccVPCRoute_basic
         - terraform-provider-aws/internal/service/ec2/vpc_route_test.go::TestAccVPCRoute_disappears
@@ -1183,7 +1187,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_route_test.go::TestAccVPCRoute_prefixListToCarrierGateway
         - terraform-provider-aws/internal/service/ec2/vpc_route_test.go::TestAccVPCRoute_prefixListToLocalGateway
         - terraform-provider-aws/internal/service/ec2/vpc_route_test.go::TestAccVPCRoute_prefixListToEgressOnlyInternetGateway
-    p10:
+    p19:
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_data_source_test.go::TestAccVPCSecurityGroupDataSource_basic
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_rule_test.go::TestAccVPCSecurityGroupRule_Ingress_vpc
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_rule_test.go::TestAccVPCSecurityGroupRule_IngressSourceWithAccount_id
@@ -1237,6 +1241,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_ipv6
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_self
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_vpc
+    p20:
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_vpcNegOneIngress
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_vpcProtoNumIngress
         - terraform-provider-aws/internal/service/ec2/vpc_security_group_test.go::TestAccVPCSecurityGroup_multiIngress
@@ -1289,7 +1294,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_subnet_test.go::TestAccVPCSubnet_enableDNS64
         - terraform-provider-aws/internal/service/ec2/vpc_subnet_test.go::TestAccVPCSubnet_privateDNSNameOptionsOnLaunch
         - terraform-provider-aws/internal/service/ec2/vpc_subnet_test.go::TestAccVPCSubnet_ipv6Native
-    p11:
+    p21:
         - terraform-provider-aws/internal/service/ec2/vpc_subnets_data_source_test.go::TestAccVPCSubnetsDataSource_basic
         - terraform-provider-aws/internal/service/ec2/vpc_subnets_data_source_test.go::TestAccVPCSubnetsDataSource_filter
         - terraform-provider-aws/internal/service/ec2/vpc_test.go::TestAccVPC_basic
@@ -1331,6 +1336,7 @@ ec2:
         - terraform-provider-aws/internal/service/ec2/vpc_vpcs_data_source_test.go::TestAccVPCsDataSource_filters
         - terraform-provider-aws/internal/service/ec2/vpc_vpcs_data_source_test.go::TestAccVPCsDataSource_empty
         - terraform-provider-aws/internal/service/ec2/vpnclient_endpoint_test.go::TestAccClientVPNEndpoint_serial
+    p22:
         - terraform-provider-aws/internal/service/ec2/vpnsite_connection_route_test.go::TestAccSiteVPNConnectionRoute_basic
         - terraform-provider-aws/internal/service/ec2/vpnsite_connection_route_test.go::TestAccSiteVPNConnectionRoute_disappears
         - terraform-provider-aws/internal/service/ec2/vpnsite_connection_test.go::TestAccSiteVPNConnection_basic
