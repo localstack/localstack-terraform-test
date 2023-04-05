@@ -59,6 +59,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10.5'
+        token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
         cache: 'pip'
 
     - name: Install system dependencies
@@ -97,7 +98,6 @@ jobs:
 
     - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
       env:
-        PYTEST_PARALLEL_CONFIG: "${{ matrix.service_partition.service == 'ec2' && '-n 2' || '' }}"
         LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
         SERVICE: ${{ matrix.service_partition.service }}
         PARTITION: ${{ matrix.service_partition.partition }}
@@ -105,7 +105,7 @@ jobs:
         source .venv/bin/activate
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
-          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --gather-metrics
+          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
         else
           python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
         fi
