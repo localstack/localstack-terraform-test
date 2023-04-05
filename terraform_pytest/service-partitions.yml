@@ -264,6 +264,7 @@ ecs:
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withCapacityProviderStrategy
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withMultipleCapacityProviderStrategies
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withAlb
+    p8:
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withLaunchTypeFargate
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withLaunchTypeFargateAndPlatformVersion
         - terraform-provider-aws/internal/service/ecs/task_set_test.go::TestAccECSTaskSet_withServiceRegistries
