@@ -14,10 +14,10 @@ on:
         required: false
         default: 'ls-all'
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
-      disable-pro:
+      enable-pro:
         type: string
         required: false
-        default: 'false'
+        default: 'true'
         description: determine if pro capabilities should be disabled
 
 name: Terraform Tests
@@ -92,13 +92,12 @@ jobs:
       run: |
         source .venv/bin/activate
         pip install --pre localstack
-        disable_pro=${{ inputs.disable-pro || 'false' }}
-        if [[ $disable_pro != 'false' ]]
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        if [[ $enable_pro != 'true' ]]
         then
-          echo disable-pro is ${{ inputs.disable-pro }}
-          echo pulling community image && docker pull localstack/localstack
+          docker pull localstack/localstack
         else
-          echo pulling pro image && docker pull localstack/localstack-pro
+          docker pull localstack/localstack-pro
           localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
           localstack extensions init
           localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
@@ -110,10 +109,10 @@ jobs:
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
-        disable_pro=${{ inputs.disable-pro || 'false' }}
-        if [[ $disable_pro == 'false' ]]
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        if [[ $enable_pro == 'true' ]]
         then
-          echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
+          export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
