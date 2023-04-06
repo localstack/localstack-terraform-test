@@ -93,7 +93,7 @@ jobs:
         source .venv/bin/activate
         pip install --pre localstack
         disable_pro=${{ inputs.disable-pro || 'false' }}
-        if [[ $disable_pro == 'false' ]]
+        if [[ $disable_pro != 'false' ]]
         then
           echo disable-pro is ${{ inputs.disable-pro }}
           echo pulling community image && docker pull localstack/localstack
@@ -111,7 +111,7 @@ jobs:
       run: |
         source .venv/bin/activate
         disable_pro=${{ inputs.disable-pro || 'false' }}
-        if [[ $disable_pro != 'false' ]]
+        if [[ $disable_pro == 'false' ]]
         then
           echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
