@@ -10,14 +10,15 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        default: 'ls-all'
-        type: string
-        description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
-      enable-pro:
         type: string
         required: false
-        default: 'true'
-        description: determine if pro capabilities should be enabled
+        default: 'ls-all'
+        description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
+      disable-pro:
+        type: boolean
+        required: false
+        default: false
+        description: determine if pro capabilities should be disabled
 
 name: Terraform Tests
 jobs:
@@ -91,10 +92,15 @@ jobs:
       run: |
         source .venv/bin/activate
         pip install --pre localstack
-        docker pull localstack/localstack-pro
-        localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
-        localstack extensions init
-        localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        if [[ inputs.disable-pro ]]
+        then
+          docker pull localstack/localstack
+        else
+          docker pull localstack/localstack-pro
+          localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
+          localstack extensions init
+          localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        fi
 
     - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
       env:
@@ -102,16 +108,15 @@ jobs:
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
-        echo enable pro is ${{ inputs.enable-pro }}, services is ${{ inputs.services }}
-        if [[ ${{ github.event.inputs.enable-pro }} == "true" ]]
+        if [[ ! ${{ inputs.disable-pro }} ]]
         then
           echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
-          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
+          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
         else
-          python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
+          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
         fi
 
     - name: Archive Test Result
