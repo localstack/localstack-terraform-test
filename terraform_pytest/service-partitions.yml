@@ -17,6 +17,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_NumCacheNodes_increaseWithPreferredAvailabilityZones
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_vpc
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_multiAZInVPC
+    p2:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_AZMode_memcached
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_AZMode_redis
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_EngineVersion_memcached
@@ -33,7 +34,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_Engine_Redis_LogDeliveryConfigurations
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_tags
         - terraform-provider-aws/internal/service/elasticache/cluster_test.go::TestAccElastiCacheCluster_tagWithOtherModification
-    p2:
+    p3:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_basic
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_description
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_disappears
@@ -58,7 +59,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnUpdate_NoVersion
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_SetParameterGroupOnUpdate_MinorUpgrade
         - terraform-provider-aws/internal/service/elasticache/global_replication_group_test.go::TestAccElastiCacheGlobalReplicationGroup_UpdateParameterGroupName
-    p3:
+    p4:
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_basic
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_addParameter
         - terraform-provider-aws/internal/service/elasticache/parameter_group_test.go::TestAccElastiCacheParameterGroup_removeAllParameters
@@ -89,7 +90,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_depecatedAvailabilityZones_vpc
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzNotInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzNotInVPC_repeated
-    p4:
+    p5:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_deprecatedAvailabilityZones_multiAzNotInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_multiAzInVPC
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_deprecatedAvailabilityZones_multiAzInVPC
@@ -120,7 +121,7 @@ elasticache:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_finalSnapshot
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_autoMinorVersionUpgrade
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_Validation_noNodeType
-    p5:
+    p6:
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_Validation_globalReplicationGroupIdAndNodeType
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_GlobalReplicationGroupID_basic
         - terraform-provider-aws/internal/service/elasticache/replication_group_test.go::TestAccElastiCacheReplicationGroup_GlobalReplicationGroupID_full
