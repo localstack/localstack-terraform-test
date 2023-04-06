@@ -101,6 +101,7 @@ jobs:
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
+        echo enable pro is ${{ github.event.inputs.enable-pro }}
         if [[ ${{ github.event.inputs.enable-pro }} == "true" ]]
         then
           echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
