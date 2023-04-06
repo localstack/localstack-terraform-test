@@ -97,7 +97,7 @@ jobs:
 
     - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
       env:
-        LOCALSTACK_API_KEY: ${{ (github.event.inputs.enable-pro && secrets.LOCALSTACK_API_KEY) || ''}}
+        LOCALSTACK_API_KEY: ${{ github.event.inputs.enable-pro && secrets.LOCALSTACK_API_KEY || '' }}
         SERVICE: ${{ matrix.service_partition.service }}
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
