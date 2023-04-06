@@ -139,36 +139,6 @@ class GoException(Exception):
         self.stderr = stderr
 
 
-def _docker_service_health(client):
-    """Check if the docker service is healthy"""
-    if not client.ping():
-        print("\nPlease start docker daemon and try again")
-        raise Exception("Docker is not running")
-
-
-def _start_docker_container(client, config, localstack_image):
-    """Start the docker container"""
-    env_vars = ["DEBUG=1", "PROVIDER_OVERRIDE_S3=asf", "FAIL_FAST=1"]
-    port_mappings = {
-        "53/tcp": ("127.0.0.1", 53),
-        "53/udp": ("127.0.0.1", 53),
-        "443": ("127.0.0.1", 443),
-        "4566": ("127.0.0.1", 4566),
-        "4571": ("127.0.0.1", 4571),
-    }
-    volumes = ["/var/run/docker.sock:/var/run/docker.sock"]
-    localstack_container = client.containers.run(
-        image=localstack_image,
-        detach=True,
-        ports=port_mappings,
-        name="localstack_main",
-        volumes=volumes,
-        auto_remove=True,
-        environment=env_vars,
-    )
-    setattr(config, "localstack_container_id", localstack_container.id)
-
-
 def _localstack_health_check():
     """Check if the localstack service is healthy"""
     localstack_health_url = "http://localhost:4566/health"

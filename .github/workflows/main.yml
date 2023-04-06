@@ -2,11 +2,6 @@ on:
   schedule:
     - cron: '0 19 * * 6'
 
-  # For Testing, remove
-  pull_request:
-    branches:
-      - main
-
   workflow_dispatch:
     inputs:
       services:
@@ -30,8 +25,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        #run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
-        run: echo "matrix=$(python -m terraform_pytest.get_services 'sqs')" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
