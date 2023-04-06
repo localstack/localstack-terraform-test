@@ -14,8 +14,8 @@ on:
         type: string
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       enable-pro:
-        type: boolean
-        default: true
+        type: string
+        default: 'true'
         description: determine if pro capabilities should be enabled
 
 name: Terraform Tests
@@ -97,11 +97,14 @@ jobs:
 
     - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
       env:
-        LOCALSTACK_API_KEY: ${{ fromJSON('{"true": secrets.LOCALSTACK_API_KEY, "false": ""}') }}[github.input.events.enable-pro]
         SERVICE: ${{ matrix.service_partition.service }}
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
+        if [[ ${{ github.event.inputs.enable-pro }} == "true" ]]
+        then
+          echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
+        fi
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
           python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
