@@ -41,3 +41,4 @@ Purpose of this project is to externalize the test cases from the localstack rep
     localstack extensions init
     localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
    ```
+   Expects a `SERVICE` environment variable to be set for naming the metric file.
