@@ -92,7 +92,7 @@ jobs:
       run: |
         source .venv/bin/activate
         pip install --pre localstack
-        if [[ ${{ inputs.disable-pro }} ]]
+        if [[ $(test -n ${{ inputs.disable-pro }}) ]]
         then
           echo disable-pro is ${{ inputs.disable-pro }}
           echo pulling community image && docker pull localstack/localstack
