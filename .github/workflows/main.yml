@@ -15,6 +15,7 @@ on:
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       enable-pro:
         type: string
+        required: false
         default: 'true'
         description: determine if pro capabilities should be enabled
 
@@ -101,7 +102,7 @@ jobs:
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
-        echo enable pro is ${{ github.event.inputs.enable-pro }}, services is ${{ github.event.inputs.services }}
+        echo enable pro is ${{ inputs.enable-pro }}, services is ${{ inputs.services }}
         if [[ ${{ github.event.inputs.enable-pro }} == "true" ]]
         then
           echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
