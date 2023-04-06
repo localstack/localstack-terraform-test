@@ -15,9 +15,9 @@ on:
         default: 'ls-all'
         description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
       disable-pro:
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: 'false'
         description: determine if pro capabilities should be disabled
 
 name: Terraform Tests
@@ -92,7 +92,8 @@ jobs:
       run: |
         source .venv/bin/activate
         pip install --pre localstack
-        if [[ $(test -n ${{ inputs.disable-pro }}) ]]
+        disable_pro=${{ inputs.disable-pro || 'false' }}
+        if [[ $disable_pro == 'false' ]]
         then
           echo disable-pro is ${{ inputs.disable-pro }}
           echo pulling community image && docker pull localstack/localstack
@@ -109,7 +110,8 @@ jobs:
         PARTITION: ${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
-        if [[ $(test ${{ inputs.disable-pro }}) ]]
+        disable_pro=${{ inputs.disable-pro || 'false' }}
+        if [[ $disable_pro != 'false' ]]
         then
           echo "Setting pro key" && export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
