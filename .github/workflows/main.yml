@@ -94,9 +94,10 @@ jobs:
         pip install --pre localstack
         if [[ inputs.disable-pro ]]
         then
-          docker pull localstack/localstack
+          echo disable-pro is inputs.disable-pro
+          echo pulling community image && docker pull localstack/localstack
         else
-          docker pull localstack/localstack-pro
+          echo pulling pro image && docker pull localstack/localstack-pro
           localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
           localstack extensions init
           localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
