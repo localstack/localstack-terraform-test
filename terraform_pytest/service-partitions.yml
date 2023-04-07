@@ -1,5 +1,9 @@
 # This file partitions services that take too long in one go to
-# complete all tests within the 6 hour GitHub hardcap
+# complete all tests within the 6 hour GitHub hardcap. Right now it is created in 2 steps:
+# - collect all tests of the affected services via the --collect-only option as described
+#   in the readme.
+# - partition them manually according to the timeouts perceived.
+# TODO: automate this, potentially via `pytest split`
 elasticache:
     p1:
         - terraform-provider-aws/internal/service/elasticache/cluster_data_source_test.go::TestAccElastiCacheClusterDataSource_Data_basic
