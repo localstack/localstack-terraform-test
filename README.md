@@ -42,3 +42,13 @@ Purpose of this project is to externalize the test cases from the localstack rep
     localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
    ```
    Expects a `SERVICE` environment variable to be set for naming the metric file.
+
+## Services
+This test suite takes a very long time, and timeouts need to be accounted for.
+This is done in the following ways:
+- Blacklisting: Services that do not have any test and would otherwise be exectued are blacklisted and skipped
+- 'Ignored': Some services have tests, but all of them fail and cause a timeout this way.
+Since this offers no insights, they are marked as failing services and skipped as well.
+Check `terraform_pytest/utils.py` for details on both skipping mechanisms.
+- Partitioning: Some services are too large to complete a run within one job, so they are divided into partitions.
+Each partition holds a distinct subset of tests for that particular service.
