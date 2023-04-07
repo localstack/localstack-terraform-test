@@ -25,7 +25,7 @@ venv: $(VENV_ACTIVATE)		## Create a new (empty) virtual environment
 install:					## Install the package in editable mode
 	$(VENV_RUN); $(PIP_CMD) install -r requirements.txt
 
-init-precommit:				## install te pre-commit hook into your local git repository
+init-precommit:				## install the pre-commit hook into your local git repository
 	($(VENV_RUN); pre-commit install)
 
 lint:						## Run linting

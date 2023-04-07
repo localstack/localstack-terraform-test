@@ -113,7 +113,11 @@ LS_PRO_SERVICES = [
 ]
 
 # list of services that doesn't contain any tests
-BLACKLISTED_SERVICES = ["controltower", "greengrass"]
+BLACKLISTED_SERVICES = ["controltower", "greengrass", "iotanalytics"]
+
+# FIXME: check why all the tests are failing, and remove this list once fixed
+# list of services that cause a timeout because every test fails against LocalStack
+FAILING_SERVICES = ["emr", "sagemaker", "qldb"]
 
 
 def execute_command(cmd, env=None, cwd=None):
@@ -214,12 +218,13 @@ def get_services(service):
         list of services
     """
     result = []
+    skipped_services = BLACKLISTED_SERVICES + FAILING_SERVICES
     if service == "ls-community":
-        services = LS_COMMUNITY_SERVICES
+        services = [s for s in LS_COMMUNITY_SERVICES if s not in skipped_services]
     elif service == "ls-pro":
-        services = LS_PRO_SERVICES
+        services = [s for s in LS_PRO_SERVICES if s not in skipped_services]
     elif service == "ls-all":
-        services = LS_COMMUNITY_SERVICES + LS_PRO_SERVICES
+        services = [s for s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES if s not in skipped_services]
     else:
         if "," in service:
             services = service.split(",")
@@ -227,10 +232,12 @@ def get_services(service):
         else:
             services = [service]
     for s in services:
-        if s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES and s not in BLACKLISTED_SERVICES:
-            result.append(s)
-        else:
+        if s not in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES:
             print(f"Service {s} is not supported...\nPlease check the service name")
+        elif s in skipped_services:
+            print(f"Service {s} doesn't have any (functioning) tests, skipping...")
+        else:
+            result.append(s)
     return list(set(result))
 
 

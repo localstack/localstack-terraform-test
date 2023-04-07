@@ -6,3 +6,6 @@ black>=22.1
 isort>=5.10
 pytest-xdist>=3.1.0
 pre-commit>=2.21.0
+localstack>=1.4.0.dev
+
+PyYAML~=6.0

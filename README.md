@@ -1,6 +1,6 @@
 # Localstack Terraform Test Runner
 
-This is a test runner for localstack and terraform. It will run a test cases from the hashicrop [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
+This is a test runner for localstack and terraform. It will run a test cases from the hashicorp [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
 
 Purpose of this project is to externalize the test cases from the localstack repo and run them against localstack to gather parity metrics.
 
@@ -12,10 +12,11 @@ Purpose of this project is to externalize the test cases from the localstack rep
 3. Run `make install` to install the dependencies
 
 ## How to run?
-1. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
+1. Only relevant when using pro-image: set the env `LOCALSTACK_API_KEY`
+2. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
    - **Note: This operation is not idempotent. Please apply the patch only once.**
-2. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
-3. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
+3. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
+4. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
 
 ## How to run test cases?
 - To list down all the test case from a specific service, run `python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q`
@@ -33,11 +34,21 @@ Purpose of this project is to externalize the test cases from the localstack rep
 - **AWS_ALTERNATE_REGION**: `us-east-2`
 - **AWS_THIRD_REGION**: `eu-west-1`
 
-## Environment variables for Localstack
-- **DEBUG**: `1`
-- **PROVIDER_OVERRIDE_S3**: `asf`
-- **FAIL_FAST**: `1`
-
 ## Options
-- `--ls-start`: Start localstack instance before running the test cases
-- `--ls-image`: Specify the localstack image to use, default is `localstack/localstack:latest`
+- `--ls-start`: Start localstack instance before running the test cases. Will use the cli by running `localstack start -d`
+- `--gather-metrics`: Collects raw test metrics for the run. Requires manual installation of the extension first:
+   ```bash
+    localstack extensions init
+    localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+   ```
+   Expects a `SERVICE` environment variable to be set for naming the metric file.
+
+## Services
+This test suite takes a very long time, and timeouts need to be accounted for.
+This is done in the following ways:
+- Blacklisting: Services that do not have any test and would otherwise be exectued are blacklisted and skipped
+- 'Ignored': Some services have tests, but all of them fail and cause a timeout this way.
+Since this offers no insights, they are marked as failing services and skipped as well.
+Check `terraform_pytest/utils.py` for details on both skipping mechanisms.
+- Partitioning: Some services are too large to complete a run within one job, so they are divided into partitions.
+Each partition holds a distinct subset of tests for that particular service.

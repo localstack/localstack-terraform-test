@@ -1,17 +1,19 @@
 on:
   schedule:
     - cron: '0 19 * * 6'
+
   workflow_dispatch:
     inputs:
       services:
-        default: 'ls-community'
         type: string
-        description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
-      localstack-image:
         required: false
+        default: 'ls-all'
+        description: name of the service to execute tests for (e.g. "ls-community", "ls-pro", "ls-all", "s3,iam,ec2")
+      enable-pro:
         type: string
-        default: 'localstack/localstack:latest'
-        description: localstack docker image name to test against
+        required: false
+        default: 'true'
+        description: determine if pro capabilities should be disabled
 
 name: Terraform Tests
 jobs:
@@ -23,7 +25,8 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        run: echo "matrix=$(python -m terraform_pytest.get-services ${{ github.event.inputs.services || 'ls-community' }})" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
+
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -33,7 +36,7 @@ jobs:
       max-parallel: 10
       fail-fast: false
       matrix:
-        service: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
+        service_partition: ${{ fromJson(needs.prepare_list.outputs.matrix) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -52,29 +55,78 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10.5'
+        token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
         cache: 'pip'
 
     - name: Install system dependencies
       run: |
+        python -m venv .venv
+        source .venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Patch Terraform Provider
       run: |
+        source .venv/bin/activate
         cd terraform-provider-aws && go mod vendor
         cd ../
         python -m terraform_pytest.main patch
 
-    - name: Build ${{ matrix.service }} Binary
+    - name: Build ${{ matrix.service_partition.service }} Binary
       run: |
-        python -m terraform_pytest.main build -s ${{ matrix.service }}
+        source .venv/bin/activate
+        python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
         ls -la terraform-provider-aws/test-bin
 
-    - name: Run ${{ matrix.service }} Tests
+    - name: Setup LocalStack
       env:
-        PYTEST_PARALLEL_CONFIG: "${{ matrix.service == 'ec2' && '-n 2' || '' }}"
+        LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+        TMP_USER: ${{ secrets.TMP_USER }}
+        TMP_PW: ${{ secrets.TMP_PW }}
       run: |
-        python -m pytest $PYTEST_PARALLEL_CONFIG --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service }} -s -v --ls-start --ls-image ${{ github.event.inputs.localstack-image || 'localstack/localstack:latest' }}
+        source .venv/bin/activate
+        pip install --pre localstack
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        if [[ $enable_pro != 'true' ]]
+        then
+          docker pull localstack/localstack
+        else
+          docker pull localstack/localstack-pro
+          localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
+          localstack extensions init
+          localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        fi
+
+    - name: Run ${{ matrix.service_partition.service }} - ${{ matrix.service_partition.partition }} Tests
+      env:
+        SERVICE: ${{ matrix.service_partition.service }}
+        PARTITION: ${{ matrix.service_partition.partition }}
+      run: |
+        source .venv/bin/activate
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        if [[ $enable_pro == 'true' ]]
+        then
+          export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
+        fi
+        if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
+        then
+          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
+        else
+          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
+        fi
+
+    - name: Archive Test Result
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-metrics
+        path: target/reports
+
+    - name: Logout LocalStack
+      if: always()
+      run: |
+        source .venv/bin/activate
+        localstack logout
 
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
