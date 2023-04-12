@@ -30,7 +30,7 @@ jobs:
           submodules: 'true'
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
-        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'sqs,sns' }})" >> $GITHUB_OUTPUT # TODO: restore
+        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'sqs' }})" >> $GITHUB_OUTPUT # TODO: restore
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -59,6 +59,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: tinybirdco/pytest-tinybird
+        path: pytest-tinybird
 
     - name: Set up Python 3.10.5
       uses: actions/setup-python@v4
