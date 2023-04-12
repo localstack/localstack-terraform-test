@@ -30,7 +30,7 @@ jobs:
           submodules: 'true'
       - id: set-matrix
         #run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
-        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'sqs, sns' }})" >> $GITHUB_OUTPUT # TODO: restore
+        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'sqs,sns' }})" >> $GITHUB_OUTPUT # TODO: restore
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -55,6 +55,10 @@ jobs:
         go-version: '1.18.x'
         cache: true
         cache-dependency-path: terraform-provider-aws/go.sum
+
+    - uses: actions/checkout@v3
+      with:
+        repository: tinybirdco/pytest-tinybird
 
     - name: Set up Python 3.10.5
       uses: actions/setup-python@v4
@@ -83,10 +87,10 @@ jobs:
         python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
         ls -la terraform-provider-aws/test-bin
 
+
     - name: Setup tinybird plugin
       run: |
         source .venv/bin/activate
-        git clone git@github.com:tinybirdco/pytest-tinybird.git
         cd pytest-tinybird
         python setup.py install
 
