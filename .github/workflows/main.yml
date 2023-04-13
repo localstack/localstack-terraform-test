@@ -2,10 +2,6 @@ on:
   schedule:
     - cron: '0 19 * * 6'
 
-  pull_request:
-    branches:
-      - main #TODO: remove
-
   workflow_dispatch:
     inputs:
       services:
@@ -29,8 +25,7 @@ jobs:
         with:
           submodules: 'true'
       - id: set-matrix
-        #run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
-        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'sqs,sns' }})" >> $GITHUB_OUTPUT # TODO: restore
+        run: echo "matrix=$(python -m terraform_pytest.get_services ${{ github.event.inputs.services || 'ls-all' }})" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -119,7 +114,7 @@ jobs:
         SERVICE: ${{ matrix.service_partition.service }}
         PARTITION: ${{ matrix.service_partition.partition }}
         TINYBIRD_URL: https://api.tinybird.co
-        TINYBIRD_DATASOURCE: tf_tinybird_local_test # TODO: change to real datasource
+        TINYBIRD_DATASOURCE: localstack_terraform_test_results
         TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
         CI_COMMIT_SHA: ${{ github.sha }}
         CI_JOB_ID: ${{ github.job }}
