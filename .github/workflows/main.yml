@@ -51,6 +51,11 @@ jobs:
         cache: true
         cache-dependency-path: terraform-provider-aws/go.sum
 
+    - uses: actions/checkout@v3
+      with:
+        repository: tinybirdco/pytest-tinybird
+        path: pytest-tinybird
+
     - name: Set up Python 3.10.5
       uses: actions/setup-python@v4
       with:
@@ -78,6 +83,13 @@ jobs:
         python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
         ls -la terraform-provider-aws/test-bin
 
+
+    - name: Setup tinybird plugin
+      run: |
+        source .venv/bin/activate
+        cd pytest-tinybird
+        python setup.py install
+
     - name: Setup LocalStack
       env:
         LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
@@ -101,6 +113,13 @@ jobs:
       env:
         SERVICE: ${{ matrix.service_partition.service }}
         PARTITION: ${{ matrix.service_partition.partition }}
+        TINYBIRD_URL: https://api.tinybird.co
+        TINYBIRD_DATASOURCE: localstack_terraform_test_results
+        TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+        CI_COMMIT_SHA: ${{ github.sha }}
+        CI_JOB_ID: ${{ github.job }}
+        CI_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        CI_JOB_NAME: ${{ github.job }}-${{ matrix.service_partition.service }}-${{ matrix.service_partition.partition }}
       run: |
         source .venv/bin/activate
         enable_pro=${{ inputs.enable-pro || 'true' }}
@@ -110,9 +129,9 @@ jobs:
         fi
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
-          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics
+          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics --report-to-tinybird
         else
-          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics
+          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics --report-to-tinybird
         fi
 
     - name: Archive Test Result
