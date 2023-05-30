@@ -13,7 +13,7 @@ on:
         type: string
         required: false
         default: 'true'
-        description: determine if pro capabilities should be disabled
+        description: determine if pro capabilities should be enabled
       tinybird-reporting:
         type: string
         required: false
@@ -157,7 +157,7 @@ jobs:
         path: target/reports
 
     - name: Logout LocalStack
-      if: ${{ (github.action.inputs.enable-pro || 'true') == 'true' }}
+      if: ${{ (github.event.inputs.enable-pro || 'true') == 'true' }}
       run: |
         source .venv/bin/activate
         localstack logout
