@@ -57,7 +57,7 @@ jobs:
         cache-dependency-path: terraform-provider-aws/go.sum
 
     - uses: actions/checkout@v3
-      if: ${{ github.event.inputs.tinybird-reporting || 'true' }} == 'true'
+      if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
       with:
         repository: tinybirdco/pytest-tinybird
         path: pytest-tinybird
@@ -91,7 +91,7 @@ jobs:
 
 
     - name: Setup tinybird plugin
-      if: ${{ github.event.inputs.tinybird-reporting || 'true' }} == 'true'
+      if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
       run: |
         source .venv/bin/activate
         cd pytest-tinybird
@@ -142,14 +142,13 @@ jobs:
         fi
 
     - name: Archive Test Result
-      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: test-metrics
         path: target/reports
 
     - name: Logout LocalStack
-      if: always()
+      if: ${{ (github.action.inputs.enable-pro || 'true') == 'true' }}
       run: |
         source .venv/bin/activate
         localstack logout
