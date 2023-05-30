@@ -136,7 +136,7 @@ jobs:
           export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
         
-        if [[ ${{ enable_tinybird }} == "true" ]]
+        if [[ $enable_tinybird == 'true' ]]
         then
           options="-s -v --ls-start --gather-metrics --report-to-tinybird"
         else
