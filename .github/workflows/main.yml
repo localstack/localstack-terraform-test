@@ -14,6 +14,11 @@ on:
         required: false
         default: 'true'
         description: determine if pro capabilities should be disabled
+      tinybird-reporting:
+        type: string
+        required: false
+        default: 'false'
+        description: determine whether results should be reported to tinybird
 
 name: Terraform Tests
 jobs:
@@ -52,6 +57,7 @@ jobs:
         cache-dependency-path: terraform-provider-aws/go.sum
 
     - uses: actions/checkout@v3
+      if: ${{ github.event.inputs.tinybird-reporting || 'true' }} == 'true'
       with:
         repository: tinybirdco/pytest-tinybird
         path: pytest-tinybird
@@ -85,6 +91,7 @@ jobs:
 
 
     - name: Setup tinybird plugin
+      if: ${{ github.event.inputs.tinybird-reporting || 'true' }} == 'true'
       run: |
         source .venv/bin/activate
         cd pytest-tinybird
