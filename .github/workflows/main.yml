@@ -13,7 +13,12 @@ on:
         type: string
         required: false
         default: 'true'
-        description: determine if pro capabilities should be disabled
+        description: determine if pro capabilities should be enabled
+      tinybird-reporting:
+        type: string
+        required: false
+        default: 'false'
+        description: determine whether results should be reported to tinybird
 
 name: Terraform Tests
 jobs:
@@ -52,6 +57,7 @@ jobs:
         cache-dependency-path: terraform-provider-aws/go.sum
 
     - uses: actions/checkout@v3
+      if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
       with:
         repository: tinybirdco/pytest-tinybird
         path: pytest-tinybird
@@ -85,6 +91,7 @@ jobs:
 
 
     - name: Setup tinybird plugin
+      if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
       run: |
         source .venv/bin/activate
         cd pytest-tinybird
@@ -123,26 +130,34 @@ jobs:
       run: |
         source .venv/bin/activate
         enable_pro=${{ inputs.enable-pro || 'true' }}
+        enable_tinybird=${{ inputs.tinybird-reporting || 'true' }}
         if [[ $enable_pro == 'true' ]]
         then
           export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
+        
+        if [[ $enable_tinybird == 'true' ]]
+        then
+          options="-s -v --ls-start --gather-metrics --report-to-tinybird"
+        else
+          options="-s -v --ls-start --gather-metrics"
+        fi
+        
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
-          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} -s -v --ls-start --gather-metrics --report-to-tinybird
+          python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} $options
         else
-          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) -s -v --ls-start --gather-metrics --report-to-tinybird
+          python -m pytest --junitxml=target/reports/pytest.xml $(python terraform_pytest/get_tf_partitions.py ${{ matrix.service_partition.service }} ${{ matrix.service_partition.partition }} ) $options
         fi
 
     - name: Archive Test Result
-      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: test-metrics
         path: target/reports
 
     - name: Logout LocalStack
-      if: always()
+      if: ${{ (github.event.inputs.enable-pro || 'true') == 'true' }}
       run: |
         source .venv/bin/activate
         localstack logout
