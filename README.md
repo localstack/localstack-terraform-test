@@ -14,13 +14,13 @@
 
 This utility serves as a test runner designed specifically for Localstack and Terraform. By leveraging it, users can execute test cases from the Hashicorp Terraform provider AWS against a Localstack Instance.
 
-## 🎯 **Purpose**:
+## 🎯 **Purpose**
 
 The primary objective behind this project is to segregate test cases from the Localstack repo and execute them against Localstack. This helps in obtaining parity metrics.
 
 ---
 
-## 🔧 **Installation**:
+## 🔧 **Installation**
 
 1. 📦 Clone the repository (including submodules):
 ```
@@ -39,7 +39,7 @@ make install
 
 ---
 
-## 🏃‍♂️ **How to Run**:
+## 🏃‍♂️ **How to Run**
 
 - 🔑 (Pro-image only) Set the `LOCALSTACK_API_KEY` environment variable.
 - Apply the patch to the Terraform provider AWS:
@@ -56,7 +56,7 @@ python -m terraform_pytest.main build -s s3
 
 ---
 
-## 🔍 **How to Run Test Cases**:
+## 🔍 **How to Run Test Cases**
 
 - 📋 List all test cases from a specific service:
 ```
@@ -77,7 +77,7 @@ AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/interna
 
 ---
 
-## 🔢 **Default Environment Variables for Terraform Tests**:
+## 🔢 **Default Environment Variables for Terraform Tests**
 
 | Variable                          | Default Value |
 | --------------------------------- | ------------- |
@@ -92,7 +92,7 @@ AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/interna
 
 ---
 
-## ⚙️ **Options**:
+## ⚙️ **Options**
 
 - `--ls-start`: Initializes the Localstack instance before test case execution. It triggers the CLI:
 ```
@@ -108,7 +108,7 @@ Remember to set the `SERVICE` environment variable for naming the metric file.
 
 ---
 
-## 🔐 **Services**:
+## 🔐 **Services**
 
 Executing this test suite is a time-intensive process. To cater to this, the following mechanisms are in place:
 
