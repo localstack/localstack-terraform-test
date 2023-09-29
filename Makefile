@@ -37,4 +37,7 @@ lint:						## Run linting
 format:						## Run formatting
 	$(VENV_RUN); python -m isort .; python -m black .
 
+reset-submodules:			## Reset the submodules to the specified commit
+	git submodule foreach git reset --hard
+
 .PHONY: usage venv install init_precommit lint format
