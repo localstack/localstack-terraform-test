@@ -1,4 +1,4 @@
-#!/bin/bash
+SHELL := /bin/bash
 
 VENV_BIN ?= python3 -m venv
 VENV_DIR ?= .venv
@@ -10,8 +10,10 @@ else
 	VENV_ACTIVATE = $(VENV_DIR)/bin/activate
 endif
 
-usage:						## Show this help
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "%-25s %s\n", $$1, $$2 }'
+usage:						## Show this help in table format
+	@echo "| Target                 | Description                                                       |"
+	@echo "|------------------------|-------------------------------------------------------------------|"
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "| %-22s | %-65s |\n", $$1, $$2 }'
 
 $(VENV_ACTIVATE):
 	test -d $(VENV_DIR) || $(VENV_BIN) $(VENV_DIR)
@@ -22,15 +24,17 @@ VENV_RUN = . $(VENV_ACTIVATE)
 
 venv: $(VENV_ACTIVATE)		## Create a new (empty) virtual environment
 
-install:					## Install the package in editable mode
+install: venv				## Install the package in editable mode
 	$(VENV_RUN); $(PIP_CMD) install -r requirements.txt
 
-init-precommit:				## install the pre-commit hook into your local git repository
+init_precommit:				## Install the pre-commit hook into your local git repository
 	($(VENV_RUN); pre-commit install)
 
 lint:						## Run linting
 	@echo "Running black... "
-	black --check .
+	$(VENV_RUN); black --check .
 
 format:						## Run formatting
 	$(VENV_RUN); python -m isort .; python -m black .
+
+.PHONY: usage venv install init_precommit lint format
