@@ -85,15 +85,10 @@ def build_test_binary(
         logging.info(f"Cache has been detected in the directory: {test_binary}.")
         return 0, ""
 
-    # Clean and set up modules
-    for _ in range(2):  # The sequence of commands seems to be repeated twice
-        cmd = ["go", "mod", "tidy"]
-        error_message = f"Error while executing 'go mod tidy' for {service}"
-        execute_and_check(cmd, tf_root_path, error_message)
-
-        cmd = ["go", "mod", "vendor"]
-        error_message = f"Error while executing 'go mod vendor' for {service}"
-        execute_and_check(cmd, tf_root_path, error_message)
+    # set up modules
+    cmd = ["go", "mod", "vendor"]
+    error_message = f"Error while executing 'go mod vendor' for {service}"
+    execute_and_check(cmd, tf_root_path, error_message)
 
     # Build the test binary
     logging.info(f"Initiating generation of testing binary in the {test_binary} directory.")
