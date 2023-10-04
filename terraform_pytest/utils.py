@@ -151,5 +151,7 @@ def patch_repository():
 
         if return_code != 0:
             logging.error("Failure encountered during repository patching.")
-        if stdout:
-            logging.info(f"Command output: {stdout}")
+            logging.error(stdout)
+        else:
+            if stdout:
+                logging.info(f"{patch_file} has been patched successfully.")

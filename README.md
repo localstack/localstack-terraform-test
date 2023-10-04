@@ -79,16 +79,18 @@ AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/interna
 
 ## 🔢 **Default Environment Variables for Terraform Tests**
 
-| Variable                          | Default Value |
-| --------------------------------- | ------------- |
-| TF_ACC                            | 1             |
-| AWS_ACCESS_KEY_ID                 | test          |
-| AWS_SECRET_ACCESS_KEY             | test          |
-| AWS_DEFAULT_REGION                | us-west-1     |
-| AWS_ALTERNATE_ACCESS_KEY_ID       | test          |
-| AWS_ALTERNATE_SECRET_ACCESS_KEY   | test          |
-| AWS_ALTERNATE_REGION              | us-east-2     |
-| AWS_THIRD_REGION                  | eu-west-1     |
+| Variable                             | Default Value |
+|--------------------------------------|---------------|
+| `TF_ACC`                             | 1             |
+| `AWS_ACCESS_KEY_ID`                  | test          |
+| `AWS_SECRET_ACCESS_KEY`              | test          |
+| `AWS_DEFAULT_REGION`                 | us-west-1     |
+| `AWS_ALTERNATE_ACCESS_KEY_ID`        | test          |
+| `AWS_ALTERNATE_SECRET_ACCESS_KEY`    | test          |
+| `AWS_ALTERNATE_REGION`               | us-east-2     |
+| `AWS_THIRD_SECRET_ACCESS_KEY`        | test          |
+| `AWS_THIRD_ACCESS_KEY_ID`            | test          |
+| `AWS_THIRD_REGION`                   | eu-west-1     |
 
 ---
 

@@ -144,7 +144,7 @@ jobs:
         
         if [[ ${{ matrix.service_partition.service }} == "lambda" ]]
         then
-          cp -r terraform-provider-aws/internal/service/lambda/test-fixtures ./test-bin/
+          make prepare-lambda
         fi
 
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 

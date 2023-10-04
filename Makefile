@@ -40,4 +40,12 @@ format:						## Run formatting
 reset-submodules:			## Reset the submodules to the specified commit
 	git submodule foreach git reset --hard
 
+get-submodules:				## Get the submodules
+	git submodule update --init --recursive
+
+prepare-lambda:				## Prepare the lambda function for deployment
+	@test -d terraform-provider-aws || echo "Please run 'git submodule update --init --recursive' to get the terraform-provider-aws submodule"
+	@cp -r terraform-provider-aws/internal/service/lambda/test-fixtures ./test-bin/ && echo "Copied test-fixtures to test-bin"
+
+
 .PHONY: usage venv install init_precommit lint format reset-submodules
