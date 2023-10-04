@@ -142,6 +142,11 @@ jobs:
           options="-s -v --ls-start --gather-metrics"
         fi
         
+        if [[ ${{ matrix.service_partition.service }} == "lambda" ]]
+        then
+          cp -r terraform-provider-aws/internal/service/lambda/test-fixtures ./test-bin/
+        fi
+
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
           python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} $options
