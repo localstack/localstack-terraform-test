@@ -87,7 +87,6 @@ jobs:
       run: |
         source .venv/bin/activate
         python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
-        ls -la terraform-provider-aws/test-bin
 
 
     - name: Setup tinybird plugin
