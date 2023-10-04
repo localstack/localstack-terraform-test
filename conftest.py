@@ -54,6 +54,7 @@ class GoItem(pytest.Item):
     def runtest(self):
         """Run the test case"""
 
+        cwd = os.getcwd()
         tf_root_path = realpath(relpath(self.path).split(os.sep)[0])
         service_path = dirname(Path(*relpath(self.path).split(os.sep)[1:]))
         service = service_path.split(os.sep)[-1]
@@ -75,14 +76,14 @@ class GoItem(pytest.Item):
         )
 
         cmd = [
-            f"./test-bin/{service}.test",
+            f"{cwd}/test-bin/{service}.test",
             "-test.v",
             "-test.parallel=1",
             "-test.count=1",
             "-test.timeout=60m",
             f"-test.run={self.name}",
         ]
-        return_code, stdout = execute_command(cmd, env, tf_root_path)
+        return_code, stdout = execute_command(cmd, env, cwd)
         if return_code != 0:
             raise GoException(returncode=return_code, stderr=stdout)
         elif IS_GATHER_METRICS:
