@@ -1,9 +1,14 @@
-from os.path import realpath
+import click
+import os
 from timeit import default_timer as timer
 
-import click
-
-from terraform_pytest.utils import TF_REPO_NAME, build_test_bin, get_services, patch_repo
+from terraform_pytest.utils import (
+    TF_REPO_NAME,
+    TF_TEST_BINARY_FOLDER,
+    build_test_bin,
+    get_services,
+    patch_repo,
+)
 
 
 @click.group(name="pytest-golang", help="Golang Test Runner for localstack")
@@ -34,7 +39,7 @@ def build(service, force_build):
         try:
             start = timer()
             build_test_bin(
-                service=service, tf_root_path=realpath(TF_REPO_NAME), force_build=force_build
+                service=service, tf_root_path=os.path.realpath(TF_REPO_NAME), force_build=force_build
             )
             end = timer()
             print(f"Build {service} in {end - start} seconds")
@@ -45,7 +50,19 @@ def build(service, force_build):
             print(f"Failed to build binary for {service}: {e}")
 
 
+@click.command(name="clean", help="Cleans up all the binaries")
+def clean():
+    binary_folder = f"{TF_REPO_NAME}/{TF_TEST_BINARY_FOLDER}"
+    print(f"Cleaning up {binary_folder}")
+    for file in os.listdir(binary_folder):
+        if file.endswith(".test"):
+            print(f"Removing: {file}")
+            os.remove(os.path.join(binary_folder, file))
+    print("Done")
+
+
 if __name__ == "__main__":
     cli.add_command(build)
     cli.add_command(patch)
+    cli.add_command(clean)
     cli()

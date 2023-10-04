@@ -1,54 +1,120 @@
-# Localstack Terraform Test Runner
+## 📖 Table of Contents
+1. [🌍 Localstack Terraform Test Runner 🚀](#-localstack-terraform-test-runner-)
+2. [🎯 Purpose](#-purpose)
+3. [🔧 Installation](#-installation)
+4. [🏃‍ How to Run](#-how-to-run)
+5. [🔍 How to Run Test Cases](#-how-to-run-test-cases)
+6. [🔢 Default Environment Variables for Terraform Tests](#-default-environment-variables-for-terraform-tests)
+7. [⚙️ Options](#-options)
+8. [🔐 Services](#-services)
 
-This is a test runner for localstack and terraform. It will run a test cases from the hashicorp [terraform provider aws](https://github.com/hashicorp/terraform-provider-aws.git) against Localstack Instance.
+---
 
-Purpose of this project is to externalize the test cases from the localstack repo and run them against localstack to gather parity metrics.
+## 🌍 **Localstack Terraform Test Runner** 🚀
 
-## Installation
-1. Clone the repository with submodules
-   - `git clone git@github.com:localstack/localstack-terraform-test.git --recurse-submodules`
-   - Make sure you have the latest version of the submodules after switching to a different branch using `git submodule update --init --recursive`
-2. Run `make venv` to create a virtual environment
-3. Run `make install` to install the dependencies
+This utility serves as a test runner designed specifically for Localstack and Terraform. By leveraging it, users can execute test cases from the Hashicorp Terraform provider AWS against a Localstack Instance.
 
-## How to run?
-1. Only relevant when using pro-image: set the env `LOCALSTACK_API_KEY`
-2. Run `python -m terraform_pytest.main patch` to apply the patch to the terraform provider aws
-   - **Note: This operation is not idempotent. Please apply the patch only once.**
-3. Run `python -m terraform_pytest.main build -s s3` to build testing binary for the golang module
-4. Now you are ready to use `python -m pytest` commands to list and run test cases from golang
+## 🎯 **Purpose**
 
-## How to run test cases?
-- To list down all the test case from a specific service, run `python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q`
-- To run a specific test case, run `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file> -k <test-case-name> --ls-start` or `python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
-- Additional environment variables can be added by appending it in the start of the command, i.e. `AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start`
+The primary objective behind this project is to segregate test cases from the Localstack repo and execute them against Localstack. This helps in obtaining parity metrics.
 
-## Default environment variables for Terraform Tests
-- **TF_ACC**: `1`
-- **AWS_ACCESS_KEY_ID**: `test`
-- **AWS_SECRET_ACCESS_KEY**: `test`
-- **AWS_DEFAULT_REGION**: `us-west-1`
-- **AWS_ALTERNATE_ACCESS_KEY_ID**: `test`
-- **AWS_ALTERNATE_SECRET_ACCESS_KEY**: `test`
-- **AWS_ALTERNATE_SECRET_ACCESS_KEY**: `test`
-- **AWS_ALTERNATE_REGION**: `us-east-2`
-- **AWS_THIRD_REGION**: `eu-west-1`
+---
 
-## Options
-- `--ls-start`: Start localstack instance before running the test cases. Will use the cli by running `localstack start -d`
-- `--gather-metrics`: Collects raw test metrics for the run. Requires manual installation of the extension first:
-   ```bash
-    localstack extensions init
-    localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
-   ```
-   Expects a `SERVICE` environment variable to be set for naming the metric file.
+## 🔧 **Installation**
 
-## Services
-This test suite takes a very long time, and timeouts need to be accounted for.
-This is done in the following ways:
-- Blacklisting: Services that do not have any test and would otherwise be exectued are blacklisted and skipped
-- 'Ignored': Some services have tests, but all of them fail and cause a timeout this way.
-Since this offers no insights, they are marked as failing services and skipped as well.
-Check `terraform_pytest/utils.py` for details on both skipping mechanisms.
-- Partitioning: Some services are too large to complete a run within one job, so they are divided into partitions.
-Each partition holds a distinct subset of tests for that particular service.
+1. 📦 Clone the repository (including submodules):
+```
+git clone git@github.com:localstack/localstack-terraform-test.git --recurse-submodules
+```
+
+2. 🔀 Ensure you're on the latest version of the submodules:
+```
+git submodule update --init --recursive
+```
+
+3. 🚀 Install dependencies:
+```
+make install
+```
+
+---
+
+## 🏃‍♂️ **How to Run**
+
+- 🔑 (Pro-image only) Set the `LOCALSTACK_API_KEY` environment variable.
+- Apply the patch to the Terraform provider AWS:
+```
+python -m terraform_pytest.main patch
+```
+⚠️ _Note: The above operation isn't idempotent. Ensure you apply the patch only once._
+
+- Construct a testing binary for the Golang module:
+```
+python -m terraform_pytest.main build -s s3
+```
+- Now you're all set to utilize the `python -m pytest` commands to list and execute test cases derived from Golang.
+
+---
+
+## 🔍 **How to Run Test Cases**
+
+- 📋 List all test cases from a specific service:
+```
+python -m pytest terraform-provider-aws/internal/service/<service> --collect-only -q
+```
+- 🚀 Execute a particular test case:
+```
+python -m pytest terraform-provider-aws/internal/service/<service>/<test-file> -k <test-case-name> --ls-start
+```
+_or_
+```
+python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start
+```
+- You can prepend additional environment variables to the command. For instance:
+```
+AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start
+```
+
+---
+
+## 🔢 **Default Environment Variables for Terraform Tests**
+
+| Variable                          | Default Value |
+| --------------------------------- | ------------- |
+| TF_ACC                            | 1             |
+| AWS_ACCESS_KEY_ID                 | test          |
+| AWS_SECRET_ACCESS_KEY             | test          |
+| AWS_DEFAULT_REGION                | us-west-1     |
+| AWS_ALTERNATE_ACCESS_KEY_ID       | test          |
+| AWS_ALTERNATE_SECRET_ACCESS_KEY   | test          |
+| AWS_ALTERNATE_REGION              | us-east-2     |
+| AWS_THIRD_REGION                  | eu-west-1     |
+
+---
+
+## ⚙️ **Options**
+
+- `--ls-start`: Initializes the Localstack instance before test case execution. It triggers the CLI:
+```
+localstack start -d
+```
+
+- `--gather-metrics`: Gathers raw test metrics for a specific run. But first, make sure you manually install the extension:
+```
+localstack extensions init
+localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+```
+Remember to set the `SERVICE` environment variable for naming the metric file.
+
+---
+
+## 🔐 **Services**
+
+Executing this test suite is a time-intensive process. To cater to this, the following mechanisms are in place:
+
+
+| Mechanism     | Description                                                                                                                                                   |
+|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Blacklisting**  | Services devoid of tests are blacklisted to avoid needless execution.                                                                                         |
+| **Ignored**       | Services might have test cases, but if they all fail leading to timeouts, they're marked as non-functional and bypassed. Refer to `terraform_pytest/utils.py`. |
+| **Partitioning**  | Some services are extensive and get divided into partitions. Each partition holds a unique subset of tests for that particular service.                          |
