@@ -3,5 +3,3 @@
 	url = https://github.com/hashicorp/terraform-provider-aws.git
 	ignore = dirty
 
-[submodule "https://github.com/hashicorp/terraform-provider-aws.git"]
-	branch = v5.19.0
