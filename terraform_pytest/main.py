@@ -1,15 +1,13 @@
+import logging
 import os
 from timeit import default_timer as timer
 
 import click
 
-from terraform_pytest.utils import (
-    TF_REPO_NAME,
-    TF_TEST_BINARY_FOLDER,
-    build_test_bin,
-    get_services,
-    patch_repo,
-)
+from terraform_pytest.constants import TF_REPO_PATH, TF_TEST_BINARY_PATH
+from terraform_pytest.utils import build_test_binary, get_services, patch_repository
+
+logging.basicConfig(level=logging.INFO)
 
 
 @click.group(name="pytest-golang", help="Golang Test Runner for localstack")
@@ -18,8 +16,8 @@ def cli():
 
 
 @click.command(name="patch", help="Patch the golang test runner")
-def patch():
-    patch_repo()
+def patch_command():
+    patch_repository()
 
 
 @click.command(name="build", help="Build binary for testing")
@@ -32,40 +30,42 @@ def patch():
 --service=ls-all; --service=ec2; --service=ec2,iam""",
 )
 @click.option("--force-build", "-f", is_flag=True, default=False, help="Force rebuilds binary")
-def build(service, force_build):
+def build_command(service, force_build):
     services = get_services(service)
 
     for service in services:
-        print(f"Building {service}...")
+        logging.info(f"Building {service}...")
         try:
-            start = timer()
-            build_test_bin(
-                service=service,
-                tf_root_path=os.path.realpath(TF_REPO_NAME),
-                force_build=force_build,
-            )
-            end = timer()
-            print(f"Build {service} in {end - start} seconds")
+            start_time = timer()
+            build_test_binary(service=service, tf_root_path=TF_REPO_PATH, force_build=force_build)
+            end_time = timer()
+            logging.info(f"Build completed in {end_time - start_time:.2f} seconds")
         except KeyboardInterrupt:
-            print("Interrupted")
-            return
+            logging.error(
+                "Operation was interrupted. The process may not have completed successfully."
+            )
+            logging.debug("Exception information:", exc_info=True)
+            return  # Necessary to terminate all ongoing processes
         except Exception as e:
-            print(f"Failed to build binary for {service}: {e}")
+            logging.error(f"Failed to build binary for service '{service}': {str(e)}")
 
 
 @click.command(name="clean", help="Cleans up all the binaries")
-def clean():
-    binary_folder = f"{TF_REPO_NAME}/{TF_TEST_BINARY_FOLDER}"
-    print(f"Cleaning up {binary_folder}")
-    for file in os.listdir(binary_folder):
+def clean_command():
+    logging.info(f"Cleaning up {TF_TEST_BINARY_PATH}")
+
+    if not os.path.exists(TF_TEST_BINARY_PATH):
+        logging.info(f"{TF_TEST_BINARY_PATH}: does not exist")
+        return
+    for file in os.listdir(TF_TEST_BINARY_PATH):
         if file.endswith(".test"):
-            print(f"Removing: {file}")
-            os.remove(os.path.join(binary_folder, file))
-    print("Done")
+            logging.info(f"Removing: {file}")
+            os.remove(os.path.join(TF_TEST_BINARY_PATH, file))
+    logging.info("Done")
 
 
 if __name__ == "__main__":
-    cli.add_command(build)
-    cli.add_command(patch)
-    cli.add_command(clean)
+    cli.add_command(build_command)
+    cli.add_command(patch_command)
+    cli.add_command(clean_command)
     cli()

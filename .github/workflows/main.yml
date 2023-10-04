@@ -87,7 +87,7 @@ jobs:
       run: |
         source .venv/bin/activate
         python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
-
+        ls -la ./test-bin
 
     - name: Setup tinybird plugin
       if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
