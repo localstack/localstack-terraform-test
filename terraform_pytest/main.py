@@ -1,6 +1,7 @@
-import click
 import os
 from timeit import default_timer as timer
+
+import click
 
 from terraform_pytest.utils import (
     TF_REPO_NAME,
@@ -39,7 +40,9 @@ def build(service, force_build):
         try:
             start = timer()
             build_test_bin(
-                service=service, tf_root_path=os.path.realpath(TF_REPO_NAME), force_build=force_build
+                service=service,
+                tf_root_path=os.path.realpath(TF_REPO_NAME),
+                force_build=force_build,
             )
             end = timer()
             print(f"Build {service} in {end - start} seconds")
