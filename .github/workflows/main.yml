@@ -52,7 +52,7 @@ jobs:
 
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.18.x'
+        go-version: '1.20.x'
         cache: true
         cache-dependency-path: terraform-provider-aws/go.sum
 
@@ -87,8 +87,7 @@ jobs:
       run: |
         source .venv/bin/activate
         python -m terraform_pytest.main build -s ${{ matrix.service_partition.service }}
-        ls -la terraform-provider-aws/test-bin
-
+        ls -la ./test-bin
 
     - name: Setup tinybird plugin
       if: ${{ (github.event.inputs.tinybird-reporting || 'true') == 'true' }}
@@ -143,6 +142,11 @@ jobs:
           options="-s -v --ls-start --gather-metrics"
         fi
         
+        if [[ ${{ matrix.service_partition.service }} == "lambda" ]]
+        then
+          make prepare-lambda
+        fi
+
         if [[ ${{ matrix.service_partition.partition }} == "All" ]] 
         then
           python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/${{ matrix.service_partition.service }} $options

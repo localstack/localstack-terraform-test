@@ -8,3 +8,4 @@ target
 report.xml
 volume
 terraform-provider-aws
+test-bin/*

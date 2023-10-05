@@ -4,4 +4,4 @@
 	ignore = dirty
 
 [submodule "https://github.com/hashicorp/terraform-provider-aws.git"]
-	branch = v5.19.0
+	branch = 96ac19e4c1feb5edee5f30aba29be233109e8717

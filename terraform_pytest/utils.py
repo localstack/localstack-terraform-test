@@ -1,126 +1,26 @@
-import signal
-from os import chdir, chmod, getcwd, listdir, system
-from os.path import exists, realpath
-from uuid import uuid4
+import logging
+import os
+import subprocess
+from typing import Dict, List, Optional, Tuple
 
-TF_REPO_NAME = "terraform-provider-aws"
+from terraform_pytest.constants import (
+    BLACKLISTED_SERVICES,
+    FAILING_SERVICES,
+    LS_COMMUNITY_SERVICES,
+    LS_PRO_SERVICES,
+    TF_REPO_NAME,
+    TF_REPO_PATCH_FILES,
+    TF_REPO_PATH,
+    TF_REPO_SERVICE_PATH,
+    TF_TEST_BINARY_PATH,
+)
 
-# absolute path to the terraform repo
-TF_REPO_PATH = f"{realpath(TF_REPO_NAME)}"
-
-# list of patch files to apply to the terraform repo
-TF_REPO_PATCH_FILES = ["etc/001-hardcode-endpoint.patch"]
-
-# folder name where the testing binaries are stored
-TF_TEST_BINARY_FOLDER = "test-bin"
-TF_REPO_SERVICE_FOLDER = "./internal/service"
-
-# list of services that are supported by the localstack community edition
-LS_COMMUNITY_SERVICES = [
-    "acm",
-    "apigateway",
-    "lambda",
-    "cloudformation",
-    "cloudwatch",
-    "configservice",
-    "dynamodb",
-    "ec2",
-    "elasticsearch",
-    "events",
-    "firehose",
-    "iam",
-    "kinesis",
-    "kms",
-    "logs",
-    "opensearch",
-    "redshift",
-    "resourcegroups",
-    "resourcegroupstaggingapi",
-    "route53",
-    "route53resolver",
-    "s3",
-    "s3control",
-    "secretsmanager",
-    "ses",
-    "sns",
-    "sqs",
-    "ssm",
-    "sts",
-    "swf",
-    "transcribe",
-]
-# list of services that are supported by the localstack pro edition
-LS_PRO_SERVICES = [
-    "amplify",
-    "apigateway",
-    "apigatewayv2",
-    "appconfig",
-    "appautoscaling",
-    "appsync",
-    "athena",
-    "autoscaling",
-    "backup",
-    "batch",
-    "cloudformation",
-    "cloudfront",
-    "cloudtrail",
-    "codecommit",
-    "cognitoidp",
-    "cognitoidentity",
-    "docdb",
-    "dynamodb",
-    "ec2",
-    "ecr",
-    "ecs",
-    "efs",
-    "eks",
-    "elasticache",
-    "elasticbeanstalk",
-    "elb",
-    "elbv2",
-    "emr",
-    "events",
-    "fis",
-    "glacier",
-    "glue",
-    "iam",
-    "iot",
-    "iotanalytics",
-    "kafka",
-    "kinesisanalytics",
-    "kms",
-    "lakeformation",
-    "lambda",
-    "logs",
-    "mediastore",
-    "mq",
-    "mwaa",
-    "neptune",
-    "organizations",
-    "qldb",
-    "rds",
-    "redshift",
-    "route53",
-    "s3",
-    "sagemaker",
-    "secretsmanager",
-    "serverlessrepo",
-    "ses",
-    "sns",
-    "sqs",
-    "ssm",
-    "sts",
-]
-
-# list of services that doesn't contain any tests
-BLACKLISTED_SERVICES = ["controltower", "greengrass", "iotanalytics"]
-
-# FIXME: check why all the tests are failing, and remove this list once fixed
-# list of services that cause a timeout because every test fails against LocalStack
-FAILING_SERVICES = ["emr", "sagemaker", "qldb"]
+logging.basicConfig(level=logging.INFO)
 
 
-def execute_command(cmd, env=None, cwd=None):
+def execute_command(
+    cmd: List[str], env: Optional[Dict[str, str]] = None, cwd: Optional[str] = None
+) -> Tuple[int, str]:
     """Execute a command and return the return code.
 
     :param list(str) cmd:
@@ -130,95 +30,93 @@ def execute_command(cmd, env=None, cwd=None):
     :param str cwd:
         working directory
     """
-    _lwd = getcwd()
-    if isinstance(cmd, list):
-        cmd = " ".join(cmd)
-    else:
-        raise Exception("Please provide command as list(str)")
-    if cwd:
-        chdir(cwd)
+    if not all(isinstance(c, str) for c in cmd):
+        raise ValueError("cmd must be a list of strings")
+
+    env_vars = os.environ.copy()
     if env:
-        _env = " ".join([f'{k}="{str(v)}"' for k, v in env.items()])
-        cmd = f"{_env} {cmd}"
-    log_file: str = "/tmp/%s" % uuid4().hex
-    _err = system(f"{cmd} > {log_file} 2>&1")
-    if _err == signal.SIGINT:
-        print("SIGNINT is caught")
-        raise KeyboardInterrupt
-    _out = open(log_file, "r").read()
-    chdir(_lwd)
-    return _err, _out
+        env_vars.update(env)
+
+    try:
+        process = subprocess.run(
+            cmd, env=env_vars, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        return_code = process.returncode
+        output = process.stdout + "\n" + process.stderr
+
+        if return_code != 0:
+            logging.error(
+                f"Command {cmd} failed with return code {return_code} and output: {output}"
+            )
+            return return_code, output
+
+        return return_code, output
+    except Exception as e:
+        logging.error(f"Command {cmd} failed with exception {e}")
+        return 1, str(e)
 
 
-def build_test_bin(service, tf_root_path, force_build=False):
-    """Build the test binary for a given service.
+def build_test_binary(
+    service: str, tf_root_path: str, force_build: bool = False
+) -> Tuple[int, str]:
+    """
+    Build the test binary for a given service.
+
+    :param str service: Service name
+    :param str tf_root_path: Path to the terraform repo
+    :param bool force_build: Force build the binary
+
+    :return: Tuple[int, str]
+        Return code and stdout
+    """
+
+    def execute_and_check(command: list[str], working_dir: str, error_msg: str) -> Tuple[int, str]:
+        """Execute a command and check its return code. Raise an exception with the provided error message if non-zero."""
+        return_code, output = execute_command(command, cwd=working_dir)
+        if return_code != 0:
+            raise Exception(f"{error_msg}\ntraceback: {output}")
+        return return_code, output
+
+    test_binary = os.path.join(TF_TEST_BINARY_PATH, f"{service}.test")
+    service_folder = os.path.join(TF_REPO_SERVICE_PATH, service)
+
+    # Return if binary already exists and force_build is False
+    if os.path.exists(test_binary) and not force_build:
+        logging.info(f"Cache has been detected in the directory: {test_binary}.")
+        return 0, ""
+
+    # set up modules
+    cmd = ["go", "mod", "vendor"]
+    error_message = f"Error while executing 'go mod vendor' for {service}"
+    execute_and_check(cmd, tf_root_path, error_message)
+
+    # Build the test binary
+    logging.info(f"Initiating generation of testing binary in the {test_binary} directory.")
+    error_message = f"Failed to build the test binary for the {service} service."
+    build_cmd = ["go", "test", "-c", service_folder, "-o", test_binary]
+    ret_code, output = execute_and_check(build_cmd, tf_root_path, error_message)
+
+    if os.path.exists(test_binary):
+        logging.info("Changing the permissions of the binary to 755.")
+        os.chmod(test_binary, 0o755)
+
+    return ret_code, output
+
+
+def get_services(service: str):
+    """
+    Get the list of services to test.
 
     :param str service:
-        service name
-    :param str tf_root_path:
-        path to the terraform repo
-    :param bool force_build:
-        force build the binary
-
-    :return: int, str or None
-        return code and stdout
-    """
-    _test_bin_abs_path = f"{TF_REPO_PATH}/{TF_TEST_BINARY_FOLDER}/{service}.test"
-    _tf_repo_service_folder = f"{TF_REPO_SERVICE_FOLDER}/{service}"
-
-    if exists(_test_bin_abs_path) and not force_build:
-        return None
-
-    cmd = ["go", "mod", "tidy"]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    if return_code != 0:
-        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
-
-    cmd = ["go", "mod", "vendor"]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    if return_code != 0:
-        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
-
-    cmd = ["go", "mod", "tidy"]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    if return_code != 0:
-        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
-
-    cmd = ["go", "mod", "vendor"]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    if return_code != 0:
-        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
-
-    cmd = [
-        "go",
-        "test",
-        "-c",
-        _tf_repo_service_folder,
-        "-o",
-        _test_bin_abs_path,
-    ]
-    return_code, stdout = execute_command(cmd, cwd=tf_root_path)
-    if return_code != 0:
-        raise Exception(f"Error while building test binary for {service}\ntraceback: {stdout}")
-
-    if exists(_test_bin_abs_path):
-        chmod(_test_bin_abs_path, 0o755)
-
-    return return_code, stdout
-
-
-def get_services(service):
-    """Get the list of services to test.
-
-    :param: str service:
-        service names in comma separated format
+        Service names in comma-separated format or a predefined keyword
         example: ec2,lambda,iam or ls-community or ls-pro or ls-all
 
     :return: list:
         list of services
     """
-    result = []
+    available_services = LS_COMMUNITY_SERVICES + LS_PRO_SERVICES
     skipped_services = BLACKLISTED_SERVICES + FAILING_SERVICES
+
     if service == "ls-community":
         services = [s for s in LS_COMMUNITY_SERVICES if s not in skipped_services]
     elif service == "ls-pro":
@@ -226,35 +124,34 @@ def get_services(service):
     elif service == "ls-all":
         services = [s for s in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES if s not in skipped_services]
     else:
-        if "," in service:
-            services = service.split(",")
-            services = [s for s in services if s]
-        else:
-            services = [service]
+        services = [s.strip() for s in service.split(",") if s.strip()]
+
+    validated_services = []
     for s in services:
-        if s not in LS_COMMUNITY_SERVICES + LS_PRO_SERVICES:
-            print(f"Service {s} is not supported...\nPlease check the service name")
+        if s not in available_services:
+            logging.warning(f"Service {s} is not supported. Please check the service name")
         elif s in skipped_services:
-            print(f"Service {s} doesn't have any (functioning) tests, skipping...")
+            logging.warning(f"Service {s} doesn't have any (functioning) tests, skipping...")
         else:
-            result.append(s)
-    return list(set(result))
+            validated_services.append(s)
+    return list(set(validated_services))
 
 
-def patch_repo():
-    """Patches terraform repo.
+def patch_repository():
+    """
+    Patch a repository using a list of patch files.
 
     return: None
     """
-    print(f"Patching {TF_REPO_NAME}...")
+    logging.info(f"Initiating patching process for repository: {TF_REPO_NAME}...")
     for patch_file in TF_REPO_PATCH_FILES:
-        cmd = [
-            "git",
-            "apply",
-            f"{realpath(patch_file)}",
-        ]
-        return_code, stdout = execute_command(cmd, cwd=realpath(TF_REPO_NAME))
+        patch_file_path = os.path.realpath(patch_file)
+        cmd = ["git", "apply", patch_file_path]
+        return_code, stdout = execute_command(cmd=cmd, cwd=TF_REPO_PATH)
+
         if return_code != 0:
-            print("----- error while patching repo -----")
-        if stdout:
-            print(f"stdout: {stdout}")
+            logging.error("Failure encountered during repository patching.")
+            logging.error(stdout)
+        else:
+            if stdout:
+                logging.info(f"{patch_file} has been patched successfully.")

@@ -54,7 +54,7 @@ class GoItem(pytest.Item):
     def runtest(self):
         """Run the test case"""
 
-        tf_root_path = realpath(relpath(self.path).split(os.sep)[0])
+        cwd = os.getcwd()
         service_path = dirname(Path(*relpath(self.path).split(os.sep)[1:]))
         service = service_path.split(os.sep)[-1]
 
@@ -67,21 +67,22 @@ class GoItem(pytest.Item):
                 "AWS_DEFAULT_REGION": "us-west-1",
                 "AWS_ALTERNATE_ACCESS_KEY_ID": "test",
                 "AWS_ALTERNATE_SECRET_ACCESS_KEY": "test",
-                "AWS_ALTERNATE_SECRET_ACCESS_KEY": "test",
                 "AWS_ALTERNATE_REGION": "us-east-2",
+                "AWS_THIRD_SECRET_ACCESS_KEY": "test",
+                "AWS_THIRD_ACCESS_KEY_ID": "test",
                 "AWS_THIRD_REGION": "eu-west-1",
             }
         )
 
         cmd = [
-            f"./test-bin/{service}.test",
+            f"./{service}.test",
             "-test.v",
             "-test.parallel=1",
             "-test.count=1",
             "-test.timeout=60m",
             f"-test.run={self.name}",
         ]
-        return_code, stdout = execute_command(cmd, env, tf_root_path)
+        return_code, stdout = execute_command(cmd, env, f"{cwd}/test-bin")
         if return_code != 0:
             raise GoException(returncode=return_code, stderr=stdout)
         elif IS_GATHER_METRICS:

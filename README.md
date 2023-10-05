@@ -79,16 +79,18 @@ AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/interna
 
 ## 🔢 **Default Environment Variables for Terraform Tests**
 
-| Variable                          | Default Value |
-| --------------------------------- | ------------- |
-| TF_ACC                            | 1             |
-| AWS_ACCESS_KEY_ID                 | test          |
-| AWS_SECRET_ACCESS_KEY             | test          |
-| AWS_DEFAULT_REGION                | us-west-1     |
-| AWS_ALTERNATE_ACCESS_KEY_ID       | test          |
-| AWS_ALTERNATE_SECRET_ACCESS_KEY   | test          |
-| AWS_ALTERNATE_REGION              | us-east-2     |
-| AWS_THIRD_REGION                  | eu-west-1     |
+| Variable                             | Default Value |
+|--------------------------------------|---------------|
+| `TF_ACC`                             | 1             |
+| `AWS_ACCESS_KEY_ID`                  | test          |
+| `AWS_SECRET_ACCESS_KEY`              | test          |
+| `AWS_DEFAULT_REGION`                 | us-west-1     |
+| `AWS_ALTERNATE_ACCESS_KEY_ID`        | test          |
+| `AWS_ALTERNATE_SECRET_ACCESS_KEY`    | test          |
+| `AWS_ALTERNATE_REGION`               | us-east-2     |
+| `AWS_THIRD_SECRET_ACCESS_KEY`        | test          |
+| `AWS_THIRD_ACCESS_KEY_ID`            | test          |
+| `AWS_THIRD_REGION`                   | eu-west-1     |
 
 ---
 
@@ -118,4 +120,3 @@ Executing this test suite is a time-intensive process. To cater to this, the fol
 | **Blacklisting**  | Services devoid of tests are blacklisted to avoid needless execution.                                                                                         |
 | **Ignored**       | Services might have test cases, but if they all fail leading to timeouts, they're marked as non-functional and bypassed. Refer to `terraform_pytest/utils.py`. |
 | **Partitioning**  | Some services are extensive and get divided into partitions. Each partition holds a unique subset of tests for that particular service.                          |
-
