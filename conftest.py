@@ -142,7 +142,7 @@ class GoException(Exception):
 
 def _localstack_health_check():
     """Check if the localstack service is healthy"""
-    localstack_health_url = "http://localhost:4566/health"
+    localstack_health_url = "http://localhost:4566/_localstack/health"
     session = requests.Session()
     retry = Retry(connect=3, backoff_factor=2)
     adapter = HTTPAdapter(max_retries=retry)
