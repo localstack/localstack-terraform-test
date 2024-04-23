@@ -109,7 +109,7 @@ jobs:
           docker pull localstack/localstack
         else
           docker pull localstack/localstack-pro
-          localstack login -u $TMP_USER -p $TMP_PW  # login is currently required
+          localstack auth login -u $TMP_USER -p $TMP_PW  # login is currently required
           localstack extensions init
           localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
         fi
