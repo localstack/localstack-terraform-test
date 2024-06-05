@@ -155,3 +155,28 @@ def patch_repository():
         else:
             if stdout:
                 logging.info(f"{patch_file} has been patched successfully.")
+
+def run_terratest_tests(terratest_path: str) -> Tuple[int, str]:
+    """
+    Run the Golang Terratest tests for the specified project.
+
+    :param str terratest_path: Path to the Terratest project
+    :return: Tuple[int, str]
+        Return code and combined stdout and stderr
+    """
+    logging.info(f"Initiating Golang Terratest in the directory: {terratest_path}")
+
+    # Command to execute Golang tests
+    test_cmd = ["go", "test", "./..."]
+
+    # Run the tests and capture output
+    return_code, output = execute_command(test_cmd, cwd=terratest_path)
+
+    # Check for errors and log appropriately
+    if return_code != 0:
+        logging.error("Golang tests failed.")
+        logging.error(output)
+    else:
+        logging.info("Golang tests completed successfully.")
+
+    return return_code, output
