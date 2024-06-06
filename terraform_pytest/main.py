@@ -4,8 +4,17 @@ from timeit import default_timer as timer
 
 import click
 
-from terraform_pytest.constants import TF_REPO_PATH, TF_TEST_BINARY_PATH
-from terraform_pytest.utils import build_test_binary, get_services, patch_repository
+from terraform_pytest.constants import (
+    TF_REPO_PATH,
+    TF_TEST_BINARY_PATH,
+    TERRATEST_PROJECT_FOLDER,
+)
+from terraform_pytest.utils import (
+    build_test_binary,
+    get_services,
+    patch_repository,
+    run_terratest_tests,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,8 +73,20 @@ def clean_command():
     logging.info("Done")
 
 
+@click.command(name="terratest-tests", help="Run Golang Terratest tests")
+def terratest_tests():
+    logging.info(f"Running terratest tests from {TERRATEST_PROJECT_FOLDER} directory")
+
+    try:
+        _, output = run_terratest_tests(TERRATEST_PROJECT_FOLDER)
+        print(output)
+    except Exception as e:
+        logging.error(f"Failed to execute terratest tests: {str(e)}")
+
+
 if __name__ == "__main__":
     cli.add_command(build_command)
     cli.add_command(patch_command)
     cli.add_command(clean_command)
+    cli.add_command(terratest_tests)
     cli()

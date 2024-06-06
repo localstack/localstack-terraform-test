@@ -3,6 +3,7 @@ import os
 TF_REPO_NAME = "terraform-provider-aws"
 TF_TEST_BINARY_FOLDER = "test-bin"
 TF_REPO_SERVICE_FOLDER = "internal/service"
+TERRATEST_PROJECT_FOLDER = "terratest"
 
 # absolute path to the terraform repo
 TF_REPO_PATH = os.path.realpath(TF_REPO_NAME)

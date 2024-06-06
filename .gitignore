@@ -9,3 +9,6 @@ report.xml
 volume
 terraform-provider-aws
 test-bin/*
+.terraform.lock.hcl
+**/terraform.tfstate*
+.terraform/

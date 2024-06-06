@@ -75,7 +75,43 @@ python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::
 AWS_ALTERNATE_REGION='us-west-2' python -m pytest terraform-provider-aws/internal/service/<service>/<test-file>::<test-case-name> --ls-start
 ```
 
+To run custom terratest test cases, you can run:
+```
+python -m terraform_pytest.main terratest-tests
+```
+
 ---
+
+## 🕵️ **How to Add new terratest tests**
+
+1. Go into the `terratest` folder (which contains a regular go module)
+2. Go into the directory where your service of interest is (e.g. `ec2`), or create it if it doesn't exist
+3. Create a golang test file with a naming like `{your_use_case_of_interest}_test.go` replacing `{your_use_case_of_interest}` with something meaningful.
+4. Create an associated directory that will host the required Terraform files (e.g. `{your-use-case-of-interest}/`), and put your `main.tf`, `variables.tf` and whatever you require for your test scenario.
+5. Add actual testing logic to your golang file, which can be as simple as the following (and can involve logic as complex as you wish, interacting with the components created by Terraform):
+```go
+package test
+
+import (
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/localstack/localstack-terraform-test/terratest"
+	"testing"
+)
+
+func TestUseCaseOfInterest(t *testing.T) {
+	terratest.SetUpFakeAWSCredentials(t)
+	awsRegion := "us-east-1"
+	terraformOptions := &terraform.Options{
+		TerraformDir: "./use-case-of-interest/",
+		Vars: map[string]interface{}{
+			"region": awsRegion,
+		},
+	}
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+}
+
+```
 
 ## 🔢 **Default Environment Variables for Terraform Tests**
 
