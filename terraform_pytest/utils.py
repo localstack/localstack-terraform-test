@@ -39,7 +39,12 @@ def execute_command(
 
     try:
         process = subprocess.run(
-            cmd, env=env_vars, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            cmd,
+            env=env_vars,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
         )
         return_code = process.returncode
         output = process.stdout + "\n" + process.stderr
@@ -155,6 +160,7 @@ def patch_repository():
         else:
             if stdout:
                 logging.info(f"{patch_file} has been patched successfully.")
+
 
 def run_terratest_tests(terratest_path: str) -> Tuple[int, str]:
     """
