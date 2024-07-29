@@ -1,0 +1,100 @@
+on: push
+
+name: Plugin Patch Test
+
+jobs:
+  test_plugin_patch:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.20.x'
+        cache: true
+        cache-dependency-path: terraform-provider-aws/go.sum
+
+    - name: Set up Python 3.10.5
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10.5'
+        cache: 'pip'
+
+    - name: Install system dependencies
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Patch Terraform Provider
+      run: |
+        source .venv/bin/activate
+        cd terraform-provider-aws && go mod vendor
+        cd ../
+        python -m terraform_pytest.main patch
+
+    - name: Build EC2 Binary
+      run: |
+        source .venv/bin/activate
+        python -m terraform_pytest.main build -s ec2
+        ls -la ./test-bin
+
+    - name: Setup LocalStack
+      env:
+        LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+        TMP_USER: ${{ secrets.TMP_USER }}
+        TMP_PW: ${{ secrets.TMP_PW }}
+      run: |
+        source .venv/bin/activate
+        pip install --pre localstack
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        if [[ $enable_pro != 'true' ]]
+        then
+          docker pull localstack/localstack
+        else
+          docker pull localstack/localstack-pro
+          localstack auth login -u $TMP_USER -p $TMP_PW  # login is currently required
+          localstack extensions init
+          localstack extensions install "git+https://github.com/localstack/localstack-moto-test-coverage/#egg=collect-raw-metric-data-extension&subdirectory=collect-raw-metric-data-extension"
+        fi
+
+    - name: Run EC2 - Create Instance Tests
+      env:
+        SERVICE: ec2
+        PARTITION: null
+        TINYBIRD_URL: https://api.tinybird.co
+        TINYBIRD_DATASOURCE: localstack_terraform_test_results
+        TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+        CI_COMMIT_SHA: ${{ github.sha }}
+        CI_JOB_ID: ${{ github.job }}
+        CI_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        CI_JOB_NAME: ${{ github.job }}-${{ matrix.service_partition.service }}-${{ matrix.service_partition.partition }}
+      run: |
+        source .venv/bin/activate
+        enable_pro=${{ inputs.enable-pro || 'true' }}
+        enable_tinybird='false'
+        if [[ $enable_pro == 'true' ]]
+        then
+          export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
+        fi
+        
+        python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_basic
+
+    - name: Archive Test Result
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-metrics
+        path: target/reports
+
+    - name: Publish ${{ matrix.service }} Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        junit_files: target/reports/*.xml
+        check_name: ${{ matrix.service }} Terraform Test Results
