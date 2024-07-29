@@ -42,6 +42,12 @@ jobs:
         source .venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
+  
+    - name: Apply Terraform Plugin Sdk Patch
+      run: |
+        cd terraform-provider-aws
+        go mod edit --replace github.com/hashicorp/terraform-plugin-sdk/v2=github.com/cloutierMat/terraform-plugin-sdk/v2@0e0cb30d203d5e8e3222850acbb8467cd48543d2
+        go mod tidy
 
     - name: Patch Terraform Provider
       run: |
