@@ -83,7 +83,7 @@ jobs:
           export LOCALSTACK_API_KEY=${{ secrets.LOCALSTACK_API_KEY }}
         fi
         
-        python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_basic
+        python -m pytest --junitxml=target/reports/pytest.xml terraform-provider-aws/internal/service/ec2/ec2_instance_test.go::TestAccEC2Instance_basic -s -v --ls-start --gather-metrics
 
     - name: Archive Test Result
       uses: actions/upload-artifact@v3
