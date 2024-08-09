@@ -79,7 +79,7 @@ jobs:
       run: |
         cd terraform-provider-aws
         sdk_version=$(go list -m github.com/hashicorp/terraform-plugin-sdk/v2 | sed -n -e 's/^.* //p')
-        go mod edit --replace github.com/hashicorp/terraform-plugin-sdk/v2=github.com/cloutierMat/terraform-plugin-sdk/v2@${sdk_version}-001
+        go mod edit --replace github.com/hashicorp/terraform-plugin-sdk/v2=github.com/localstack/terraform-plugin-sdk/v2@${sdk_version}
         go mod tidy
 
     - name: Patch Terraform Provider
