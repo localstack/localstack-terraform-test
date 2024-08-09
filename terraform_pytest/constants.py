@@ -10,15 +10,7 @@ TF_TEST_BINARY_PATH = os.path.realpath(TF_TEST_BINARY_FOLDER)
 TF_REPO_SERVICE_PATH = os.path.join(TF_REPO_PATH, TF_REPO_SERVICE_FOLDER)
 
 # list of patch files to apply to the terraform repo
-TF_REPO_PATCH_FILES = [
-    "etc/0001-Patch-Hardcode-endpoints-to-local-server.patch",
-    # "etc/0002-EC2-reduce-wait-times.patch",
-    "etc/0003-Patch-IAM-wait-times.patch",
-    "etc/0005-Route53-Reduce-wait-times.patch",
-    "etc/0006-CF-Reduce-wait-times.patch",
-    "etc/0007-Comprehend-Reduce-wait-times.patch",
-    "etc/0008-Patch-RDS-improvements.patch",
-]
+TF_REPO_PATCH_FILES = ["etc/0001-Patch-Hardcode-endpoints-to-local-server.patch"]
 
 # list of services that are supported by the localstack community edition
 LS_COMMUNITY_SERVICES = [
