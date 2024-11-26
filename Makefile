@@ -26,6 +26,7 @@ venv: $(VENV_ACTIVATE)		## Create a new (empty) virtual environment
 
 install: venv				## Install the package in editable mode
 	$(VENV_RUN); $(PIP_CMD) install -r requirements.txt
+	@terraform -v >/dev/null 2>&1 || { echo >&2 "Terraform is not installed. Please install it by following the guide at https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli"; exit 1; }
 
 init_precommit:				## Install the pre-commit hook into your local git repository
 	($(VENV_RUN); pre-commit install)
