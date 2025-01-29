@@ -165,7 +165,7 @@ jobs:
       if: always()
       with:
         name: test-metrics
-        path: target/reports
+        path: target/reports/*.csv
 
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
