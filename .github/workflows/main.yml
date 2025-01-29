@@ -161,10 +161,10 @@ jobs:
         fi
 
     - name: Archive Test Result
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-metrics
+        name: test-metrics-${{ matrix.service_partition.service }}-${{ matrix.service_partition.partition }}
         path: target/reports
 
     - name: Publish ${{ matrix.service }} Test Results
@@ -173,3 +173,14 @@ jobs:
       with:
         junit_files: target/reports/*.xml
         check_name: ${{ matrix.service }} Terraform Test Results
+
+  merge_artifacts:
+    needs: test_service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/upload-artifact/merge@v4
+        with:
+          name: test-metrics
+          pattern: test-metrics-*
+          separate-directories: false
+          delete-merged: true
