@@ -176,6 +176,7 @@ jobs:
 
   merge_artifacts:
     needs: test_service
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/upload-artifact/merge@v4
