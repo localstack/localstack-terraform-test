@@ -161,12 +161,11 @@ jobs:
         fi
 
     - name: Archive Test Result
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       if: always()
       with:
         name: test-metrics
         path: target/reports
-        overwrite: true
 
     - name: Publish ${{ matrix.service }} Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
